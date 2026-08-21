@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from 'next';
 import { getLocale } from 'next-intl/server';
-import { HotelProvider, hotelDisplayName } from '@/components/hotel-provider';
+import { HotelProvider } from '@/components/hotel-provider';
 import { HotelNotFoundScreen, UnavailableScreen } from '@/components/state-screens';
 import { accentVars } from '@/lib/color';
+import { hotelDisplayName } from '@/lib/hotel-name';
 import type { GuestHotelProfile } from '@/lib/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000/api/v1';

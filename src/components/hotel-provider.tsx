@@ -2,6 +2,7 @@
 
 import { useLocale } from 'next-intl';
 import { createContext, useContext, type ReactNode } from 'react';
+import { hotelDisplayName } from '@/lib/hotel-name';
 import type { GuestHotelProfile } from '@/lib/types';
 
 interface HotelContextValue {
@@ -12,10 +13,6 @@ interface HotelContextValue {
 }
 
 const HotelContext = createContext<HotelContextValue | null>(null);
-
-export function hotelDisplayName(hotel: { nameEn: string; nameAr: string }, locale: string) {
-  return locale === 'ar' ? hotel.nameAr : hotel.nameEn;
-}
 
 export function HotelProvider({
   hotel,
