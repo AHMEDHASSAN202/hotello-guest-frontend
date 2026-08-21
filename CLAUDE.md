@@ -1,4 +1,4 @@
-# CLAUDE.md — GXP Guest App (`gxp-guest-frontend`)
+# CLAUDE.md — GXP Guest App (`hotello-guest-frontend`)
 
 The guest-facing PWA of GXP (Guest Experience Platform) — the fourth surface,
 opened from a QR code in a hotel room. Next.js 14 App Router + TypeScript +
