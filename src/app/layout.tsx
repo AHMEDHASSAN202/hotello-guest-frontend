@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google';
+import { SwRegister } from '@/components/sw-register';
 import { dirFor, type Locale } from '@/i18n/config';
 import './globals.css';
 
@@ -47,6 +48,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <NextIntlClientProvider locale={locale} messages={messages}>
           <main id="app-frame">{children}</main>
         </NextIntlClientProvider>
+        <SwRegister />
       </body>
     </html>
   );
