@@ -1,0 +1,25 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "startServerCommand": "npm run start",
+      "startServerReadyPattern": "Ready",
+      "url": ["http://localhost:3002/"],
+      "settings": {
+        "preset": "perf",
+        "formFactor": "mobile",
+        "screenEmulation": { "mobile": true, "width": 360, "height": 780, "deviceScaleFactor": 2.25 },
+        "throttlingMethod": "simulate"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "interactive": ["error", { "maxNumericValue": 3500 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.02 }],
+        "total-blocking-time": ["error", { "maxNumericValue": 300 }]
+      }
+    },
+    "upload": { "target": "temporary-public-storage" }
+  }
+}

@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3002",
-    "build": "npm run check:i18n && npm run build:offline && next build",
+    "build": "npm run check:i18n && npm run build:offline && next build && npm run check:bundle",
+    "check:bundle": "node scripts/check-bundle-size.mjs",
     "start": "next start -p 3002",
     "check:i18n": "node scripts/check-i18n.mjs",
     "build:offline": "node scripts/build-offline.mjs",

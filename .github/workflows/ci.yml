@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run check:i18n
+      - run: npm test
+      # build = i18n check + offline page + next build + JS budget assert
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
+      # Budgets from 14.1 AC4 — a red budget fails the pipeline like a red test.
+      # Runs against the apex page (no backend in CI); the /{slug} flow is
+      # covered by the JS budget assert plus real-device review (14.5 AC6).
+      - run: npx --yes @lhci/cli@0.14.x autorun
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:4000/api/v1
