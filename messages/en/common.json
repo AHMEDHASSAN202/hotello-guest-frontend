@@ -4,5 +4,6 @@
   "retry": "Try again",
   "close": "Close",
   "contactFrontDesk": "Contact the front desk",
-  "language": "Language"
+  "language": "Language",
+  "scanHint": "Scan the QR code in your room to get started"
 }

@@ -4,5 +4,6 @@
   "retry": "Réessayer",
   "close": "Fermer",
   "contactFrontDesk": "Contacter la réception",
-  "language": "Langue"
+  "language": "Langue",
+  "scanHint": "Scannez le code QR dans votre chambre pour commencer"
 }

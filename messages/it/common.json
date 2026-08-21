@@ -4,5 +4,6 @@
   "retry": "Riprova",
   "close": "Chiudi",
   "contactFrontDesk": "Contatta la reception",
-  "language": "Lingua"
+  "language": "Lingua",
+  "scanHint": "Scansiona il codice QR nella tua camera per iniziare"
 }
