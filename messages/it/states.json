@@ -1,0 +1,26 @@
+{
+  "offline": {
+    "title": "Sei offline",
+    "body": "Riconnettiti al WiFi dell'hotel per continuare."
+  },
+  "notFound": {
+    "title": "Hotel non trovato",
+    "body": "Questo link non porta da nessuna parte. Chiedi un nuovo codice QR alla reception."
+  },
+  "unavailable": {
+    "title": "Temporaneamente non disponibile",
+    "body": "Questo servizio non è al momento disponibile. Contatta la reception."
+  },
+  "goodbye": {
+    "title": "Questo soggiorno è terminato",
+    "body": "Speriamo che la visita ti sia piaciuta! Torni da noi? Inserisci il nuovo codice qui sotto."
+  },
+  "rateLimited": {
+    "title": "Troppi tentativi",
+    "body": "Per la tua sicurezza, l'inserimento del codice è sospeso. Potrai riprovare tra {time}."
+  },
+  "error": {
+    "title": "Qualcosa è andato storto",
+    "body": "Riprova tra un istante."
+  }
+}

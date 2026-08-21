@@ -1,0 +1,20 @@
+{
+  "greeting": "Добро пожаловать, {name}!",
+  "stayCard": {
+    "room": "Номер",
+    "nights": "{count, plural, one {Осталась # ночь} few {Осталось # ночи} many {Осталось # ночей} other {Осталось # ночи}}",
+    "checkout": "до {date} · {time}",
+    "checkoutToday": "Выезд сегодня в {time} — надеемся, вам понравилось у нас"
+  },
+  "services": {
+    "title": "К вашим услугам",
+    "soon": "Скоро"
+  },
+  "tiles": {
+    "requests": "Запросы",
+    "dining": "Ресторан",
+    "housekeeping": "Уборка",
+    "transport": "Трансфер",
+    "info": "Об отеле"
+  }
+}

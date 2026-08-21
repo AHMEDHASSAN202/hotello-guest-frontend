@@ -1,0 +1,26 @@
+{
+  "offline": {
+    "title": "You're offline",
+    "body": "Reconnect to the hotel WiFi to continue."
+  },
+  "notFound": {
+    "title": "Hotel not found",
+    "body": "This link doesn't lead anywhere. Please ask the front desk for a new QR code."
+  },
+  "unavailable": {
+    "title": "Temporarily unavailable",
+    "body": "This service is currently unavailable. Please contact the front desk."
+  },
+  "goodbye": {
+    "title": "This stay has ended",
+    "body": "We hope you enjoyed your visit! Checking in again? Enter your new code below."
+  },
+  "rateLimited": {
+    "title": "Too many tries",
+    "body": "For your security, code entry is paused. You can try again in {time}."
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "Please try again in a moment."
+  }
+}

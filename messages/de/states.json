@@ -1,0 +1,26 @@
+{
+  "offline": {
+    "title": "Sie sind offline",
+    "body": "Verbinden Sie sich wieder mit dem Hotel-WLAN, um fortzufahren."
+  },
+  "notFound": {
+    "title": "Hotel nicht gefunden",
+    "body": "Dieser Link führt ins Leere. Bitten Sie die Rezeption um einen neuen QR-Code."
+  },
+  "unavailable": {
+    "title": "Vorübergehend nicht verfügbar",
+    "body": "Dieser Service ist derzeit nicht verfügbar. Bitte wenden Sie sich an die Rezeption."
+  },
+  "goodbye": {
+    "title": "Dieser Aufenthalt ist beendet",
+    "body": "Wir hoffen, Ihr Besuch hat Ihnen gefallen! Checken Sie erneut ein? Geben Sie unten Ihren neuen Code ein."
+  },
+  "rateLimited": {
+    "title": "Zu viele Versuche",
+    "body": "Zu Ihrer Sicherheit ist die Code-Eingabe pausiert. In {time} können Sie es erneut versuchen."
+  },
+  "error": {
+    "title": "Etwas ist schiefgelaufen",
+    "body": "Bitte versuchen Sie es gleich noch einmal."
+  }
+}

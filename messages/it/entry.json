@@ -1,0 +1,13 @@
+{
+  "title": "Benvenuti a {hotel}",
+  "subtitle": "Inserisci il numero della camera e il codice del soggiorno per iniziare",
+  "roomLabel": "Numero di camera",
+  "roomPlaceholder": "es. 304",
+  "codeLabel": "Codice soggiorno",
+  "codeHint": "Il codice a 6 cifre ricevuto al check-in",
+  "checking": "Un attimo…",
+  "errors": {
+    "INVALID_CODE": "Il codice non corrisponde — verificalo con la reception",
+    "generic": "Qualcosa non ha funzionato. Riprova."
+  }
+}

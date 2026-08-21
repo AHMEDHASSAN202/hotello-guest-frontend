@@ -1,0 +1,26 @@
+{
+  "offline": {
+    "title": "Vous êtes hors ligne",
+    "body": "Reconnectez-vous au WiFi de l'hôtel pour continuer."
+  },
+  "notFound": {
+    "title": "Hôtel introuvable",
+    "body": "Ce lien ne mène nulle part. Demandez un nouveau code QR à la réception."
+  },
+  "unavailable": {
+    "title": "Temporairement indisponible",
+    "body": "Ce service est actuellement indisponible. Veuillez contacter la réception."
+  },
+  "goodbye": {
+    "title": "Ce séjour est terminé",
+    "body": "Nous espérons que votre visite vous a plu ! Vous revenez ? Saisissez votre nouveau code ci-dessous."
+  },
+  "rateLimited": {
+    "title": "Trop de tentatives",
+    "body": "Pour votre sécurité, la saisie du code est suspendue. Vous pourrez réessayer dans {time}."
+  },
+  "error": {
+    "title": "Une erreur s'est produite",
+    "body": "Veuillez réessayer dans un instant."
+  }
+}

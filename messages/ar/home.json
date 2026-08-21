@@ -1,0 +1,20 @@
+{
+  "greeting": "أهلاً بك، {name}!",
+  "stayCard": {
+    "room": "غرفة",
+    "nights": "{count, plural, zero {لا ليالٍ متبقية} one {ليلة واحدة متبقية} two {ليلتان متبقيتان} few {# ليالٍ متبقية} many {# ليلة متبقية} other {# ليلة متبقية}}",
+    "checkout": "حتى {date} · {time}",
+    "checkoutToday": "تسجيل المغادرة اليوم في {time} — نتمنى أن تكون قد استمتعت بإقامتك"
+  },
+  "services": {
+    "title": "في خدمتك",
+    "soon": "قريباً"
+  },
+  "tiles": {
+    "requests": "الطلبات",
+    "dining": "المطاعم",
+    "housekeeping": "التدبير الفندقي",
+    "transport": "المواصلات",
+    "info": "معلومات الفندق"
+  }
+}

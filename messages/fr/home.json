@@ -1,0 +1,20 @@
+{
+  "greeting": "Bienvenue, {name} !",
+  "stayCard": {
+    "room": "Chambre",
+    "nights": "{count, plural, one {# nuit restante} other {# nuits restantes}}",
+    "checkout": "jusqu'au {date} · {time}",
+    "checkoutToday": "Départ aujourd'hui à {time} — nous espérons que votre séjour vous a plu"
+  },
+  "services": {
+    "title": "À votre service",
+    "soon": "Bientôt"
+  },
+  "tiles": {
+    "requests": "Demandes",
+    "dining": "Restauration",
+    "housekeeping": "Ménage",
+    "transport": "Transport",
+    "info": "Infos hôtel"
+  }
+}

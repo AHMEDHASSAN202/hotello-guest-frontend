@@ -1,0 +1,20 @@
+{
+  "greeting": "Willkommen, {name}!",
+  "stayCard": {
+    "room": "Zimmer",
+    "nights": "{count, plural, one {Noch # Nacht} other {Noch # Nächte}}",
+    "checkout": "bis {date} · {time}",
+    "checkoutToday": "Check-out heute um {time} — wir hoffen, Sie hatten einen angenehmen Aufenthalt"
+  },
+  "services": {
+    "title": "Für Sie da",
+    "soon": "Bald"
+  },
+  "tiles": {
+    "requests": "Anfragen",
+    "dining": "Restaurant",
+    "housekeeping": "Housekeeping",
+    "transport": "Transfer",
+    "info": "Hotel-Infos"
+  }
+}

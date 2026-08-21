@@ -1,0 +1,13 @@
+{
+  "title": "Te damos la bienvenida a {hotel}",
+  "subtitle": "Introduce tu número de habitación y el código de estancia para empezar",
+  "roomLabel": "Número de habitación",
+  "roomPlaceholder": "p. ej. 304",
+  "codeLabel": "Código de estancia",
+  "codeHint": "El código de 6 dígitos que recibiste al hacer el check-in",
+  "checking": "Un momento…",
+  "errors": {
+    "INVALID_CODE": "El código no coincide — compruébalo en recepción",
+    "generic": "No ha funcionado. Inténtalo de nuevo."
+  }
+}

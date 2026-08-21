@@ -1,0 +1,13 @@
+{
+  "title": "Welcome to {hotel}",
+  "subtitle": "Enter your room number and stay code to get started",
+  "roomLabel": "Room number",
+  "roomPlaceholder": "e.g. 304",
+  "codeLabel": "Stay code",
+  "codeHint": "The 6-digit code from check-in",
+  "checking": "One moment…",
+  "errors": {
+    "INVALID_CODE": "The code doesn't match — check it with the front desk",
+    "generic": "That didn't work. Please try again."
+  }
+}
