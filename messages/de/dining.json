@@ -1,0 +1,77 @@
+{
+  "title": "Restaurant",
+  "tabs": {
+    "menu": "Speisekarte",
+    "orders": "Meine Bestellungen"
+  },
+  "browse": {
+    "opensAt": "Öffnet um {time}",
+    "closed": "Derzeit geschlossen",
+    "from": "ab {price}",
+    "included": "✓ Inklusive",
+    "empty": "Die Speisekarte wird vorbereitet — schau bald wieder vorbei.",
+    "loadError": "Die Speisekarte konnte nicht geladen werden.",
+    "retry": "Erneut versuchen"
+  },
+  "sheet": {
+    "quantity": "Menge",
+    "less": "Weniger",
+    "more": "Mehr",
+    "note": "Notiz hinzufügen",
+    "notePlaceholder": "z. B. ohne Zwiebeln",
+    "add": "Zur Bestellung hinzufügen",
+    "addFor": "Hinzufügen · {price}",
+    "closedMenu": "Diese Karte ist gerade geschlossen — stöbern geht, bestellen ab {time}."
+  },
+  "cart": {
+    "title": "Deine Bestellung",
+    "button": "Bestellen",
+    "empty": "Noch nichts hier — füge etwas Leckeres hinzu.",
+    "included": "✓ Inklusive",
+    "total": "Zu zahlen",
+    "menuClosed": "Die Karte dieses Gerichts hat geschlossen — entferne es, um fortzufahren.",
+    "checkout": "Zur Kasse",
+    "remove": "Entfernen"
+  },
+  "checkout": {
+    "title": "Fast geschafft",
+    "destination": "Wohin dürfen wir liefern?",
+    "myRoom": "Mein Zimmer ({room})",
+    "spotLabel": "{label}-Nummer",
+    "spotFallback": "Platznummer",
+    "spotPlaceholder": "z. B. 12",
+    "payment": "Wie möchtest du zahlen?",
+    "cash": "Beim Kellner bei Lieferung zahlen",
+    "roomCharge": "Auf die Zimmerrechnung — Zahlung beim Check-out",
+    "includedNote": "Alles in dieser Bestellung ist in deinem Aufenthalt inklusive.",
+    "place": "Bestellung senden",
+    "placing": "Wird gesendet…"
+  },
+  "success": {
+    "title": "Bestellung eingegangen!",
+    "body": "Die Küche legt los — verfolge sie hier."
+  },
+  "status": {
+    "new": "Eingegangen",
+    "preparing": "In Zubereitung",
+    "on_the_way": "Unterwegs",
+    "delivered": "Geliefert",
+    "cancelled": "Storniert"
+  },
+  "tracking": {
+    "destination": "Lieferung an",
+    "payCash": "Halte {amount} in bar bereit",
+    "payRoom": "Auf deiner Zimmerrechnung — Zahlung beim Check-out",
+    "included": "✓ In deinem Aufenthalt inklusive",
+    "cancel": "Bestellung stornieren",
+    "cancelConfirm": "Diese Bestellung stornieren?",
+    "keep": "Behalten",
+    "yesCancel": "Ja, stornieren",
+    "noCancel": "Die Küche hat schon begonnen — wende dich für Änderungen an die Rezeption."
+  },
+  "history": {
+    "title": "Frühere Bestellungen",
+    "empty": "Noch keine Bestellungen.",
+    "roomCharge": "Zimmerrechnung"
+  }
+}

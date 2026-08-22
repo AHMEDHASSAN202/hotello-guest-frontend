@@ -1,0 +1,77 @@
+{
+  "title": "Ristorazione",
+  "tabs": {
+    "menu": "Menù",
+    "orders": "I miei ordini"
+  },
+  "browse": {
+    "opensAt": "Apre alle {time}",
+    "closed": "Ora chiuso",
+    "from": "da {price}",
+    "included": "✓ Incluso",
+    "empty": "Il menù è in preparazione — torna presto.",
+    "loadError": "Impossibile caricare il menù.",
+    "retry": "Riprova"
+  },
+  "sheet": {
+    "quantity": "Quantità",
+    "less": "Meno",
+    "more": "Più",
+    "note": "Aggiungi una nota",
+    "notePlaceholder": "es. senza cipolle",
+    "add": "Aggiungi all'ordine",
+    "addFor": "Aggiungi · {price}",
+    "closedMenu": "Questo menù è chiuso al momento — puoi sfogliarlo, gli ordini aprono alle {time}."
+  },
+  "cart": {
+    "title": "Il tuo ordine",
+    "button": "Ordina",
+    "empty": "Ancora niente — aggiungi qualcosa di buono.",
+    "included": "✓ Incluso",
+    "total": "Totale da pagare",
+    "menuClosed": "Il menù di questo piatto ha chiuso — rimuovilo per continuare.",
+    "checkout": "Conferma",
+    "remove": "Rimuovi"
+  },
+  "checkout": {
+    "title": "Ci siamo quasi",
+    "destination": "Dove lo portiamo?",
+    "myRoom": "La mia camera ({room})",
+    "spotLabel": "Numero {label}",
+    "spotFallback": "Numero postazione",
+    "spotPlaceholder": "es. 12",
+    "payment": "Come preferisci pagare?",
+    "cash": "Paga il cameriere alla consegna",
+    "roomCharge": "Aggiungi al conto della camera — paghi al check-out",
+    "includedNote": "Tutto in questo ordine è incluso nel tuo soggiorno.",
+    "place": "Invia ordine",
+    "placing": "Invio…"
+  },
+  "success": {
+    "title": "Ordine ricevuto!",
+    "body": "La cucina è al lavoro — seguilo qui."
+  },
+  "status": {
+    "new": "Ricevuto",
+    "preparing": "In preparazione",
+    "on_the_way": "In arrivo",
+    "delivered": "Consegnato",
+    "cancelled": "Annullato"
+  },
+  "tracking": {
+    "destination": "Consegna a",
+    "payCash": "Tieni pronti {amount} in contanti",
+    "payRoom": "Sul conto della camera — paghi al check-out",
+    "included": "✓ Incluso nel soggiorno",
+    "cancel": "Annulla ordine",
+    "cancelConfirm": "Annullare questo ordine?",
+    "keep": "Tienilo",
+    "yesCancel": "Sì, annulla",
+    "noCancel": "La cucina ha già iniziato — per modifiche rivolgiti alla reception."
+  },
+  "history": {
+    "title": "Ordini passati",
+    "empty": "Nessun ordine ancora.",
+    "roomCharge": "Conto camera"
+  }
+}

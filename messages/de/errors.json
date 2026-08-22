@@ -6,6 +6,11 @@
     "REQUEST_LIMIT_OPEN": "Sie haben bereits mehrere Anfragen in Arbeit — wir kümmern uns darum! Versuchen Sie es erneut, sobald eine erledigt ist.",
     "REQUEST_LIMIT_DAILY": "Sie haben das Tageslimit für Anfragen erreicht. Die Rezeption hilft Ihnen gern weiter.",
     "REQUEST_INVALID_STATUS": "Diese Anfrage wird bereits bearbeitet.",
-    "REQUEST_ITEM_DISABLED": "Dieser Service ist derzeit nicht verfügbar."
+    "REQUEST_ITEM_DISABLED": "Dieser Service ist derzeit nicht verfügbar.",
+    "MENU_UNAVAILABLE": "Diese Karte hat gerade geschlossen — bitte aktualisieren und erneut versuchen.",
+    "FNB_LIMIT_OPEN": "Du hast bereits mehrere Bestellungen offen — warte zuerst auf eine davon.",
+    "FNB_LIMIT_DAILY": "Du hast das Tageslimit für Bestellungen erreicht — die Rezeption hilft gern weiter.",
+    "FNB_ITEM_DISABLED": "Dieses Gericht ist gerade nicht mehr verfügbar — wähle etwas anderes.",
+    "FNB_PAYMENT_METHOD_INVALID": "Bitte wähle, wie du zahlen möchtest."
   }
 }

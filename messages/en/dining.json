@@ -1,0 +1,77 @@
+{
+  "title": "Dining",
+  "tabs": {
+    "menu": "Menu",
+    "orders": "My orders"
+  },
+  "browse": {
+    "opensAt": "Opens at {time}",
+    "closed": "Closed now",
+    "from": "from {price}",
+    "included": "✓ Included",
+    "empty": "The menu is being prepared — check back soon.",
+    "loadError": "We couldn't load the menu.",
+    "retry": "Try again"
+  },
+  "sheet": {
+    "quantity": "Quantity",
+    "less": "Less",
+    "more": "More",
+    "note": "Add a note",
+    "notePlaceholder": "e.g. no onions",
+    "add": "Add to order",
+    "addFor": "Add · {price}",
+    "closedMenu": "This menu is closed right now — you can browse, but ordering opens at {time}."
+  },
+  "cart": {
+    "title": "Your order",
+    "button": "Order",
+    "empty": "Nothing here yet — add something delicious.",
+    "included": "✓ Included",
+    "total": "Total to pay",
+    "menuClosed": "This item's menu has closed — remove it to continue.",
+    "checkout": "Checkout",
+    "remove": "Remove"
+  },
+  "checkout": {
+    "title": "Almost there",
+    "destination": "Where should we bring it?",
+    "myRoom": "My room ({room})",
+    "spotLabel": "{label} number",
+    "spotFallback": "Spot number",
+    "spotPlaceholder": "e.g. 12",
+    "payment": "How would you like to pay?",
+    "cash": "Pay the waiter on delivery",
+    "roomCharge": "Add to my room bill — pay at checkout",
+    "includedNote": "Everything in this order is included in your stay.",
+    "place": "Place order",
+    "placing": "Sending…"
+  },
+  "success": {
+    "title": "Order received!",
+    "body": "The kitchen is on it — track it here."
+  },
+  "status": {
+    "new": "Received",
+    "preparing": "Preparing",
+    "on_the_way": "On the way",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "tracking": {
+    "destination": "Delivering to",
+    "payCash": "Have {amount} ready in cash",
+    "payRoom": "On your room bill — pay at checkout",
+    "included": "✓ Included in your stay",
+    "cancel": "Cancel order",
+    "cancelConfirm": "Cancel this order?",
+    "keep": "Keep it",
+    "yesCancel": "Yes, cancel",
+    "noCancel": "The kitchen has already started — ask the front desk if you need changes."
+  },
+  "history": {
+    "title": "Past orders",
+    "empty": "No orders yet.",
+    "roomCharge": "Room bill"
+  }
+}

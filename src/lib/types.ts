@@ -14,6 +14,10 @@ export interface GuestProfile {
   language: string;
   /** 'YYYY-MM-DD'. */
   checkOutDate: string;
+  /** Board basis (Epic 16, 16.1 AC4) — prices menus without extra calls. */
+  stayType: string;
+  /** Keys the client-persisted cart per stay (Epic 16, note 9). */
+  stayId: string;
 }
 
 export interface GuestSessionResponse {
@@ -78,5 +82,114 @@ export interface GuestHotelProfile {
   /** IANA timezone. */
   timezone: string;
   defaultLanguage: string;
+  /** ISO currency code — F&B prices format with it (Epic 16). */
+  currency: string;
   enabledModules: string[];
+}
+
+
+/* ---- F&B Ordering (Epic 16) ---- */
+
+export type FnbOrderStatus =
+  | 'new'
+  | 'preparing'
+  | 'on_the_way'
+  | 'delivered'
+  | 'cancelled';
+
+export const OPEN_FNB_ORDER_STATUSES: FnbOrderStatus[] = [
+  'new',
+  'preparing',
+  'on_the_way',
+];
+
+export type FnbPaymentMethod = 'cash' | 'room_charge';
+
+/** `GET /guest/fnb/menus` — everything pre-localized + priced server-side
+ * for THIS guest's stay type; client totals are display-only. */
+export interface GuestFnbVariantOption {
+  key: string;
+  name: string;
+  included: boolean;
+  unitPrice: number;
+}
+
+export interface GuestFnbItem {
+  id: string;
+  name: string;
+  description: string | null;
+  /** Relative to the API base (`files/{key}`), or null → placeholder. */
+  photoThumbUrl: string | null;
+  photoDetailUrl: string | null;
+  included: boolean;
+  /** Lowest applicable price ("from X" for variants); 0 when included. */
+  unitPrice: number;
+  allowNotes: boolean;
+  variant: { label: string; options: GuestFnbVariantOption[] } | null;
+}
+
+export interface GuestFnbSection {
+  id: string;
+  name: string;
+  items: GuestFnbItem[];
+}
+
+export interface GuestFnbMenu {
+  id: string;
+  name: string;
+  description: string | null;
+  availability: { available: boolean; opensAt: string | null };
+  windows: Array<{ start: string; end: string }>;
+  prepSlaMinutes: number;
+  sections: GuestFnbSection[];
+}
+
+export interface GuestFnbLocation {
+  id: string;
+  key: string;
+  name: string;
+  hasSpots: boolean;
+  spotLabel: string | null;
+}
+
+export interface GuestFnbCatalog {
+  stayType: string;
+  currency: string;
+  paymentMethods: FnbPaymentMethod[];
+  locations: GuestFnbLocation[];
+  menus: GuestFnbMenu[];
+}
+
+/** `GET /guest/fnb/orders` rows (`data` + `serverTime` delta cursor). */
+export interface GuestFnbOrderLine {
+  id: string;
+  itemName: string;
+  variantOptionName: string | null;
+  quantity: number;
+  unitPrice: number;
+  included: boolean;
+  lineTotal: number;
+  note: string | null;
+  photoThumbUrl: string | null;
+}
+
+export interface GuestFnbOrder {
+  id: string;
+  status: FnbOrderStatus;
+  destinationType: 'room' | 'location';
+  locationName: string | null;
+  spot: string | null;
+  roomNumber: string;
+  paymentMethod: FnbPaymentMethod | null;
+  totalAmount: number;
+  currency: string;
+  slaTargetMinutes: number;
+  createdAt: string;
+  startedAt: string | null;
+  outForDeliveryAt: string | null;
+  deliveredAt: string | null;
+  cancelledAt: string | null;
+  cancelledReason: string | null;
+  updatedAt: string;
+  lines: GuestFnbOrderLine[];
 }

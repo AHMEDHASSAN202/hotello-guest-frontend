@@ -16,5 +16,8 @@
     "housekeeping": "Уборка",
     "transport": "Трансфер",
     "info": "Об отеле"
+  },
+  "diningCard": {
+    "track": "Отследить заказ"
   }
 }

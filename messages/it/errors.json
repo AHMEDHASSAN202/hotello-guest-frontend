@@ -6,6 +6,11 @@
     "REQUEST_LIMIT_OPEN": "Hai già alcune richieste in corso — ce ne stiamo occupando! Riprova quando una sarà completata.",
     "REQUEST_LIMIT_DAILY": "Hai raggiunto il limite giornaliero di richieste. La reception è felice di aiutarti.",
     "REQUEST_INVALID_STATUS": "Questa richiesta è già in lavorazione.",
-    "REQUEST_ITEM_DISABLED": "Questo servizio non è disponibile al momento."
+    "REQUEST_ITEM_DISABLED": "Questo servizio non è disponibile al momento.",
+    "MENU_UNAVAILABLE": "Questo menù ha appena chiuso — aggiorna e riprova.",
+    "FNB_LIMIT_OPEN": "Hai già alcuni ordini in corso — aspetta prima che ne arrivi uno.",
+    "FNB_LIMIT_DAILY": "Hai raggiunto il limite di ordini di oggi — la reception può aiutarti.",
+    "FNB_ITEM_DISABLED": "Questo piatto non è più disponibile — scegli qualcos'altro.",
+    "FNB_PAYMENT_METHOD_INVALID": "Scegli come vuoi pagare."
   }
 }

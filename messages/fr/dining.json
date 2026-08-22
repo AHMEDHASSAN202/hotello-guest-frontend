@@ -1,0 +1,77 @@
+{
+  "title": "Restauration",
+  "tabs": {
+    "menu": "Menu",
+    "orders": "Mes commandes"
+  },
+  "browse": {
+    "opensAt": "Ouvre à {time}",
+    "closed": "Fermé pour le moment",
+    "from": "à partir de {price}",
+    "included": "✓ Inclus",
+    "empty": "Le menu se prépare — revenez bientôt.",
+    "loadError": "Impossible de charger le menu.",
+    "retry": "Réessayer"
+  },
+  "sheet": {
+    "quantity": "Quantité",
+    "less": "Moins",
+    "more": "Plus",
+    "note": "Ajouter une note",
+    "notePlaceholder": "ex. sans oignons",
+    "add": "Ajouter à la commande",
+    "addFor": "Ajouter · {price}",
+    "closedMenu": "Ce menu est fermé pour le moment — vous pouvez parcourir, la commande ouvre à {time}."
+  },
+  "cart": {
+    "title": "Votre commande",
+    "button": "Commander",
+    "empty": "Rien pour l'instant — ajoutez quelque chose de délicieux.",
+    "included": "✓ Inclus",
+    "total": "Total à payer",
+    "menuClosed": "Le menu de cet article a fermé — retirez-le pour continuer.",
+    "checkout": "Valider",
+    "remove": "Retirer"
+  },
+  "checkout": {
+    "title": "Presque fini",
+    "destination": "Où devons-nous livrer ?",
+    "myRoom": "Ma chambre ({room})",
+    "spotLabel": "Numéro de {label}",
+    "spotFallback": "Numéro d'emplacement",
+    "spotPlaceholder": "ex. 12",
+    "payment": "Comment souhaitez-vous payer ?",
+    "cash": "Payez le serveur à la livraison",
+    "roomCharge": "Ajouter à ma note de chambre — paiement au départ",
+    "includedNote": "Tout dans cette commande est inclus dans votre séjour.",
+    "place": "Envoyer la commande",
+    "placing": "Envoi…"
+  },
+  "success": {
+    "title": "Commande reçue !",
+    "body": "La cuisine s'en occupe — suivez-la ici."
+  },
+  "status": {
+    "new": "Reçue",
+    "preparing": "En préparation",
+    "on_the_way": "En route",
+    "delivered": "Livrée",
+    "cancelled": "Annulée"
+  },
+  "tracking": {
+    "destination": "Livraison à",
+    "payCash": "Préparez {amount} en espèces",
+    "payRoom": "Sur votre note de chambre — paiement au départ",
+    "included": "✓ Inclus dans votre séjour",
+    "cancel": "Annuler la commande",
+    "cancelConfirm": "Annuler cette commande ?",
+    "keep": "La garder",
+    "yesCancel": "Oui, annuler",
+    "noCancel": "La cuisine a déjà commencé — voyez avec la réception pour tout changement."
+  },
+  "history": {
+    "title": "Commandes passées",
+    "empty": "Aucune commande pour l'instant.",
+    "roomCharge": "Note de chambre"
+  }
+}

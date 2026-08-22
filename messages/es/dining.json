@@ -1,0 +1,77 @@
+{
+  "title": "Restaurante",
+  "tabs": {
+    "menu": "Menú",
+    "orders": "Mis pedidos"
+  },
+  "browse": {
+    "opensAt": "Abre a las {time}",
+    "closed": "Cerrado ahora",
+    "from": "desde {price}",
+    "included": "✓ Incluido",
+    "empty": "El menú se está preparando — vuelve pronto.",
+    "loadError": "No pudimos cargar el menú.",
+    "retry": "Reintentar"
+  },
+  "sheet": {
+    "quantity": "Cantidad",
+    "less": "Menos",
+    "more": "Más",
+    "note": "Añadir una nota",
+    "notePlaceholder": "p. ej., sin cebolla",
+    "add": "Añadir al pedido",
+    "addFor": "Añadir · {price}",
+    "closedMenu": "Este menú está cerrado ahora — puedes mirarlo; los pedidos abren a las {time}."
+  },
+  "cart": {
+    "title": "Tu pedido",
+    "button": "Pedir",
+    "empty": "Aún no hay nada — añade algo delicioso.",
+    "included": "✓ Incluido",
+    "total": "Total a pagar",
+    "menuClosed": "El menú de este plato ha cerrado — quítalo para continuar.",
+    "checkout": "Finalizar",
+    "remove": "Quitar"
+  },
+  "checkout": {
+    "title": "Casi listo",
+    "destination": "¿Dónde te lo llevamos?",
+    "myRoom": "Mi habitación ({room})",
+    "spotLabel": "Número de {label}",
+    "spotFallback": "Número de sitio",
+    "spotPlaceholder": "p. ej., 12",
+    "payment": "¿Cómo quieres pagar?",
+    "cash": "Paga al camarero en la entrega",
+    "roomCharge": "Cargar a mi habitación — pago al hacer check-out",
+    "includedNote": "Todo en este pedido está incluido en tu estancia.",
+    "place": "Enviar pedido",
+    "placing": "Enviando…"
+  },
+  "success": {
+    "title": "¡Pedido recibido!",
+    "body": "La cocina ya está en ello — síguelo aquí."
+  },
+  "status": {
+    "new": "Recibido",
+    "preparing": "Preparando",
+    "on_the_way": "En camino",
+    "delivered": "Entregado",
+    "cancelled": "Cancelado"
+  },
+  "tracking": {
+    "destination": "Entrega en",
+    "payCash": "Ten listos {amount} en efectivo",
+    "payRoom": "En la cuenta de tu habitación — pago al check-out",
+    "included": "✓ Incluido en tu estancia",
+    "cancel": "Cancelar pedido",
+    "cancelConfirm": "¿Cancelar este pedido?",
+    "keep": "Mantenerlo",
+    "yesCancel": "Sí, cancelar",
+    "noCancel": "La cocina ya ha empezado — habla con recepción para cualquier cambio."
+  },
+  "history": {
+    "title": "Pedidos anteriores",
+    "empty": "Aún no hay pedidos.",
+    "roomCharge": "Cuenta de habitación"
+  }
+}

@@ -10,6 +10,7 @@ import {
   isCheckoutDay,
   nightsRemaining,
   todayInTimezone,
+  formatMoney,
 } from './format';
 
 describe('Russian plural rules (14.3 AC6 — the test case)', () => {
@@ -130,5 +131,24 @@ describe('formatCountdown', () => {
   });
   it('clamps at zero', () => {
     expect(formatCountdown(-4)).toBe('00:00');
+  });
+});
+
+describe('formatMoney (Epic 16, note 8)', () => {
+  it('formats the hotel currency with Latin digits in Arabic', () => {
+    const formatted = formatMoney(230, 'EGP', 'ar');
+    expect(formatted).toContain('230'); // Latin digits, never ٢٣٠
+    expect(formatted).not.toMatch(/[٠-٩]/);
+  });
+
+  it('whole amounts drop the fraction; fractions keep two digits', () => {
+    expect(formatMoney(230, 'EGP', 'en')).not.toContain('.00');
+    expect(formatMoney(230.5, 'EGP', 'en')).toContain('230.5');
+  });
+
+  it('covers all seven locales without throwing', () => {
+    for (const locale of ['ar', 'en', 'ru', 'fr', 'it', 'es', 'de'] as const) {
+      expect(formatMoney(99, 'EGP', locale).length).toBeGreaterThan(0);
+    }
   });
 });

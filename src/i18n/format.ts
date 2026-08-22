@@ -111,3 +111,21 @@ export function formatCountdown(totalSeconds: number): string {
   const ss = String(s % 60).padStart(2, '0');
   return `${mm}:${ss}`;
 }
+
+/**
+ * Hotel-currency money (Epic 16, note 8) — ONE formatter used everywhere
+ * prices render. Latin digits in every locale via intlLocale; whole amounts
+ * drop the fraction ("EGP 230", "230 ج.م.").
+ */
+export function formatMoney(
+  amount: number,
+  currency: string,
+  locale: Locale,
+): string {
+  return new Intl.NumberFormat(intlLocale(locale), {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+  }).format(amount);
+}

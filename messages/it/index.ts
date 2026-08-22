@@ -1,4 +1,5 @@
 import common from './common.json';
+import dining from './dining.json';
 import entry from './entry.json';
 import errors from './errors.json';
 import home from './home.json';

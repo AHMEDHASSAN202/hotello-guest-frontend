@@ -16,5 +16,8 @@
     "housekeeping": "Limpieza",
     "transport": "Transporte",
     "info": "Info del hotel"
+  },
+  "diningCard": {
+    "track": "Seguir el pedido"
   }
 }
