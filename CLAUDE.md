@@ -92,3 +92,14 @@ npm run build                 # i18n parity check + next build + bundle budget
 npm test                      # vitest
 npm run check:i18n            # seven-locale parity check alone
 ```
+
+## Workflow (pre-production convention — revisit at launch)
+
+- All work happens directly on `master` (the GitHub default for this repo).
+  No feature branches, no stacked epic branches, no worktrees.
+- Small, clear commits per task; push to origin after each verified green
+  state — `origin/master` always holds the latest work.
+- Quality gates never relax: `npm test` + `npm run build` (seven-locale
+  parity check, offline page, JS budget) must be green before every push.
+  Never push red.
+- Changes spanning repos land backend-first, then the frontends.
