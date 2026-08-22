@@ -61,6 +61,49 @@ export function isCheckoutDay(checkOutDate: string, timezone: string): boolean {
   return todayInTimezone(timezone) >= checkOutDate;
 }
 
+const RELATIVE_LADDER: Array<[limitSeconds: number, unit: Intl.RelativeTimeFormatUnit, unitSeconds: number]> = [
+  [60 * 60, 'minute', 60],
+  [24 * 60 * 60, 'hour', 60 * 60],
+  [7 * 24 * 60 * 60, 'day', 24 * 60 * 60],
+  [30 * 24 * 60 * 60, 'week', 7 * 24 * 60 * 60],
+  [365 * 24 * 60 * 60, 'month', 30 * 24 * 60 * 60],
+];
+
+/**
+ * "5 мин назад" / «منذ 4 دقائق» (15.3 AC4) — localized relative age with
+ * Latin digits via intlLocale. Under a minute reads as "this minute"-style
+ * copy (numeric:'auto'), which is the warm "just now". `now` is injectable
+ * so a poll ticker can re-render live ages.
+ */
+export function formatRelativeTime(
+  value: string | Date,
+  locale: Locale,
+  now: Date = new Date(),
+): string {
+  const then = typeof value === 'string' ? new Date(value) : value;
+  const diffSeconds = Math.round((then.getTime() - now.getTime()) / 1000);
+  const magnitude = Math.abs(diffSeconds);
+  const rtf = new Intl.RelativeTimeFormat(intlLocale(locale), {
+    numeric: 'auto',
+  });
+  for (const [limit, unit, unitSeconds] of RELATIVE_LADDER) {
+    if (magnitude < limit) {
+      return rtf.format(Math.trunc(diffSeconds / unitSeconds), unit);
+    }
+  }
+  return rtf.format(Math.trunc(diffSeconds / (365 * 24 * 60 * 60)), 'year');
+}
+
+/** "14:05" — timeline timestamps (guest's clock context, Latin digits). */
+export function formatTimeOfDay(value: string | Date, locale: Locale): string {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  return new Intl.DateTimeFormat(intlLocale(locale), {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).format(date);
+}
+
 /** Live lockout countdown, mm:ss (14.2 AC3). Always Latin digits. */
 export function formatCountdown(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds));

@@ -5,6 +5,8 @@ import ru from '../../messages/ru';
 import {
   formatCheckoutDate,
   formatCountdown,
+  formatRelativeTime,
+  formatTimeOfDay,
   isCheckoutDay,
   nightsRemaining,
   todayInTimezone,
@@ -77,6 +79,47 @@ describe('nightsRemaining / isCheckoutDay', () => {
   });
   it('never negative after checkout has passed', () => {
     expect(nightsRemaining(shift(-1), tz)).toBe(0);
+  });
+});
+
+describe('formatRelativeTime (15.3 AC4)', () => {
+  const now = new Date('2026-08-22T12:00:00Z');
+
+  it('renders localized minute ages with Latin digits', () => {
+    const fiveMinAgo = new Date('2026-08-22T11:55:00Z');
+    expect(formatRelativeTime(fiveMinAgo, 'en', now)).toBe('5 minutes ago');
+    expect(formatRelativeTime(fiveMinAgo, 'ru', now)).toBe('5 минут назад');
+    const arAge = formatRelativeTime(fiveMinAgo, 'ar', now);
+    expect(arAge).toContain('5');
+    expect(arAge).toContain('دقائق');
+  });
+
+  it('climbs the unit ladder: hours and days', () => {
+    expect(
+      formatRelativeTime(new Date('2026-08-22T09:00:00Z'), 'en', now),
+    ).toBe('3 hours ago');
+    expect(
+      formatRelativeTime(new Date('2026-08-20T11:00:00Z'), 'de', now),
+    ).toBe('vorgestern');
+  });
+
+  it('reads warmly under a minute (numeric auto)', () => {
+    const justNow = new Date('2026-08-22T11:59:50Z');
+    expect(formatRelativeTime(justNow, 'en', now)).toBe('this minute');
+  });
+
+  it('accepts ISO strings (the API shape)', () => {
+    expect(formatRelativeTime('2026-08-22T11:30:00Z', 'en', now)).toBe(
+      '30 minutes ago',
+    );
+  });
+});
+
+describe('formatTimeOfDay', () => {
+  it('renders 24h HH:MM with Latin digits in every script', () => {
+    const t = new Date('2026-08-22T14:05:00Z');
+    expect(formatTimeOfDay(t, 'en')).toMatch(/\d{2}:\d{2}/);
+    expect(formatTimeOfDay(t, 'ar')).toMatch(/\d{2}:\d{2}/);
   });
 });
 
