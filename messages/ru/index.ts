@@ -6,4 +6,4 @@ import home from './home.json';
 import requests from './requests.json';
 import states from './states.json';
 
-export default { common, entry, errors, home, requests, states };
+export default { common, dining, entry, errors, home, requests, states };

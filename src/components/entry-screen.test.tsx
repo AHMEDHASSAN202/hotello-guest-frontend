@@ -27,6 +27,7 @@ const hotel: GuestHotelProfile = {
   checkoutTime: '12:00',
   timezone: 'Africa/Cairo',
   defaultLanguage: 'ar',
+  currency: 'EGP',
   enabledModules: [],
 };
 

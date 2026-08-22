@@ -1,9 +1,9 @@
 'use client';
 
-import { ConciergeBell, House } from 'lucide-react';
+import { ConciergeBell, House, UtensilsCrossed } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-export type GuestSection = 'home' | 'requests';
+export type GuestSection = 'home' | 'requests' | 'dining';
 
 /**
  * The bottom nav (14.5 AC3, activated by Epic 15) — exists only once a
@@ -14,18 +14,28 @@ export type GuestSection = 'home' | 'requests';
 export function BottomNav({
   section,
   onSelect,
+  requestsLive = true,
+  diningLive = false,
 }: {
   section: GuestSection;
   onSelect: (section: GuestSection) => void;
+  requestsLive?: boolean;
+  diningLive?: boolean;
 }) {
   const t = useTranslations('requests');
+  const tDining = useTranslations('dining');
   const slots: Array<{
     key: GuestSection;
     icon: typeof House;
     label: string;
   }> = [
     { key: 'home', icon: House, label: t('nav.home') },
-    { key: 'requests', icon: ConciergeBell, label: t('nav.requests') },
+    ...(requestsLive
+      ? [{ key: 'requests' as const, icon: ConciergeBell, label: t('nav.requests') }]
+      : []),
+    ...(diningLive
+      ? [{ key: 'dining' as const, icon: UtensilsCrossed, label: tDining('title') }]
+      : []),
   ];
   return (
     <nav

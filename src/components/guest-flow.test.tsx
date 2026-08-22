@@ -47,6 +47,7 @@ const hotel: GuestHotelProfile = {
   checkoutTime: '12:00',
   timezone: 'Africa/Cairo',
   defaultLanguage: 'ar',
+  currency: 'EGP',
   enabledModules: [],
 };
 
@@ -58,6 +59,8 @@ const profile: GuestProfile = {
   slug: 'sunrise',
   language: 'en',
   checkOutDate: '2030-01-05',
+  stayType: 'all_inclusive',
+  stayId: 'stay-1',
 };
 
 function wrap(ui: ReactNode) {

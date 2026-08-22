@@ -1,10 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError, onSessionDeath } from '@/lib/api';
 import { tokenStore } from '@/lib/auth';
+import { cartStore } from '@/lib/cart';
 import type { GuestProfile, GuestSessionResponse } from '@/lib/types';
 import { BottomNav, type GuestSection } from './bottom-nav';
+import type { DiningPrefill } from './dining/dining-screen';
 import { EntryScreen } from './entry-screen';
 import { HomeScreen } from './home-screen';
 import { useHotel } from './hotel-provider';
@@ -12,6 +15,18 @@ import { LocaleSync } from './locale-sync';
 import { RequestsScreen } from './requests/requests-screen';
 import { GenericErrorScreen, GoodbyeScreen, OfflineScreen } from './state-screens';
 import { Screen, Skeleton } from './ui';
+
+// Dining rides a dynamic chunk — the /[slug] JS budget stays untouched for
+// guests who never open it (Epic 16, bundle-budget law).
+const DiningScreen = dynamic(
+  () => import('./dining/dining-screen').then((m) => m.DiningScreen),
+  { ssr: false },
+);
+const ActiveOrderStrip = dynamic(
+  () =>
+    import('./dining/active-order-strip').then((m) => m.ActiveOrderStrip),
+  { ssr: false },
+);
 
 type GuestState =
   | { phase: 'probing' }
@@ -24,13 +39,42 @@ type GuestState =
  * The client-side session state machine (14.2). Screens are animated state
  * transitions inside one route — the app never navigates, so nothing flashes.
  */
-export function GuestFlow({ slug, roomParam }: { slug: string; roomParam?: string }) {
+export function GuestFlow({
+  slug,
+  roomParam,
+  locationParam,
+  spotParam,
+}: {
+  slug: string;
+  roomParam?: string;
+  locationParam?: string;
+  spotParam?: string;
+}) {
   const { isModuleEnabled } = useHotel();
   // Boot decides instantly: a stored token means we probe (skeleton), never
   // the entry form — a valid session must not see a flash of login (AC4).
   const [state, setState] = useState<GuestState>(() =>
     tokenStore.get() ? { phase: 'probing' } : { phase: 'entry' },
   );
+
+  // 16.5 AC6 — ?location/?spot follow the ?room contract: captured once
+  // into memory (they must survive into the checkout prefill even for an
+  // already-sessioned guest), then dropped from the URL. Never identity.
+  const diningPrefill = useRef<DiningPrefill | undefined>(
+    locationParam || spotParam
+      ? { location: locationParam, spot: spotParam }
+      : undefined,
+  );
+  useEffect(() => {
+    if (
+      (locationParam || spotParam) &&
+      typeof window !== 'undefined' &&
+      window.location.search
+    ) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const probe = useCallback(async () => {
     setState({ phase: 'probing' });
@@ -56,10 +100,14 @@ export function GuestFlow({ slug, roomParam }: { slug: string; roomParam?: strin
 
   // Mid-use session death (checkout/suspension — NOT regeneration, which the
   // backend deliberately survives): warm goodbye with the entry form beneath.
+  // The stay's cart dies with the stay (Epic 16, note 9).
   const isHome = state.phase === 'home';
   useEffect(() => {
     if (!isHome) return;
-    return onSessionDeath(() => setState({ phase: 'goodbye' }));
+    return onSessionDeath(() => {
+      cartStore.clear();
+      setState({ phase: 'goodbye' });
+    });
   }, [isHome]);
 
   const enter = useCallback((session: GuestSessionResponse) => {
@@ -91,6 +139,21 @@ export function GuestFlow({ slug, roomParam }: { slug: string; roomParam?: strin
     );
   }, []);
 
+  // A location-QR scan lands the guest straight in Dining — once.
+  const prefillRouted = useRef(false);
+  const diningLiveNow = isModuleEnabled('fnb');
+  useEffect(() => {
+    if (
+      isHome &&
+      diningLiveNow &&
+      diningPrefill.current &&
+      !prefillRouted.current
+    ) {
+      prefillRouted.current = true;
+      setSection('dining');
+    }
+  }, [isHome, diningLiveNow, setSection]);
+
   switch (state.phase) {
     case 'probing':
       return <HomeSkeleton />;
@@ -118,24 +181,45 @@ export function GuestFlow({ slug, roomParam }: { slug: string; roomParam?: strin
     case 'home': {
       // The nav exists only once a second section is live (14.5 AC3).
       const requestsLive = isModuleEnabled('requests');
+      const diningLive = isModuleEnabled('fnb');
+      const navLive = requestsLive || diningLive;
       return (
         <>
           <LocaleSync stayLanguage={state.profile.language} />
-          <div className={requestsLive ? 'pb-16' : ''}>
+          <div className={navLive ? 'pb-16' : ''}>
             {state.section === 'requests' && requestsLive ? (
               <RequestsScreen profile={state.profile} />
-            ) : (
-              <HomeScreen
+            ) : state.section === 'dining' && diningLive ? (
+              <DiningScreen
                 profile={state.profile}
-                onRefresh={refresh}
-                onOpenTile={(key) => {
-                  if (key === 'requests' && requestsLive) setSection('requests');
-                }}
+                prefill={diningPrefill.current}
               />
+            ) : (
+              <>
+                <HomeScreen
+                  profile={state.profile}
+                  onRefresh={refresh}
+                  onOpenTile={(key) => {
+                    if (key === 'requests' && requestsLive) {
+                      setSection('requests');
+                    } else if (key === 'dining' && diningLive) {
+                      setSection('dining');
+                    }
+                  }}
+                />
+                {diningLive ? (
+                  <ActiveOrderStrip onOpen={() => setSection('dining')} />
+                ) : null}
+              </>
             )}
           </div>
-          {requestsLive ? (
-            <BottomNav section={state.section} onSelect={setSection} />
+          {navLive ? (
+            <BottomNav
+              section={state.section}
+              onSelect={setSection}
+              requestsLive={requestsLive}
+              diningLive={diningLive}
+            />
           ) : null}
         </>
       );
