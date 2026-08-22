@@ -1,4 +1,11 @@
 {
   "generic": "Something went wrong. Please try again.",
-  "network": "Connection lost — check your WiFi and try again."
+  "network": "Connection lost — check your WiFi and try again.",
+  "code": {
+    "NETWORK": "Connection lost — check your WiFi and try again.",
+    "REQUEST_LIMIT_OPEN": "You already have a few requests in progress — we're on them! Please try again once one is done.",
+    "REQUEST_LIMIT_DAILY": "You've reached today's request limit. The front desk is happy to help with anything else.",
+    "REQUEST_INVALID_STATUS": "This request is already being handled.",
+    "REQUEST_ITEM_DISABLED": "This service isn't available right now."
+  }
 }

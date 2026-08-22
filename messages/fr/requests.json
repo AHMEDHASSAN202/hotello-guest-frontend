@@ -1,0 +1,55 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "requests": "Demandes"
+  },
+  "title": "Demandes",
+  "tabs": {
+    "browse": "Commander",
+    "mine": "Mes demandes"
+  },
+  "soon": {
+    "title": "Bientôt disponible",
+    "body": "Ce service n'est pas encore disponible — notre équipe reste à votre écoute."
+  },
+  "browse": {
+    "emptyTitle": "Rien à commander pour le moment",
+    "emptyBody": "Notre équipe se fera un plaisir de vous aider."
+  },
+  "sheet": {
+    "quantity": "Combien ?",
+    "time": "À quelle heure ?",
+    "less": "Moins",
+    "more": "Plus",
+    "noteLabel": "Note (facultatif)",
+    "notePlaceholder": "Quelque chose à préciser ?",
+    "submit": "Envoyer la demande",
+    "sending": "Envoi…",
+    "confirmed": "Demande envoyée !",
+    "confirmedBody": "On s'en occupe — suivez l'avancement dans Mes demandes."
+  },
+  "mine": {
+    "emptyTitle": "Aucune demande pour l'instant",
+    "emptyBody": "Serviettes, réveil, dépannage — commandez tout en quelques gestes.",
+    "orderCta": "Parcourir les services",
+    "history": "{count, plural, one {# demande passée} other {# demandes passées}}"
+  },
+  "status": {
+    "new": "Reçue",
+    "in_progress": "En cours",
+    "done": "Terminée",
+    "cancelled": "Annulée"
+  },
+  "detail": {
+    "note": "Votre note",
+    "submitted": "Reçue",
+    "started": "Commencée",
+    "completed": "Terminée",
+    "cancelled": "Annulée",
+    "cancel": "Annuler cette demande",
+    "cancelConfirm": "Annuler cette demande ?",
+    "cancelKeep": "La garder",
+    "cancelYes": "Oui, annuler",
+    "noCancel": "L'équipe a déjà commencé à s'en occuper."
+  }
+}

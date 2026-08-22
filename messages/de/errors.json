@@ -1,4 +1,11 @@
 {
   "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
-  "network": "Verbindung verloren — prüfen Sie das WLAN und versuchen Sie es erneut."
+  "network": "Verbindung verloren — prüfen Sie das WLAN und versuchen Sie es erneut.",
+  "code": {
+    "NETWORK": "Verbindung verloren — prüfen Sie das WLAN und versuchen Sie es erneut.",
+    "REQUEST_LIMIT_OPEN": "Sie haben bereits mehrere Anfragen in Arbeit — wir kümmern uns darum! Versuchen Sie es erneut, sobald eine erledigt ist.",
+    "REQUEST_LIMIT_DAILY": "Sie haben das Tageslimit für Anfragen erreicht. Die Rezeption hilft Ihnen gern weiter.",
+    "REQUEST_INVALID_STATUS": "Diese Anfrage wird bereits bearbeitet.",
+    "REQUEST_ITEM_DISABLED": "Dieser Service ist derzeit nicht verfügbar."
+  }
 }

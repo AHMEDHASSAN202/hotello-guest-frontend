@@ -20,7 +20,8 @@ export interface GuestTile {
 }
 
 export const GUEST_TILES: GuestTile[] = [
-  { key: 'requests', icon: ConciergeBell, moduleKey: 'requests', live: false },
+  // Epic 15 (15.2 AC1) — the first live tile.
+  { key: 'requests', icon: ConciergeBell, moduleKey: 'requests', live: true },
   { key: 'dining', icon: UtensilsCrossed, moduleKey: 'fnb', live: false },
   { key: 'housekeeping', icon: Sparkles, moduleKey: 'housekeeping', live: false },
   { key: 'transport', icon: CarFront, moduleKey: 'transportation', live: false },

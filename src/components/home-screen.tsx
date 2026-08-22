@@ -21,9 +21,11 @@ const PULL_THRESHOLD = 70;
 export function HomeScreen({
   profile,
   onRefresh,
+  onOpenTile,
 }: {
   profile: GuestProfile;
   onRefresh?: () => Promise<void>;
+  onOpenTile?: (key: 'requests' | 'dining' | 'housekeeping' | 'transport' | 'info') => void;
 }) {
   const t = useTranslations('home');
   const tc = useTranslations('common');
@@ -94,15 +96,12 @@ export function HomeScreen({
         </div>
 
         <div className="mt-7">
-          <ServicesGrid />
+          <ServicesGrid onOpen={onOpenTile} />
         </div>
 
         <p className="mt-10 pb-2 text-center text-[11px] uppercase tracking-[0.16em] text-ink-faint">
           {tc('poweredBy')}
         </p>
-
-        {/* Reserved bottom-nav slot (14.5 AC3) — Epic 15 activates it. */}
-        <div aria-hidden className="h-2" />
       </div>
     </Screen>
   );

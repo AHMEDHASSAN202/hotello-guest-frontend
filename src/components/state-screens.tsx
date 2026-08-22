@@ -34,7 +34,7 @@ function Medallion({ icon: Icon }: { icon: LucideIcon }) {
   );
 }
 
-function StateShell({
+export function StateShell({
   icon,
   title,
   body,

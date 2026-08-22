@@ -1,0 +1,55 @@
+{
+  "nav": {
+    "home": "Home",
+    "requests": "Requests"
+  },
+  "title": "Requests",
+  "tabs": {
+    "browse": "Order",
+    "mine": "My requests"
+  },
+  "soon": {
+    "title": "Coming soon",
+    "body": "This service isn't available right now — our team is happy to help meanwhile."
+  },
+  "browse": {
+    "emptyTitle": "Nothing to order here yet",
+    "emptyBody": "Our team is happy to help with anything you need."
+  },
+  "sheet": {
+    "quantity": "How many?",
+    "time": "What time?",
+    "less": "Less",
+    "more": "More",
+    "noteLabel": "Note (optional)",
+    "notePlaceholder": "Anything we should know?",
+    "submit": "Send request",
+    "sending": "Sending…",
+    "confirmed": "Request sent!",
+    "confirmedBody": "We're on it — follow the progress in My requests."
+  },
+  "mine": {
+    "emptyTitle": "No requests yet",
+    "emptyBody": "Anything you need — towels, a wake-up call, a fix — order it in a few taps.",
+    "orderCta": "Browse services",
+    "history": "{count, plural, one {# earlier request} other {# earlier requests}}"
+  },
+  "status": {
+    "new": "Received",
+    "in_progress": "In progress",
+    "done": "Done",
+    "cancelled": "Cancelled"
+  },
+  "detail": {
+    "note": "Your note",
+    "submitted": "Received",
+    "started": "Started",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "cancel": "Cancel this request",
+    "cancelConfirm": "Cancel this request?",
+    "cancelKeep": "Keep it",
+    "cancelYes": "Yes, cancel",
+    "noCancel": "The team has already started on this one."
+  }
+}

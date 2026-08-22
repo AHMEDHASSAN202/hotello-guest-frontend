@@ -1,0 +1,55 @@
+{
+  "nav": {
+    "home": "Start",
+    "requests": "Anfragen"
+  },
+  "title": "Anfragen",
+  "tabs": {
+    "browse": "Bestellen",
+    "mine": "Meine Anfragen"
+  },
+  "soon": {
+    "title": "Bald verfügbar",
+    "body": "Dieser Service ist noch nicht verfügbar — unser Team hilft Ihnen jederzeit gern."
+  },
+  "browse": {
+    "emptyTitle": "Im Moment nichts zu bestellen",
+    "emptyBody": "Unser Team hilft Ihnen gern bei allem, was Sie brauchen."
+  },
+  "sheet": {
+    "quantity": "Wie viele?",
+    "time": "Um wie viel Uhr?",
+    "less": "Weniger",
+    "more": "Mehr",
+    "noteLabel": "Notiz (optional)",
+    "notePlaceholder": "Gibt es etwas zu beachten?",
+    "submit": "Anfrage senden",
+    "sending": "Wird gesendet…",
+    "confirmed": "Anfrage gesendet!",
+    "confirmedBody": "Wir kümmern uns darum — verfolgen Sie den Status unter Meine Anfragen."
+  },
+  "mine": {
+    "emptyTitle": "Noch keine Anfragen",
+    "emptyBody": "Handtücher, ein Weckruf, eine Reparatur — bestellen Sie alles mit wenigen Fingertipps.",
+    "orderCta": "Services ansehen",
+    "history": "{count, plural, one {# frühere Anfrage} other {# frühere Anfragen}}"
+  },
+  "status": {
+    "new": "Eingegangen",
+    "in_progress": "In Arbeit",
+    "done": "Erledigt",
+    "cancelled": "Storniert"
+  },
+  "detail": {
+    "note": "Ihre Notiz",
+    "submitted": "Eingegangen",
+    "started": "Begonnen",
+    "completed": "Erledigt",
+    "cancelled": "Storniert",
+    "cancel": "Anfrage stornieren",
+    "cancelConfirm": "Diese Anfrage stornieren?",
+    "cancelKeep": "Behalten",
+    "cancelYes": "Ja, stornieren",
+    "noCancel": "Das Team hat bereits damit begonnen."
+  }
+}

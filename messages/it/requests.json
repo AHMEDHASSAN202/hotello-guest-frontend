@@ -1,0 +1,55 @@
+{
+  "nav": {
+    "home": "Home",
+    "requests": "Richieste"
+  },
+  "title": "Richieste",
+  "tabs": {
+    "browse": "Ordina",
+    "mine": "Le mie richieste"
+  },
+  "soon": {
+    "title": "In arrivo",
+    "body": "Questo servizio non è ancora disponibile — il nostro team è comunque a disposizione."
+  },
+  "browse": {
+    "emptyTitle": "Niente da ordinare al momento",
+    "emptyBody": "Il nostro team è felice di aiutarti con qualsiasi cosa."
+  },
+  "sheet": {
+    "quantity": "Quanti?",
+    "time": "A che ora?",
+    "less": "Meno",
+    "more": "Più",
+    "noteLabel": "Nota (facoltativa)",
+    "notePlaceholder": "Qualcosa da sapere?",
+    "submit": "Invia richiesta",
+    "sending": "Invio…",
+    "confirmed": "Richiesta inviata!",
+    "confirmedBody": "Ci stiamo lavorando — segui lo stato in Le mie richieste."
+  },
+  "mine": {
+    "emptyTitle": "Ancora nessuna richiesta",
+    "emptyBody": "Asciugamani, sveglia, una riparazione — ordina tutto in pochi tocchi.",
+    "orderCta": "Sfoglia i servizi",
+    "history": "{count, plural, one {# richiesta precedente} other {# richieste precedenti}}"
+  },
+  "status": {
+    "new": "Ricevuta",
+    "in_progress": "In corso",
+    "done": "Completata",
+    "cancelled": "Annullata"
+  },
+  "detail": {
+    "note": "La tua nota",
+    "submitted": "Ricevuta",
+    "started": "Iniziata",
+    "completed": "Completata",
+    "cancelled": "Annullata",
+    "cancel": "Annulla questa richiesta",
+    "cancelConfirm": "Annullare questa richiesta?",
+    "cancelKeep": "Mantienila",
+    "cancelYes": "Sì, annulla",
+    "noCancel": "Il team ha già iniziato a occuparsene."
+  }
+}

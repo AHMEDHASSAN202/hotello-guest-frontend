@@ -1,4 +1,11 @@
 {
   "generic": "Une erreur s'est produite. Veuillez réessayer.",
-  "network": "Connexion perdue — vérifiez le WiFi et réessayez."
+  "network": "Connexion perdue — vérifiez le WiFi et réessayez.",
+  "code": {
+    "NETWORK": "Connexion perdue — vérifiez le WiFi et réessayez.",
+    "REQUEST_LIMIT_OPEN": "Vous avez déjà plusieurs demandes en cours — on s'en occupe ! Réessayez dès qu'une sera terminée.",
+    "REQUEST_LIMIT_DAILY": "Vous avez atteint la limite de demandes du jour. La réception se fera un plaisir de vous aider.",
+    "REQUEST_INVALID_STATUS": "Cette demande est déjà en cours de traitement.",
+    "REQUEST_ITEM_DISABLED": "Ce service n'est pas disponible pour le moment."
+  }
 }

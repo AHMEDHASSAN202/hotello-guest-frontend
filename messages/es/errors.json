@@ -1,4 +1,11 @@
 {
   "generic": "Algo ha salido mal. Inténtalo de nuevo.",
-  "network": "Conexión perdida — comprueba el WiFi e inténtalo de nuevo."
+  "network": "Conexión perdida — comprueba el WiFi e inténtalo de nuevo.",
+  "code": {
+    "NETWORK": "Conexión perdida — comprueba el WiFi e inténtalo de nuevo.",
+    "REQUEST_LIMIT_OPEN": "Ya tienes varias solicitudes en curso — ¡estamos en ello! Inténtalo de nuevo cuando una esté lista.",
+    "REQUEST_LIMIT_DAILY": "Has alcanzado el límite diario de solicitudes. Recepción estará encantada de ayudarte.",
+    "REQUEST_INVALID_STATUS": "Esta solicitud ya se está gestionando.",
+    "REQUEST_ITEM_DISABLED": "Este servicio no está disponible ahora mismo."
+  }
 }

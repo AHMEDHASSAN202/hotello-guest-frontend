@@ -2,14 +2,19 @@
 
 import { useTranslations } from 'next-intl';
 import { useHotel } from '@/components/hotel-provider';
-import { visibleTiles } from '@/lib/tiles';
+import { visibleTiles, type GuestTile } from '@/lib/tiles';
 
 /**
  * The services grid (14.4 AC3): visible ambition, disabled interaction. One
  * tasteful "soon" treatment — full-color icon art on an accent-soft medallion,
  * a quiet chip, no gray sadness. Tiles are plan-gated via enabledModules.
+ * Live tiles fire `onOpen` (Epic 15 — sections are state, not routes).
  */
-export function ServicesGrid() {
+export function ServicesGrid({
+  onOpen,
+}: {
+  onOpen?: (key: GuestTile['key']) => void;
+}) {
   const t = useTranslations('home');
   const { hotel } = useHotel();
   const tiles = visibleTiles(hotel.enabledModules);
@@ -25,7 +30,16 @@ export function ServicesGrid() {
             <div
               data-testid={`tile-${key}`}
               role={live ? 'button' : undefined}
+              tabIndex={live ? 0 : undefined}
               aria-disabled={live ? undefined : 'true'}
+              onClick={live && onOpen ? () => onOpen(key) : undefined}
+              onKeyDown={
+                live && onOpen
+                  ? (e) => {
+                      if (e.key === 'Enter' || e.key === ' ') onOpen(key);
+                    }
+                  : undefined
+              }
               className={`relative flex h-28 flex-col items-start justify-between rounded-card bg-card p-4 shadow-card ${
                 live ? 'pressable cursor-pointer' : ''
               }`}

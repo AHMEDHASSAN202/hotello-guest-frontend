@@ -74,20 +74,27 @@ export function BottomSheet({
         aria-modal="true"
         aria-label={title}
         data-testid="bottom-sheet"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
         style={{
           transform: offset ? `translateY(${offset}px)` : undefined,
           transition: offset ? 'none' : 'transform 0.2s ease-out',
         }}
-        className="animate-sheet-in absolute inset-x-0 bottom-0 touch-none rounded-t-sheet bg-card px-5 pt-3 shadow-sheet pb-safe"
+        className="animate-sheet-in absolute inset-x-0 bottom-0 rounded-t-sheet bg-card px-5 pt-3 shadow-sheet pb-safe"
       >
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/15" aria-hidden />
-        {title ? (
-          <h2 className="mb-3 text-center text-[15px] font-semibold text-ink">{title}</h2>
-        ) : null}
-        <div className="pb-6">{children}</div>
+        {/* Drag is scoped to the grab area (Epic 15) so sheet bodies can hold
+            scrollable lists and text inputs without fighting the gesture. */}
+        <div
+          data-testid="sheet-grab"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          className="-mx-5 touch-none px-5"
+        >
+          <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/15" aria-hidden />
+          {title ? (
+            <h2 className="mb-3 text-center text-[15px] font-semibold text-ink">{title}</h2>
+          ) : null}
+        </div>
+        <div className="max-h-[70dvh] overflow-y-auto pb-6">{children}</div>
       </div>
     </div>
   );

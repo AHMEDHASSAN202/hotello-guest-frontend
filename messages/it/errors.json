@@ -1,4 +1,11 @@
 {
   "generic": "Qualcosa è andato storto. Riprova.",
-  "network": "Connessione persa — controlla il WiFi e riprova."
+  "network": "Connessione persa — controlla il WiFi e riprova.",
+  "code": {
+    "NETWORK": "Connessione persa — controlla il WiFi e riprova.",
+    "REQUEST_LIMIT_OPEN": "Hai già alcune richieste in corso — ce ne stiamo occupando! Riprova quando una sarà completata.",
+    "REQUEST_LIMIT_DAILY": "Hai raggiunto il limite giornaliero di richieste. La reception è felice di aiutarti.",
+    "REQUEST_INVALID_STATUS": "Questa richiesta è già in lavorazione.",
+    "REQUEST_ITEM_DISABLED": "Questo servizio non è disponibile al momento."
+  }
 }

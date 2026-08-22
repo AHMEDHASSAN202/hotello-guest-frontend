@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -96,9 +96,19 @@ describe('ServicesGrid gating (14.4 AC3)', () => {
 
   it('soon tiles are visibly ambitious but inert: aria-disabled, no button role', () => {
     wrap(<ServicesGrid />);
-    const tile = screen.getByTestId('tile-requests');
+    const tile = screen.getByTestId('tile-dining');
     expect(tile.getAttribute('aria-disabled')).toBe('true');
     expect(tile.getAttribute('role')).toBeNull();
     expect(screen.getAllByText('Soon').length).toBeGreaterThan(0);
+  });
+
+  it('Epic 15 — the live requests tile is a button and fires onOpen', () => {
+    const onOpen = vi.fn();
+    wrap(<ServicesGrid onOpen={onOpen} />);
+    const tile = screen.getByTestId('tile-requests');
+    expect(tile.getAttribute('role')).toBe('button');
+    expect(tile.getAttribute('aria-disabled')).toBeNull();
+    fireEvent.click(tile);
+    expect(onOpen).toHaveBeenCalledWith('requests');
   });
 });

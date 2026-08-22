@@ -1,0 +1,55 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "requests": "Solicitudes"
+  },
+  "title": "Solicitudes",
+  "tabs": {
+    "browse": "Pedir",
+    "mine": "Mis solicitudes"
+  },
+  "soon": {
+    "title": "Muy pronto",
+    "body": "Este servicio aún no está disponible — nuestro equipo estará encantado de ayudarte."
+  },
+  "browse": {
+    "emptyTitle": "Nada que pedir por ahora",
+    "emptyBody": "Nuestro equipo estará encantado de ayudarte con lo que necesites."
+  },
+  "sheet": {
+    "quantity": "¿Cuántos?",
+    "time": "¿A qué hora?",
+    "less": "Menos",
+    "more": "Más",
+    "noteLabel": "Nota (opcional)",
+    "notePlaceholder": "¿Algo que debamos saber?",
+    "submit": "Enviar solicitud",
+    "sending": "Enviando…",
+    "confirmed": "¡Solicitud enviada!",
+    "confirmedBody": "Ya estamos en ello — sigue el estado en Mis solicitudes."
+  },
+  "mine": {
+    "emptyTitle": "Aún no hay solicitudes",
+    "emptyBody": "Toallas, una llamada despertador, una reparación — pídelo todo en unos toques.",
+    "orderCta": "Ver servicios",
+    "history": "{count, plural, one {# solicitud anterior} other {# solicitudes anteriores}}"
+  },
+  "status": {
+    "new": "Recibida",
+    "in_progress": "En curso",
+    "done": "Lista",
+    "cancelled": "Cancelada"
+  },
+  "detail": {
+    "note": "Tu nota",
+    "submitted": "Recibida",
+    "started": "Iniciada",
+    "completed": "Completada",
+    "cancelled": "Cancelada",
+    "cancel": "Cancelar esta solicitud",
+    "cancelConfirm": "¿Cancelar esta solicitud?",
+    "cancelKeep": "Mantenerla",
+    "cancelYes": "Sí, cancelar",
+    "noCancel": "El equipo ya ha empezado a ocuparse de ella."
+  }
+}

@@ -62,10 +62,10 @@ describe('BottomSheet (14.5 AC2 — drag-to-dismiss picker)', () => {
         <p>content</p>
       </BottomSheet>,
     );
-    const sheet = screen.getByTestId('bottom-sheet');
-    fireEvent.pointerDown(sheet, { clientY: 100, pointerId: 1 });
-    fireEvent.pointerMove(sheet, { clientY: 260, pointerId: 1 });
-    fireEvent.pointerUp(sheet, { clientY: 260, pointerId: 1 });
+    const grab = screen.getByTestId('sheet-grab');
+    fireEvent.pointerDown(grab, { clientY: 100, pointerId: 1 });
+    fireEvent.pointerMove(grab, { clientY: 260, pointerId: 1 });
+    fireEvent.pointerUp(grab, { clientY: 260, pointerId: 1 });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -76,11 +76,11 @@ describe('BottomSheet (14.5 AC2 — drag-to-dismiss picker)', () => {
         <p>content</p>
       </BottomSheet>,
     );
-    const sheet = screen.getByTestId('bottom-sheet');
-    fireEvent.pointerDown(sheet, { clientY: 100, pointerId: 1 });
+    const grab = screen.getByTestId('sheet-grab');
+    fireEvent.pointerDown(grab, { clientY: 100, pointerId: 1 });
     // A tiny drag: below both the distance and the flick-distance thresholds.
-    fireEvent.pointerMove(sheet, { clientY: 130, pointerId: 1 });
-    fireEvent.pointerUp(sheet, { clientY: 130, pointerId: 1 });
+    fireEvent.pointerMove(grab, { clientY: 130, pointerId: 1 });
+    fireEvent.pointerUp(grab, { clientY: 130, pointerId: 1 });
     expect(onClose).not.toHaveBeenCalled();
   });
 });

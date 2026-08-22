@@ -30,7 +30,7 @@ export function mergeRequests(
   if (delta.length === 0) return current;
   const byId = new Map(current.map((r) => [r.id, r]));
   for (const row of delta) byId.set(row.id, row);
-  return sortRequests([...byId.values()]);
+  return sortRequests(Array.from(byId.values()));
 }
 
 export function useGuestRequests(active: boolean) {

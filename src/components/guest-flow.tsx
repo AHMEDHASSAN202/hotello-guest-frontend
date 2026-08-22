@@ -4,16 +4,19 @@ import { useCallback, useEffect, useState } from 'react';
 import { api, ApiError, onSessionDeath } from '@/lib/api';
 import { tokenStore } from '@/lib/auth';
 import type { GuestProfile, GuestSessionResponse } from '@/lib/types';
+import { BottomNav, type GuestSection } from './bottom-nav';
 import { EntryScreen } from './entry-screen';
 import { HomeScreen } from './home-screen';
+import { useHotel } from './hotel-provider';
 import { LocaleSync } from './locale-sync';
+import { RequestsScreen } from './requests/requests-screen';
 import { GenericErrorScreen, GoodbyeScreen, OfflineScreen } from './state-screens';
 import { Screen, Skeleton } from './ui';
 
 type GuestState =
   | { phase: 'probing' }
   | { phase: 'entry' }
-  | { phase: 'home'; profile: GuestProfile }
+  | { phase: 'home'; profile: GuestProfile; section: GuestSection }
   | { phase: 'goodbye' }
   | { phase: 'error'; kind: 'offline' | 'generic' };
 
@@ -22,6 +25,7 @@ type GuestState =
  * transitions inside one route — the app never navigates, so nothing flashes.
  */
 export function GuestFlow({ slug, roomParam }: { slug: string; roomParam?: string }) {
+  const { isModuleEnabled } = useHotel();
   // Boot decides instantly: a stored token means we probe (skeleton), never
   // the entry form — a valid session must not see a flash of login (AC4).
   const [state, setState] = useState<GuestState>(() =>
@@ -32,7 +36,7 @@ export function GuestFlow({ slug, roomParam }: { slug: string; roomParam?: strin
     setState({ phase: 'probing' });
     try {
       const profile = await api<GuestProfile>('/guest/me');
-      setState({ phase: 'home', profile });
+      setState({ phase: 'home', profile, section: 'home' });
     } catch (err) {
       if (err instanceof ApiError && err.code === 'NETWORK') {
         setState({ phase: 'error', kind: 'offline' });
@@ -64,17 +68,27 @@ export function GuestFlow({ slug, roomParam }: { slug: string; roomParam?: strin
     if (typeof window !== 'undefined' && window.location.search) {
       window.history.replaceState(null, '', window.location.pathname);
     }
-    setState({ phase: 'home', profile: session.profile });
+    setState({ phase: 'home', profile: session.profile, section: 'home' });
   }, []);
 
   const refresh = useCallback(async () => {
     try {
       const profile = await api<GuestProfile>('/guest/me');
-      setState({ phase: 'home', profile });
+      setState((prev) => ({
+        phase: 'home',
+        profile,
+        section: prev.phase === 'home' ? prev.section : 'home',
+      }));
     } catch {
       // A dead session already routed to goodbye via onSessionDeath;
       // transient errors keep the current view.
     }
+  }, []);
+
+  const setSection = useCallback((section: GuestSection) => {
+    setState((prev) =>
+      prev.phase === 'home' ? { ...prev, section } : prev,
+    );
   }, []);
 
   switch (state.phase) {
@@ -101,13 +115,31 @@ export function GuestFlow({ slug, roomParam }: { slug: string; roomParam?: strin
       ) : (
         <GenericErrorScreen onRetry={probe} />
       );
-    case 'home':
+    case 'home': {
+      // The nav exists only once a second section is live (14.5 AC3).
+      const requestsLive = isModuleEnabled('requests');
       return (
         <>
           <LocaleSync stayLanguage={state.profile.language} />
-          <HomeScreen profile={state.profile} onRefresh={refresh} />
+          <div className={requestsLive ? 'pb-16' : ''}>
+            {state.section === 'requests' && requestsLive ? (
+              <RequestsScreen profile={state.profile} />
+            ) : (
+              <HomeScreen
+                profile={state.profile}
+                onRefresh={refresh}
+                onOpenTile={(key) => {
+                  if (key === 'requests' && requestsLive) setSection('requests');
+                }}
+              />
+            )}
+          </div>
+          {requestsLive ? (
+            <BottomNav section={state.section} onSelect={setSection} />
+          ) : null}
         </>
       );
+    }
   }
 }
 
