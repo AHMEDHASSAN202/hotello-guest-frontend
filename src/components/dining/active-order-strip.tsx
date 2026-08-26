@@ -9,7 +9,11 @@ import { useGuestFnbOrders } from '@/lib/use-guest-fnb-orders';
  * 16.6 AC1 — the active order surfaces on the app home as a compact
  * progress strip floating above the bottom nav; tapping it opens Dining.
  */
-export function ActiveOrderStrip({ onOpen }: { onOpen: () => void }) {
+export function ActiveOrderStrip({
+  onOpen,
+}: {
+  onOpen: (orderId: string) => void;
+}) {
   const t = useTranslations('dining');
   const tHome = useTranslations('home');
   useLocale(); // keeps the strip re-rendering on locale switches
@@ -23,7 +27,7 @@ export function ActiveOrderStrip({ onOpen }: { onOpen: () => void }) {
     <div className="fixed inset-x-0 bottom-[64px] z-30 mx-auto max-w-[430px] px-5 pb-2">
       <button
         data-testid="active-order-strip"
-        onClick={onOpen}
+        onClick={() => onOpen(active.id)}
         className="pressable animate-fade-in flex min-h-[52px] w-full items-center gap-3 rounded-card bg-card p-3 shadow-sheet"
       >
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft">

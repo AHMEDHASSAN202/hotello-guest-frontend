@@ -11,7 +11,9 @@
     "included": "✓ Inclus",
     "empty": "Le menu se prépare — revenez bientôt.",
     "loadError": "Impossible de charger le menu.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "searchPlaceholder": "Rechercher dans le menu…",
+    "noResults": "Rien ne correspond à « {query} » — essayez un autre mot."
   },
   "sheet": {
     "quantity": "Quantité",
@@ -73,5 +75,9 @@
     "title": "Commandes passées",
     "empty": "Aucune commande pour l'instant.",
     "roomCharge": "Note de chambre"
+  },
+  "balance": {
+    "title": "Sur votre note de chambre : {amount}",
+    "hint": "À régler à la réception lors du départ."
   }
 }

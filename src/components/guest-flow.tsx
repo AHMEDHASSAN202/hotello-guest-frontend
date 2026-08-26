@@ -56,6 +56,8 @@ export function GuestFlow({
   const [state, setState] = useState<GuestState>(() =>
     tokenStore.get() ? { phase: 'probing' } : { phase: 'entry' },
   );
+  // "Track order" intent: opens Dining directly on that order's sheet.
+  const [diningOrderId, setDiningOrderId] = useState<string | null>(null);
 
   // 16.5 AC6 — ?location/?spot follow the ?room contract: captured once
   // into memory (they must survive into the checkout prefill even for an
@@ -193,6 +195,7 @@ export function GuestFlow({
               <DiningScreen
                 profile={state.profile}
                 prefill={diningPrefill.current}
+                initialOrderId={diningOrderId}
               />
             ) : (
               <>
@@ -208,7 +211,12 @@ export function GuestFlow({
                   }}
                 />
                 {diningLive ? (
-                  <ActiveOrderStrip onOpen={() => setSection('dining')} />
+                  <ActiveOrderStrip
+                    onOpen={(orderId) => {
+                      setDiningOrderId(orderId);
+                      setSection('dining');
+                    }}
+                  />
                 ) : null}
               </>
             )}
@@ -216,7 +224,10 @@ export function GuestFlow({
           {navLive ? (
             <BottomNav
               section={state.section}
-              onSelect={setSection}
+              onSelect={(section) => {
+                setDiningOrderId(null);
+                setSection(section);
+              }}
               requestsLive={requestsLive}
               diningLive={diningLive}
             />

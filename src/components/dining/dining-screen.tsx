@@ -1,10 +1,11 @@
 'use client';
 
-import { ShoppingBag, UtensilsCrossed } from 'lucide-react';
+import { Search, ShoppingBag, UtensilsCrossed, Wallet } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Locale } from '@/i18n/config';
 import { isLocale } from '@/i18n/config';
+import { formatMoney } from '@/i18n/format';
 import { api, ApiError } from '@/lib/api';
 import {
   addLine,
@@ -45,9 +46,12 @@ export interface DiningPrefill {
 export function DiningScreen({
   profile,
   prefill,
+  initialOrderId,
 }: {
   profile: GuestProfile;
   prefill?: DiningPrefill;
+  /** "Track order" intent — opens the orders tab on this order's sheet. */
+  initialOrderId?: string | null;
 }) {
   const t = useTranslations('dining');
   const resolveError = useApiError();
@@ -58,7 +62,9 @@ export function DiningScreen({
       ? (profile.language as Locale)
       : 'en';
 
-  const [tab, setTab] = useState<'menu' | 'orders'>('menu');
+  const [tab, setTab] = useState<'menu' | 'orders'>(
+    initialOrderId ? 'orders' : 'menu',
+  );
   const [catalog, setCatalog] = useState<GuestFnbCatalog | null>(null);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [cart, setCart] = useState<GuestCart>(() =>
@@ -70,7 +76,10 @@ export function DiningScreen({
   } | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [detailId, setDetailId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(
+    initialOrderId ?? null,
+  );
+  const [search, setSearch] = useState('');
 
   const { orders, error: ordersError, refresh, applyLocal } =
     useGuestFnbOrders(true);
@@ -108,7 +117,42 @@ export function DiningScreen({
     return map;
   }, [catalog]);
 
+  // Search filter: match item name/description within each section.
+  const filteredMenus = useMemo(() => {
+    const menus = catalog?.menus ?? [];
+    const query = search.trim().toLowerCase();
+    if (!query) return menus;
+    return menus
+      .map((menu) => ({
+        ...menu,
+        sections: menu.sections
+          .map((section) => ({
+            ...section,
+            items: section.items.filter(
+              (item) =>
+                item.name.toLowerCase().includes(query) ||
+                (item.description ?? '').toLowerCase().includes(query),
+            ),
+          }))
+          .filter((section) => section.items.length > 0),
+      }))
+      .filter((menu) => menu.sections.length > 0);
+  }, [catalog, search]);
+
   const cartCount = cart.lines.reduce((sum, l) => sum + l.quantity, 0);
+  // 16.8, guest side — what lands on the room bill at checkout.
+  const roomBillBalance = (orders ?? [])
+    .filter(
+      (o) =>
+        o.status === 'delivered' &&
+        o.paymentMethod === 'room_charge' &&
+        !o.settled,
+    )
+    .reduce((sum, o) => sum + o.totalAmount, 0);
+  const billCurrency =
+    orders?.find((o) => o.paymentMethod === 'room_charge')?.currency ??
+    catalog?.currency ??
+    'EGP';
   const activeOrders =
     orders?.filter((o) => OPEN_FNB_ORDER_STATUSES.includes(o.status)) ?? [];
   const detailOrder = orders?.find((o) => o.id === detailId) ?? null;
@@ -198,15 +242,60 @@ export function DiningScreen({
             />
           </div>
         ) : (
-          <MenuBrowse
-            menus={catalog.menus}
-            currency={catalog.currency}
-            locale={locale}
-            onPick={(item, menu) => setSheetItem({ item, menu })}
-          />
+          <>
+            {/* Item search — filters the already-localized catalog locally. */}
+            <label className="relative mt-4 block">
+              <Search
+                aria-hidden
+                className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint"
+              />
+              <input
+                data-selectable
+                data-testid="menu-search"
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t('browse.searchPlaceholder')}
+                aria-label={t('browse.searchPlaceholder')}
+                className="w-full rounded-full border border-line bg-card py-2.5 pe-4 ps-9 text-sm text-ink placeholder:text-ink-faint focus:border-accent focus:outline-none"
+              />
+            </label>
+            {filteredMenus.length === 0 ? (
+              <p className="mt-8 text-center text-sm text-ink-soft">
+                {t('browse.noResults', { query: search.trim() })}
+              </p>
+            ) : (
+              <MenuBrowse
+                menus={filteredMenus}
+                currency={catalog.currency}
+                locale={locale}
+                onPick={(item, menu) => setSheetItem({ item, menu })}
+              />
+            )}
+          </>
         )
       ) : (
         <div className="mt-6">
+          {roomBillBalance > 0 ? (
+            <div
+              data-testid="room-bill-balance"
+              className="mb-4 flex items-center gap-3 rounded-card bg-accent-soft p-4"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-card">
+                <Wallet className="h-5 w-5 text-accent" aria-hidden />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-ink">
+                  {t('balance.title', {
+                    amount: formatMoney(roomBillBalance, billCurrency, locale),
+                  })}
+                </span>
+                <span className="block text-xs text-ink-soft">
+                  {t('balance.hint')}
+                </span>
+              </span>
+            </div>
+          ) : null}
           {orders === null ? (
             <div className="space-y-3">
               <Skeleton className="h-20 w-full" />

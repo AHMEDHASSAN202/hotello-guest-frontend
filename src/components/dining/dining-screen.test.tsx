@@ -109,13 +109,54 @@ const CATALOG = {
   ],
 };
 
-function wrap(prefill?: { location?: string; spot?: string }) {
+function wrap(
+  prefill?: { location?: string; spot?: string },
+  initialOrderId?: string,
+) {
   return render(
     <NextIntlClientProvider locale="en" messages={en} timeZone="Africa/Cairo">
-      <DiningScreen profile={profile} prefill={prefill} />
+      <DiningScreen
+        profile={profile}
+        prefill={prefill}
+        initialOrderId={initialOrderId}
+      />
     </NextIntlClientProvider>,
   );
 }
+
+const DELIVERED_RC_ORDER = {
+  id: 'order-rc',
+  status: 'delivered',
+  destinationType: 'room',
+  locationName: null,
+  spot: null,
+  roomNumber: '304',
+  paymentMethod: 'room_charge',
+  totalAmount: 460,
+  currency: 'EGP',
+  slaTargetMinutes: 20,
+  createdAt: '2026-08-26T10:00:00.000Z',
+  startedAt: '2026-08-26T10:05:00.000Z',
+  outForDeliveryAt: '2026-08-26T10:15:00.000Z',
+  deliveredAt: '2026-08-26T10:20:00.000Z',
+  cancelledAt: null,
+  cancelledReason: null,
+  settled: false,
+  updatedAt: '2026-08-26T10:20:00.000Z',
+  lines: [
+    {
+      id: 'l1',
+      itemName: 'Burger',
+      variantOptionName: null,
+      quantity: 2,
+      unitPrice: 230,
+      included: false,
+      lineTotal: 460,
+      note: null,
+      photoThumbUrl: null,
+    },
+  ],
+};
 
 beforeEach(() => {
   localStorage.clear();
@@ -243,5 +284,60 @@ describe('DiningScreen (16.5)', () => {
       ),
     ).toBeTruthy();
     expect(screen.queryByTestId('pay-cash')).toBeNull();
+  });
+
+  it('search filters items across menus; no-results state appears', async () => {
+    wrap();
+    await screen.findByText('Fresh Juice');
+
+    fireEvent.change(screen.getByTestId('menu-search'), {
+      target: { value: 'whis' },
+    });
+    expect(screen.queryByText('Fresh Juice')).toBeNull();
+    expect(screen.getByText('Imported Whiskey')).toBeTruthy();
+
+    fireEvent.change(screen.getByTestId('menu-search'), {
+      target: { value: 'sushi' },
+    });
+    expect(screen.getByText(/Nothing matches/)).toBeTruthy();
+  });
+
+  it('the room-bill balance shows unsettled delivered room-charge totals (16.8 guest side)', async () => {
+    apiMock.api.mockImplementation(async (path: string) => {
+      if (path.startsWith('/guest/fnb/menus')) return CATALOG;
+      if (path.startsWith('/guest/fnb/orders'))
+        return {
+          data: [
+            DELIVERED_RC_ORDER,
+            { ...DELIVERED_RC_ORDER, id: 'order-settled', settled: true },
+            { ...DELIVERED_RC_ORDER, id: 'order-cash', paymentMethod: 'cash' },
+          ],
+          serverTime: new Date().toISOString(),
+        };
+      return {};
+    });
+    wrap(undefined, 'order-rc'); // also lands on the orders tab
+    const banner = await screen.findByTestId('room-bill-balance');
+    // Only the unsettled room-charge order counts: 460, not 1380.
+    expect(banner.textContent).toMatch(/460/);
+    expect(banner.textContent).not.toMatch(/920|1,?380/);
+    expect(banner.textContent).toContain('Pay at checkout at the front desk.');
+  });
+
+  it('an initialOrderId (Track order) opens the orders tab with that order sheet', async () => {
+    apiMock.api.mockImplementation(async (path: string) => {
+      if (path.startsWith('/guest/fnb/menus')) return CATALOG;
+      if (path.startsWith('/guest/fnb/orders'))
+        return {
+          data: [{ ...DELIVERED_RC_ORDER, id: 'order-track', status: 'preparing' }],
+          serverTime: new Date().toISOString(),
+        };
+      return {};
+    });
+    wrap(undefined, 'order-track');
+    // The tracking bottom sheet is open on the order, no extra taps.
+    const sheet = await screen.findByTestId('bottom-sheet');
+    expect(sheet.textContent).toContain('Preparing');
+    expect(sheet.textContent).toContain('Burger');
   });
 });

@@ -11,7 +11,9 @@
     "included": "✓ Inklusive",
     "empty": "Die Speisekarte wird vorbereitet — schau bald wieder vorbei.",
     "loadError": "Die Speisekarte konnte nicht geladen werden.",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "searchPlaceholder": "Speisekarte durchsuchen…",
+    "noResults": "Nichts passt zu „{query}“ — versuche ein anderes Wort."
   },
   "sheet": {
     "quantity": "Menge",
@@ -73,5 +75,9 @@
     "title": "Frühere Bestellungen",
     "empty": "Noch keine Bestellungen.",
     "roomCharge": "Zimmerrechnung"
+  },
+  "balance": {
+    "title": "Auf deiner Zimmerrechnung: {amount}",
+    "hint": "Zahlung beim Check-out an der Rezeption."
   }
 }

@@ -11,7 +11,9 @@
     "included": "✓ Included",
     "empty": "The menu is being prepared — check back soon.",
     "loadError": "We couldn't load the menu.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "searchPlaceholder": "Search the menu…",
+    "noResults": "Nothing matches “{query}” — try another word."
   },
   "sheet": {
     "quantity": "Quantity",
@@ -73,5 +75,9 @@
     "title": "Past orders",
     "empty": "No orders yet.",
     "roomCharge": "Room bill"
+  },
+  "balance": {
+    "title": "On your room bill: {amount}",
+    "hint": "Pay at checkout at the front desk."
   }
 }

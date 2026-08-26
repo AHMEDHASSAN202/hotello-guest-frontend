@@ -11,7 +11,9 @@
     "included": "✓ Incluido",
     "empty": "El menú se está preparando — vuelve pronto.",
     "loadError": "No pudimos cargar el menú.",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "searchPlaceholder": "Buscar en el menú…",
+    "noResults": "Nada coincide con «{query}» — prueba otra palabra."
   },
   "sheet": {
     "quantity": "Cantidad",
@@ -73,5 +75,9 @@
     "title": "Pedidos anteriores",
     "empty": "Aún no hay pedidos.",
     "roomCharge": "Cuenta de habitación"
+  },
+  "balance": {
+    "title": "En la cuenta de tu habitación: {amount}",
+    "hint": "Se paga en recepción al hacer check-out."
   }
 }

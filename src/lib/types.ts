@@ -190,6 +190,8 @@ export interface GuestFnbOrder {
   deliveredAt: string | null;
   cancelledAt: string | null;
   cancelledReason: string | null;
+  /** Room-charge orders flip true once the front desk collects (16.8). */
+  settled: boolean;
   updatedAt: string;
   lines: GuestFnbOrderLine[];
 }
