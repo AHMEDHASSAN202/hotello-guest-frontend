@@ -27,6 +27,11 @@ const ActiveOrderStrip = dynamic(
     import('./dining/active-order-strip').then((m) => m.ActiveOrderStrip),
   { ssr: false },
 );
+// Hotel Info rides its own dynamic chunk too (Epic 17, 17.2 AC4).
+const InfoScreen = dynamic(
+  () => import('./info/info-screen').then((m) => m.InfoScreen),
+  { ssr: false },
+);
 
 type GuestState =
   | { phase: 'probing' }
@@ -50,7 +55,7 @@ export function GuestFlow({
   locationParam?: string;
   spotParam?: string;
 }) {
-  const { isModuleEnabled } = useHotel();
+  const { hotel, isModuleEnabled } = useHotel();
   // Boot decides instantly: a stored token means we probe (skeleton), never
   // the entry form — a valid session must not see a flash of login (AC4).
   const [state, setState] = useState<GuestState>(() =>
@@ -184,7 +189,10 @@ export function GuestFlow({
       // The nav exists only once a second section is live (14.5 AC3).
       const requestsLive = isModuleEnabled('requests');
       const diningLive = isModuleEnabled('fnb');
-      const navLive = requestsLive || diningLive;
+      // Epic 17 AC4 tri-state: live only when enabled AND content exists.
+      const infoLive =
+        isModuleEnabled('hotel_info') && hotel.hotelInfoHasContent;
+      const navLive = requestsLive || diningLive || infoLive;
       return (
         <>
           <LocaleSync stayLanguage={state.profile.language} />
@@ -197,6 +205,8 @@ export function GuestFlow({
                 prefill={diningPrefill.current}
                 initialOrderId={diningOrderId}
               />
+            ) : state.section === 'info' && infoLive ? (
+              <InfoScreen />
             ) : (
               <>
                 <HomeScreen
@@ -207,6 +217,8 @@ export function GuestFlow({
                       setSection('requests');
                     } else if (key === 'dining' && diningLive) {
                       setSection('dining');
+                    } else if (key === 'info' && infoLive) {
+                      setSection('info');
                     }
                   }}
                 />
@@ -230,6 +242,7 @@ export function GuestFlow({
               }}
               requestsLive={requestsLive}
               diningLive={diningLive}
+              infoLive={infoLive}
             />
           ) : null}
         </>

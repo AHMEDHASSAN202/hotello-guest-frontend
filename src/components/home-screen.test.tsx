@@ -25,7 +25,14 @@ const baseHotel: GuestHotelProfile = {
   timezone: 'Africa/Cairo',
   defaultLanguage: 'ar',
   currency: 'EGP',
-  enabledModules: ['requests', 'fnb', 'housekeeping', 'transportation'],
+  enabledModules: [
+    'requests',
+    'fnb',
+    'housekeeping',
+    'transportation',
+    'hotel_info',
+  ],
+  hotelInfoHasContent: true,
 };
 
 const futureDate = (days: number) => {
@@ -92,9 +99,25 @@ describe('ServicesGrid gating (14.4 AC3)', () => {
     expect(screen.queryByTestId('tile-transport')).toBeNull();
   });
 
-  it('the info tile is unconditional', () => {
+  it('Epic 17 AC4 — info tile shows as "soon" when the module is disabled', () => {
     wrap(<ServicesGrid />, { ...baseHotel, enabledModules: [] });
-    expect(screen.getByTestId('tile-info')).toBeTruthy();
+    const tile = screen.getByTestId('tile-info');
+    expect(tile.getAttribute('aria-disabled')).toBe('true');
+    expect(tile.getAttribute('role')).toBeNull();
+  });
+
+  it('Epic 17 AC4 — info tile is hidden entirely when enabled but empty', () => {
+    wrap(<ServicesGrid />, { ...baseHotel, hotelInfoHasContent: false });
+    expect(screen.queryByTestId('tile-info')).toBeNull();
+  });
+
+  it('Epic 17 AC1 — info tile is live and fires onOpen when content exists', () => {
+    const onOpen = vi.fn();
+    wrap(<ServicesGrid onOpen={onOpen} />);
+    const tile = screen.getByTestId('tile-info');
+    expect(tile.getAttribute('role')).toBe('button');
+    fireEvent.click(tile);
+    expect(onOpen).toHaveBeenCalledWith('info');
   });
 
   it('soon tiles are visibly ambitious but inert: aria-disabled, no button role', () => {

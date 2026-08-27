@@ -17,7 +17,7 @@ export function ServicesGrid({
 }) {
   const t = useTranslations('home');
   const { hotel } = useHotel();
-  const tiles = visibleTiles(hotel.enabledModules);
+  const tiles = visibleTiles(hotel.enabledModules, hotel.hotelInfoHasContent);
 
   if (tiles.length === 0) return null;
 
