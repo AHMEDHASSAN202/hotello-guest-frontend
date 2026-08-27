@@ -177,6 +177,25 @@ describe('Epic 18 — branding application (18.2)', () => {
     expect(screen.getByText('Sunrise')).toBeTruthy();
   });
 
+  it('a replaced cover resets the failure latch — new URL is shown again after the old one errored', () => {
+    const hotelA = { ...baseHotel, coverImageUrl: 'files/branding/h1/broken.webp' };
+    const result = wrap(<HomeScreen profile={profile} />, hotelA);
+    fireEvent.error(screen.getByTestId('home-cover').querySelector('img')!);
+    expect(screen.queryByTestId('home-cover')).toBeNull();
+
+    const hotelB = { ...baseHotel, coverImageUrl: 'files/branding/h1/new-cover.webp' };
+    result.rerender(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={hotelB}>
+          <HomeScreen profile={profile} />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+    const cover = screen.getByTestId('home-cover');
+    expect(cover).toBeTruthy();
+    expect(cover.querySelector('img')?.getAttribute('src')).toContain('new-cover.webp');
+  });
+
   it('AC2 — welcome message renders under the greeting in the guest language', () => {
     wrap(<HomeScreen profile={profile} />, {
       ...baseHotel,

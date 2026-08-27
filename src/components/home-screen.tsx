@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useLocale, useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useHotel } from '@/components/hotel-provider';
 import { assetUrl } from '@/lib/api';
 import { localizeField } from '@/lib/localize';
@@ -35,6 +35,9 @@ export function HomeScreen({
   const locale = useLocale();
   const cover = assetUrl(hotel.coverImageUrl);
   const [coverFailed, setCoverFailed] = useState(false);
+  // A replaced cover (e.g. rebranding mid-stay) must not stay hidden behind a
+  // stale failure latched onto the previous URL.
+  useEffect(() => setCoverFailed(false), [cover]);
   const showCover = Boolean(cover) && !coverFailed;
   const welcome = localizeField(hotel.welcomeMessage, locale);
 
