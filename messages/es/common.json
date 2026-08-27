@@ -5,5 +5,7 @@
   "close": "Cerrar",
   "contactFrontDesk": "Contacta con recepción",
   "language": "Idioma",
-  "scanHint": "Escanea el código QR de tu habitación para empezar"
+  "scanHint": "Escanea el código QR de tu habitación para empezar",
+  "copy": "Copiar",
+  "copied": "Copiado"
 }

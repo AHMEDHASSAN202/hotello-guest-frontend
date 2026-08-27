@@ -5,5 +5,7 @@
   "close": "Close",
   "contactFrontDesk": "Contact the front desk",
   "language": "Language",
-  "scanHint": "Scan the QR code in your room to get started"
+  "scanHint": "Scan the QR code in your room to get started",
+  "copy": "Copy",
+  "copied": "Copied"
 }

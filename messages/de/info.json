@@ -1,0 +1,32 @@
+{
+  "title": "Hotel-Infos",
+  "sections": {
+    "facilities": "Einrichtungen",
+    "services": "Services",
+    "houseRules": "Gut zu wissen",
+    "about": "Über das Hotel"
+  },
+  "essentials": {
+    "title": "Das Wichtigste",
+    "wifi": "WLAN-Netz",
+    "wifiPassword": "Passwort",
+    "reception": "Rezeption",
+    "whatsapp": "WhatsApp",
+    "emergency": "Notfall",
+    "checkout": "Check-out-Zeit"
+  },
+  "openNow": "Jetzt geöffnet",
+  "opensAt": "Öffnet um {time}",
+  "soon": {
+    "title": "Hotel-Infos kommen bald",
+    "body": "Das Hotel hat sie noch nicht freigeschaltet — die Rezeption hilft Ihnen gern weiter."
+  },
+  "error": {
+    "title": "Infos konnten nicht geladen werden",
+    "body": "Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."
+  },
+  "empty": {
+    "title": "Noch nichts hier",
+    "body": "Das Hotel hat seine Infos noch nicht veröffentlicht."
+  }
+}

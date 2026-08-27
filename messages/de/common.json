@@ -5,5 +5,7 @@
   "close": "Schließen",
   "contactFrontDesk": "Wenden Sie sich an die Rezeption",
   "language": "Sprache",
-  "scanHint": "Scannen Sie den QR-Code in Ihrem Zimmer, um zu beginnen"
+  "scanHint": "Scannen Sie den QR-Code in Ihrem Zimmer, um zu beginnen",
+  "copy": "Kopieren",
+  "copied": "Kopiert"
 }

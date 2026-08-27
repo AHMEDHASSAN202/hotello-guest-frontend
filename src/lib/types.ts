@@ -85,6 +85,11 @@ export interface GuestHotelProfile {
   /** ISO currency code — F&B prices format with it (Epic 16). */
   currency: string;
   enabledModules: string[];
+  /**
+   * Epic 17 AC4 tri-state: module on + zero content hides the info tile
+   * entirely; module off shows it as "soon"; on + content goes live.
+   */
+  hotelInfoHasContent: boolean;
 }
 
 
@@ -194,4 +199,50 @@ export interface GuestFnbOrder {
   settled: boolean;
   updatedAt: string;
   lines: GuestFnbOrderLine[];
+}
+
+/* ------------------------------------------------- Hotel Info (Epic 17) */
+
+export interface GuestInfoFacility {
+  id: string;
+  name: string;
+  description: string | null;
+  /** Raw hotel-local windows — the client computes "open now" (src/lib/hours). */
+  windows: { start: string; end: string }[];
+  locationNote: string | null;
+  photoThumbUrl: string | null;
+  photoDetailUrl: string | null;
+}
+
+export interface GuestInfoService {
+  id: string;
+  name: string;
+  description: string | null;
+  howTo: string | null;
+  priceNote: string | null;
+}
+
+export interface GuestInfoRule {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+/** GET /guest/hotel-info — server-localized, active entries only. */
+export interface GuestHotelInfo {
+  essentials: {
+    wifiName: string | null;
+    wifiPassword: string | null;
+    receptionPhone: string | null;
+    whatsapp: string | null;
+    emergencyPhone: string | null;
+    checkoutTime: string;
+  } | null;
+  facilities: GuestInfoFacility[];
+  services: GuestInfoService[];
+  houseRules: GuestInfoRule[];
+  about: {
+    text: string | null;
+    gallery: { thumbUrl: string; detailUrl: string }[];
+  } | null;
 }

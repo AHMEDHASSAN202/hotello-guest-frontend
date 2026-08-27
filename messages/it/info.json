@@ -1,0 +1,32 @@
+{
+  "title": "Info hotel",
+  "sections": {
+    "facilities": "Strutture",
+    "services": "Servizi",
+    "houseRules": "Da sapere",
+    "about": "Sull'hotel"
+  },
+  "essentials": {
+    "title": "Essenziali",
+    "wifi": "Rete WiFi",
+    "wifiPassword": "Password",
+    "reception": "Reception",
+    "whatsapp": "WhatsApp",
+    "emergency": "Emergenza",
+    "checkout": "Orario di check-out"
+  },
+  "openNow": "Aperto ora",
+  "opensAt": "Apre alle {time}",
+  "soon": {
+    "title": "Le info stanno arrivando",
+    "body": "L'hotel non le ha ancora attivate — la reception è a tua disposizione nel frattempo."
+  },
+  "error": {
+    "title": "Impossibile caricare le info",
+    "body": "Controlla la connessione e riprova."
+  },
+  "empty": {
+    "title": "Ancora niente qui",
+    "body": "L'hotel non ha ancora pubblicato le sue informazioni."
+  }
+}

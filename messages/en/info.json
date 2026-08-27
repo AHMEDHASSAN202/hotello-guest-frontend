@@ -1,0 +1,32 @@
+{
+  "title": "Hotel info",
+  "sections": {
+    "facilities": "Facilities",
+    "services": "Services",
+    "houseRules": "Good to know",
+    "about": "About the hotel"
+  },
+  "essentials": {
+    "title": "Essentials",
+    "wifi": "WiFi network",
+    "wifiPassword": "Password",
+    "reception": "Reception",
+    "whatsapp": "WhatsApp",
+    "emergency": "Emergency",
+    "checkout": "Checkout time"
+  },
+  "openNow": "Open now",
+  "opensAt": "Opens at {time}",
+  "soon": {
+    "title": "Hotel info is on its way",
+    "body": "This hotel hasn't switched it on yet — the front desk is happy to help meanwhile."
+  },
+  "error": {
+    "title": "Couldn't load hotel info",
+    "body": "Check your connection and try again."
+  },
+  "empty": {
+    "title": "Nothing here yet",
+    "body": "The hotel hasn't published its info yet."
+  }
+}
