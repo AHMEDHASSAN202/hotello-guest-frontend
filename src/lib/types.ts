@@ -90,6 +90,10 @@ export interface GuestHotelProfile {
    * entirely; module off shows it as "soon"; on + content goes live.
    */
   hotelInfoHasContent: boolean;
+  /** Wide home cover (`files/{key}`, detail rendition) — null without `guest_app_branding` (Epic 18). */
+  coverImageUrl: string | null;
+  /** Welcome line translations; resolve with localizeField() — null without the module (Epic 18). */
+  welcomeMessage: Partial<Record<string, string>> | null;
 }
 
 

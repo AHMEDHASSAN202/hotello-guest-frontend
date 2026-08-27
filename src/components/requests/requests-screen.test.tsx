@@ -39,6 +39,8 @@ const hotel: GuestHotelProfile = {
   defaultLanguage: 'en',
   currency: 'EGP',
   enabledModules: ['requests'],
+  coverImageUrl: null,
+  welcomeMessage: null,
 };
 
 const profile: GuestProfile = {

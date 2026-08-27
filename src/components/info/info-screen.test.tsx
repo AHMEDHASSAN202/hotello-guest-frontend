@@ -38,6 +38,8 @@ const hotel: GuestHotelProfile = {
   currency: 'EGP',
   enabledModules: ['hotel_info'],
   hotelInfoHasContent: true,
+  coverImageUrl: null,
+  welcomeMessage: null,
 };
 
 const INFO: GuestHotelInfo = {

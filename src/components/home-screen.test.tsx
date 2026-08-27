@@ -33,6 +33,8 @@ const baseHotel: GuestHotelProfile = {
     'hotel_info',
   ],
   hotelInfoHasContent: true,
+  coverImageUrl: null,
+  welcomeMessage: null,
 };
 
 const futureDate = (days: number) => {
