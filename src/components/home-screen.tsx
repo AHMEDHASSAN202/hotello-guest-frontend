@@ -1,10 +1,11 @@
 'use client';
 
 /* eslint-disable @next/next/no-img-element */
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
 import { useHotel } from '@/components/hotel-provider';
 import { assetUrl } from '@/lib/api';
+import { localizeField } from '@/lib/localize';
 import type { GuestProfile } from '@/lib/types';
 import { LanguageSwitcher } from './language-switcher';
 import { ServicesGrid } from './services-grid';
@@ -31,6 +32,11 @@ export function HomeScreen({
   const tc = useTranslations('common');
   const { hotel, hotelName } = useHotel();
   const logo = assetUrl(hotel.logoUrl);
+  const locale = useLocale();
+  const cover = assetUrl(hotel.coverImageUrl);
+  const [coverFailed, setCoverFailed] = useState(false);
+  const showCover = Boolean(cover) && !coverFailed;
+  const welcome = localizeField(hotel.welcomeMessage, locale);
 
   const pullStart = useRef<number | null>(null);
   const [pull, setPull] = useState(0);
@@ -77,19 +83,47 @@ export function HomeScreen({
           <span className={`h-6 w-6 rounded-full border-2 border-accent border-t-transparent ${refreshing ? 'animate-spin' : ''}`} />
         </div>
 
-        <header className="flex items-center justify-between pt-3">
-          <div className="flex items-center gap-2.5">
-            {logo ? (
-              <img src={logo} alt="" className="h-10 w-10 rounded-xl object-contain" />
-            ) : null}
-            <span className="text-[15px] font-semibold text-ink">{hotelName}</span>
+        {showCover ? (
+          <div data-testid="home-cover" className="relative -mx-5 aspect-[16/9] overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={cover ?? undefined}
+              alt=""
+              onError={() => setCoverFailed(true)}
+              className="absolute inset-0 h-full w-full object-cover"
+              {...{ fetchpriority: 'high' }}
+            />
+            {/* Legibility scrim — text stays readable over any photo (18.2 AC2). */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex items-center justify-between px-5 pb-3">
+              <div className="flex items-center gap-2.5">
+                {logo ? <img src={logo} alt="" className="h-10 w-10 rounded-xl object-contain" /> : null}
+                <span className="text-[15px] font-semibold text-white">{hotelName}</span>
+              </div>
+              <LanguageSwitcher />
+            </div>
           </div>
-          <LanguageSwitcher />
-        </header>
+        ) : (
+          <header className="flex items-center justify-between pt-3">
+            <div className="flex items-center gap-2.5">
+              {logo ? (
+                <img src={logo} alt="" className="h-10 w-10 rounded-xl object-contain" />
+              ) : null}
+              <span className="text-[15px] font-semibold text-ink">{hotelName}</span>
+            </div>
+            <LanguageSwitcher />
+          </header>
+        )}
 
         <h1 className="mt-7 text-[22px] font-bold leading-snug text-ink">
           {t('greeting', { name: profile.guestName })}
         </h1>
+
+        {welcome ? (
+          <p data-testid="home-welcome" className="mt-2 text-[14px] leading-relaxed text-ink-soft">
+            {welcome}
+          </p>
+        ) : null}
 
         <div className="mt-5">
           <StayCard profile={profile} />

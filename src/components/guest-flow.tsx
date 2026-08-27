@@ -253,8 +253,10 @@ export function GuestFlow({
 
 /** Boot skeleton mirroring the home layout — never a blank screen (AC4). */
 function HomeSkeleton() {
+  const { hotel } = useHotel();
   return (
     <Screen>
+      {hotel.coverImageUrl ? <div className="-mx-5 aspect-[16/9] animate-pulse bg-line" /> : null}
       <div className="flex items-center justify-between pt-3">
         <Skeleton className="h-10 w-10 rounded-full" />
         <Skeleton className="h-9 w-28 rounded-full" />

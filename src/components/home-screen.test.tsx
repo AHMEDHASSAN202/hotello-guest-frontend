@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import type { ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -147,5 +147,55 @@ describe('ServicesGrid gating (14.4 AC3)', () => {
     expect(tile.getAttribute('aria-disabled')).toBeNull();
     fireEvent.click(tile);
     expect(onOpen).toHaveBeenCalledWith('requests');
+  });
+});
+
+describe('Epic 18 — branding application (18.2)', () => {
+  it('AC2 — renders the cover header with scrim when coverImageUrl is set', () => {
+    wrap(<HomeScreen profile={profile} />, {
+      ...baseHotel,
+      coverImageUrl: 'files/branding/h1/x-detail.webp',
+    });
+    const cover = screen.getByTestId('home-cover');
+    expect(cover).toBeTruthy();
+    expect(cover.querySelector('img')?.getAttribute('src')).toContain('branding/h1/x-detail.webp');
+  });
+
+  it('AC3 — no cover keeps the current clean header', () => {
+    wrap(<HomeScreen profile={profile} />, baseHotel);
+    expect(screen.queryByTestId('home-cover')).toBeNull();
+    expect(screen.getByText('Sunrise')).toBeTruthy();
+  });
+
+  it('AC3 — a broken image URL falls back silently to the clean header', () => {
+    wrap(<HomeScreen profile={profile} />, {
+      ...baseHotel,
+      coverImageUrl: 'files/branding/h1/broken.webp',
+    });
+    fireEvent.error(screen.getByTestId('home-cover').querySelector('img')!);
+    expect(screen.queryByTestId('home-cover')).toBeNull();
+    expect(screen.getByText('Sunrise')).toBeTruthy();
+  });
+
+  it('AC2 — welcome message renders under the greeting in the guest language', () => {
+    wrap(<HomeScreen profile={profile} />, {
+      ...baseHotel,
+      welcomeMessage: { ar: 'أهلاً بكم', en: 'Welcome to the heart of Hurghada' },
+    });
+    expect(screen.getByText('Welcome to the heart of Hurghada')).toBeTruthy();
+  });
+
+  it('AC1/AC3 — untranslated locale falls back to English; absent message renders nothing', () => {
+    // Render with locale 'ru' + real ru messages (the file already imports messages/ru for another case).
+    wrap(
+      <HomeScreen profile={profile} />,
+      { ...baseHotel, welcomeMessage: { ar: 'أهلاً', en: 'Welcome' } },
+      'ru',
+      ru as unknown as typeof en,
+    );
+    expect(screen.getByText('Welcome')).toBeTruthy();
+    cleanup();
+    wrap(<HomeScreen profile={profile} />, baseHotel);
+    expect(screen.queryByTestId('home-welcome')).toBeNull();
   });
 });
