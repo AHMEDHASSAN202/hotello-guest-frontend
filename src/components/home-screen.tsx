@@ -6,13 +6,24 @@ import { useEffect, useRef, useState } from 'react';
 import { useHotel } from '@/components/hotel-provider';
 import { assetUrl } from '@/lib/api';
 import { localizeField } from '@/lib/localize';
-import type { GuestProfile } from '@/lib/types';
+import type { GuestAnnouncement, GuestProfile } from '@/lib/types';
+import { AnnouncementsBell } from './announcements/announcements-bell';
+import { PriorityBanner } from './announcements/priority-banner';
 import { LanguageSwitcher } from './language-switcher';
 import { ServicesGrid } from './services-grid';
 import { StayCard } from './stay-card';
 import { Screen } from './ui';
 
 const PULL_THRESHOLD = 70;
+
+/** 19.4 — everything home needs from the shared announcements feed. */
+export interface HomeAnnouncements {
+  unreadCount: number;
+  banner: GuestAnnouncement | null;
+  onOpenInbox: () => void;
+  onOpenBanner: () => void;
+  onDismissBanner: () => void;
+}
 
 /**
  * Home (14.4 AC2): hotel header → personal greeting → stay card → services
@@ -23,10 +34,13 @@ export function HomeScreen({
   profile,
   onRefresh,
   onOpenTile,
+  announcements,
 }: {
   profile: GuestProfile;
   onRefresh?: () => Promise<void>;
   onOpenTile?: (key: 'requests' | 'dining' | 'housekeeping' | 'transport' | 'info') => void;
+  /** null/absent = module off → no bell, no banner (19.4 AC4). */
+  announcements?: HomeAnnouncements | null;
 }) {
   const t = useTranslations('home');
   const tc = useTranslations('common');
@@ -103,7 +117,16 @@ export function HomeScreen({
                 {logo ? <img src={logo} alt="" className="h-10 w-10 rounded-xl object-contain" /> : null}
                 <span className="text-[15px] font-semibold text-white">{hotelName}</span>
               </div>
-              <LanguageSwitcher />
+              <div className="flex items-center gap-2">
+                {announcements ? (
+                  <AnnouncementsBell
+                    unreadCount={announcements.unreadCount}
+                    onOpen={announcements.onOpenInbox}
+                    onCover
+                  />
+                ) : null}
+                <LanguageSwitcher />
+              </div>
             </div>
           </div>
         ) : (
@@ -114,7 +137,15 @@ export function HomeScreen({
               ) : null}
               <span className="text-[15px] font-semibold text-ink">{hotelName}</span>
             </div>
-            <LanguageSwitcher />
+            <div className="flex items-center gap-2">
+              {announcements ? (
+                <AnnouncementsBell
+                  unreadCount={announcements.unreadCount}
+                  onOpen={announcements.onOpenInbox}
+                />
+              ) : null}
+              <LanguageSwitcher />
+            </div>
           </header>
         )}
 
@@ -126,6 +157,16 @@ export function HomeScreen({
           <p data-testid="home-welcome" className="mt-2 text-[14px] leading-relaxed text-ink-soft">
             {welcome}
           </p>
+        ) : null}
+
+        {announcements?.banner ? (
+          <div className="mt-4">
+            <PriorityBanner
+              announcement={announcements.banner}
+              onOpen={announcements.onOpenBanner}
+              onDismiss={announcements.onDismissBanner}
+            />
+          </div>
         ) : null}
 
         <div className="mt-5">

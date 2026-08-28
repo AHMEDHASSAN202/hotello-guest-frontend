@@ -150,6 +150,65 @@ describe('ServicesGrid gating (14.4 AC3)', () => {
   });
 });
 
+describe('Epic 19 — bell + priority banner (19.4 AC1/AC3/AC4)', () => {
+  const announcement = {
+    id: 'ann-1',
+    title: 'Pool closed tomorrow',
+    body: 'Maintenance 9-12',
+    priority: true,
+    infoChip: null,
+    publishedAt: '2026-01-15T09:00:00.000Z',
+    readAt: null,
+    active: true,
+  };
+  const feed = (over: Partial<Parameters<typeof HomeScreen>[0]['announcements'] & object> = {}) => ({
+    unreadCount: 3,
+    banner: null,
+    onOpenInbox: vi.fn(),
+    onOpenBanner: vi.fn(),
+    onDismissBanner: vi.fn(),
+    ...over,
+  });
+
+  it('AC1 — bell renders with the unread badge and opens the inbox', () => {
+    const f = feed();
+    wrap(<HomeScreen profile={profile} announcements={f} />);
+    const bell = screen.getByTestId('announcements-bell');
+    expect(bell.textContent).toContain('3');
+    fireEvent.click(bell);
+    expect(f.onOpenInbox).toHaveBeenCalled();
+  });
+
+  it('AC1 — no badge at zero unread; bell still present', () => {
+    wrap(<HomeScreen profile={profile} announcements={feed({ unreadCount: 0 })} />);
+    const bell = screen.getByTestId('announcements-bell');
+    expect(bell).toBeTruthy();
+    expect(bell.textContent).not.toContain('0');
+  });
+
+  it('AC4 — module off (no announcements prop) → bell absent entirely', () => {
+    wrap(<HomeScreen profile={profile} />);
+    expect(screen.queryByTestId('announcements-bell')).toBeNull();
+  });
+
+  it('AC3 — unread priority banner renders, opens, and dismisses (= mark read)', () => {
+    const f = feed({ banner: announcement });
+    wrap(<HomeScreen profile={profile} announcements={f} />);
+    const banner = screen.getByTestId('priority-banner');
+    expect(banner.textContent).toContain('Pool closed tomorrow');
+    expect(banner.textContent).toContain('Important');
+    fireEvent.click(screen.getByTestId('priority-banner-open'));
+    expect(f.onOpenBanner).toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('priority-banner-dismiss'));
+    expect(f.onDismissBanner).toHaveBeenCalled();
+  });
+
+  it('AC3 — no banner strip without an unread priority announcement', () => {
+    wrap(<HomeScreen profile={profile} announcements={feed()} />);
+    expect(screen.queryByTestId('priority-banner')).toBeNull();
+  });
+});
+
 describe('Epic 18 — branding application (18.2)', () => {
   it('AC2 — renders the cover header with scrim when coverImageUrl is set', () => {
     wrap(<HomeScreen profile={profile} />, {
