@@ -250,3 +250,28 @@ export interface GuestHotelInfo {
     gallery: { thumbUrl: string; detailUrl: string }[];
   } | null;
 }
+
+/* ---- Guest Announcements (Epic 19) ---- */
+
+/** "Details in Hotel Info" deep-link chip (19.1 AC1). */
+export interface GuestAnnouncementChip {
+  entryId: string;
+  section: string;
+  name: string;
+}
+
+/**
+ * GET /guest/announcements — server-localized (stay language, EN fallback).
+ * Delta rows with `active: false` are tombstones: the item was retracted or
+ * expired and must leave the inbox (19.2 AC2).
+ */
+export interface GuestAnnouncement {
+  id: string;
+  title: string;
+  body: string;
+  priority: boolean;
+  infoChip: GuestAnnouncementChip | null;
+  publishedAt: string | null;
+  readAt: string | null;
+  active: boolean;
+}
