@@ -6,6 +6,10 @@ import { api, ApiError, onSessionDeath } from '@/lib/api';
 import { tokenStore } from '@/lib/auth';
 import { cartStore } from '@/lib/cart';
 import type { GuestProfile, GuestSessionResponse } from '@/lib/types';
+import {
+  latestUnreadPriority,
+  useGuestAnnouncements,
+} from '@/lib/use-guest-announcements';
 import { BottomNav, type GuestSection } from './bottom-nav';
 import type { DiningPrefill } from './dining/dining-screen';
 import { EntryScreen } from './entry-screen';
@@ -30,6 +34,14 @@ const ActiveOrderStrip = dynamic(
 // Hotel Info rides its own dynamic chunk too (Epic 17, 17.2 AC4).
 const InfoScreen = dynamic(
   () => import('./info/info-screen').then((m) => m.InfoScreen),
+  { ssr: false },
+);
+// The announcements inbox is bell-only traffic — dynamic chunk (Epic 19).
+const AnnouncementsScreen = dynamic(
+  () =>
+    import('./announcements/announcements-screen').then(
+      (m) => m.AnnouncementsScreen,
+    ),
   { ssr: false },
 );
 
@@ -63,6 +75,15 @@ export function GuestFlow({
   );
   // "Track order" intent: opens Dining directly on that order's sheet.
   const [diningOrderId, setDiningOrderId] = useState<string | null>(null);
+  // Announcement chip intent: opens Hotel Info scrolled to that entry (19.4).
+  const [infoEntryId, setInfoEntryId] = useState<string | null>(null);
+
+  // ONE announcements poller app-wide (19.4 AC1 — bell, banner and inbox all
+  // share this feed; never a poller per surface).
+  const announcementsLive = isModuleEnabled('announcements');
+  const announcementsFeed = useGuestAnnouncements(
+    state.phase === 'home' && announcementsLive,
+  );
 
   // 16.5 AC6 — ?location/?spot follow the ?room contract: captured once
   // into memory (they must survive into the checkout prefill even for an
@@ -197,7 +218,19 @@ export function GuestFlow({
         <>
           <LocaleSync stayLanguage={state.profile.language} />
           <div className={navLive ? 'pb-16' : ''}>
-            {state.section === 'requests' && requestsLive ? (
+            {state.section === 'announcements' && announcementsLive ? (
+              <AnnouncementsScreen
+                feed={announcementsFeed}
+                profile={state.profile}
+                onBack={() => setSection('home')}
+                onOpenInfo={(chip) => {
+                  if (infoLive) {
+                    setInfoEntryId(chip.entryId);
+                    setSection('info');
+                  }
+                }}
+              />
+            ) : state.section === 'requests' && requestsLive ? (
               <RequestsScreen profile={state.profile} />
             ) : state.section === 'dining' && diningLive ? (
               <DiningScreen
@@ -206,12 +239,30 @@ export function GuestFlow({
                 initialOrderId={diningOrderId}
               />
             ) : state.section === 'info' && infoLive ? (
-              <InfoScreen />
+              <InfoScreen initialEntryId={infoEntryId} />
             ) : (
               <>
                 <HomeScreen
                   profile={state.profile}
                   onRefresh={refresh}
+                  announcements={
+                    announcementsLive
+                      ? {
+                          unreadCount: announcementsFeed.unreadCount,
+                          banner: latestUnreadPriority(
+                            announcementsFeed.announcements,
+                          ),
+                          onOpenInbox: () => setSection('announcements'),
+                          onOpenBanner: () => setSection('announcements'),
+                          onDismissBanner: () => {
+                            const banner = latestUnreadPriority(
+                              announcementsFeed.announcements,
+                            );
+                            if (banner) announcementsFeed.markRead(banner.id);
+                          },
+                        }
+                      : null
+                  }
                   onOpenTile={(key) => {
                     if (key === 'requests' && requestsLive) {
                       setSection('requests');
@@ -238,6 +289,7 @@ export function GuestFlow({
               section={state.section}
               onSelect={(section) => {
                 setDiningOrderId(null);
+                setInfoEntryId(null);
                 setSection(section);
               }}
               requestsLive={requestsLive}

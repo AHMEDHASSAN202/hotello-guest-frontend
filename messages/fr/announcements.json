@@ -12,5 +12,9 @@
   "empty": {
     "title": "Rien de nouveau pour l'instant",
     "body": "Les messages de l'hôtel apparaîtront ici — nous vous tiendrons informé."
+  },
+  "soon": {
+    "title": "Les annonces font une pause",
+    "body": "Cette fonction n'est pas disponible pour le moment — tout le reste est à votre service."
   }
 }

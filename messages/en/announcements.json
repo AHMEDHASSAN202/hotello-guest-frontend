@@ -12,5 +12,9 @@
   "empty": {
     "title": "Nothing new right now",
     "body": "Messages from the hotel will appear here — we'll keep you posted."
+  },
+  "soon": {
+    "title": "Announcements are taking a break",
+    "body": "This feature isn't available right now — everything else is still at your service."
   }
 }

@@ -31,7 +31,12 @@ import { Bdi, Screen, Skeleton } from '../ui';
  * "Open now" badges are computed client-side from the raw windows in
  * hotel-local time and refreshed on a 30s tick.
  */
-export function InfoScreen() {
+export function InfoScreen({
+  initialEntryId = null,
+}: {
+  /** Epic 19 — announcement chip deep-link: scroll to this entry on load. */
+  initialEntryId?: string | null;
+} = {}) {
   const t = useTranslations('info');
   const tCommon = useTranslations('common');
   const { hotel } = useHotel();
@@ -60,6 +65,15 @@ export function InfoScreen() {
     const timer = setInterval(() => setTick((n) => n + 1), 30_000);
     return () => clearInterval(timer);
   }, []);
+
+  // Announcement chip deep-link (19.4 AC2): once content is in, scroll to
+  // the linked entry. A dangling id is a silent no-op.
+  useEffect(() => {
+    if (!info || !initialEntryId || typeof document === 'undefined') return;
+    document
+      .getElementById(`info-entry-${initialEntryId}`)
+      ?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  }, [info, initialEntryId]);
 
   // Module disabled mid-stay: warm screen + one server-layout refresh so the
   // tile lands back on "soon" (the Epic 15 pattern).
@@ -130,13 +144,14 @@ export function InfoScreen() {
             <SectionTitle icon={Dumbbell} label={t('sections.facilities')} />
             <div className="space-y-3">
               {info.facilities.map((facility) => (
-                <FacilityCard
-                  key={facility.id}
-                  facility={facility}
-                  minutes={minutes}
-                  openNow={t('openNow')}
-                  opensAt={(time) => t('opensAt', { time })}
-                />
+                <div key={facility.id} id={`info-entry-${facility.id}`}>
+                  <FacilityCard
+                    facility={facility}
+                    minutes={minutes}
+                    openNow={t('openNow')}
+                    opensAt={(time) => t('opensAt', { time })}
+                  />
+                </div>
               ))}
             </div>
           </section>
@@ -147,7 +162,11 @@ export function InfoScreen() {
             <SectionTitle icon={ConciergeBell} label={t('sections.services')} />
             <div className="space-y-3">
               {info.services.map((service) => (
-                <article key={service.id} className="rounded-card bg-card p-4 shadow-card">
+                <article
+                  key={service.id}
+                  id={`info-entry-${service.id}`}
+                  className="rounded-card bg-card p-4 shadow-card"
+                >
                   <h3 className="text-[15px] font-semibold text-ink">{service.name}</h3>
                   {service.description ? (
                     <p className="mt-1 text-sm text-ink-soft">{service.description}</p>
@@ -173,7 +192,7 @@ export function InfoScreen() {
             <div className="rounded-card bg-card p-4 shadow-card">
               <ul className="space-y-3">
                 {info.houseRules.map((rule) => (
-                  <li key={rule.id}>
+                  <li key={rule.id} id={`info-entry-${rule.id}`}>
                     <p className="text-[14px] font-semibold text-ink">{rule.name}</p>
                     {rule.description ? (
                       <p className="mt-0.5 text-sm text-ink-soft">{rule.description}</p>
