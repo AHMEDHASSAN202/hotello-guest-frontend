@@ -1,0 +1,16 @@
+{
+  "bell": "Avisos",
+  "title": "Avisos",
+  "back": "Atrás",
+  "priority": "Importante",
+  "unread": "Nuevo",
+  "infoChip": "Detalles en Info del hotel",
+  "banner": {
+    "open": "Leer más",
+    "dismiss": "Ocultar"
+  },
+  "empty": {
+    "title": "Nada nuevo por ahora",
+    "body": "Los mensajes del hotel aparecerán aquí — te mantendremos al tanto."
+  }
+}

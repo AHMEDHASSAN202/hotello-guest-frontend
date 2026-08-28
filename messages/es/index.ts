@@ -1,3 +1,4 @@
+import announcements from './announcements.json';
 import common from './common.json';
 import dining from './dining.json';
 import entry from './entry.json';
@@ -7,4 +8,4 @@ import info from './info.json';
 import requests from './requests.json';
 import states from './states.json';
 
-export default { common, dining, entry, errors, home, info, requests, states };
+export default { announcements, common, dining, entry, errors, home, info, requests, states };
