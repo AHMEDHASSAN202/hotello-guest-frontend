@@ -41,6 +41,50 @@ export function Button({
   );
 }
 
+/**
+ * The one switch (Epic 20, 20.4) — an instant-apply toggle, not a form
+ * control. ≥44×44px hit target around a 48×28 track (14.5 AC3), pressed
+ * state (.pressable), accent track when on. RTL-safe: the thumb sits at the
+ * flex start of the track (right edge in RTL) and travels toward the end via
+ * `rtl:-translate-x-5`, so it moves left-to-right in LTR and right-to-left
+ * in RTL without any physical left/right classes.
+ */
+export function Switch({
+  checked,
+  onChange,
+  disabled,
+  className = '',
+  ...rest
+}: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onChange'> & {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      {...rest}
+      className={`pressable flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center disabled:pointer-events-none disabled:opacity-50 ${className}`}
+    >
+      <span
+        aria-hidden
+        className={`flex h-7 w-12 items-center rounded-full px-1 transition-colors duration-200 ${
+          checked ? 'bg-accent' : 'bg-line'
+        }`}
+      >
+        <span
+          className={`h-5 w-5 rounded-full bg-card shadow-card transition-transform duration-200 ${
+            checked ? 'translate-x-5 rtl:-translate-x-5' : 'translate-x-0'
+          }`}
+        />
+      </span>
+    </button>
+  );
+}
+
 /** Skeletons for every loading state — never spinners alone (14.5 AC2). */
 export function Skeleton({ className = '' }: { className?: string }) {
   return (

@@ -11,7 +11,7 @@ import { AnnouncementsBell } from './announcements/announcements-bell';
 import { PriorityBanner } from './announcements/priority-banner';
 import { LanguageSwitcher } from './language-switcher';
 import { ServicesGrid } from './services-grid';
-import { StayCard } from './stay-card';
+import { StayCard, type StayCardDnd } from './stay-card';
 import { Screen } from './ui';
 
 const PULL_THRESHOLD = 70;
@@ -35,12 +35,15 @@ export function HomeScreen({
   onRefresh,
   onOpenTile,
   announcements,
+  dnd,
 }: {
   profile: GuestProfile;
   onRefresh?: () => Promise<void>;
   onOpenTile?: (key: 'requests' | 'dining' | 'housekeeping' | 'transport' | 'info') => void;
   /** null/absent = module off → no bell, no banner (19.4 AC4). */
   announcements?: HomeAnnouncements | null;
+  /** null/absent = housekeeping module off → no DND row (Epic 20, 20.4). */
+  dnd?: StayCardDnd | null;
 }) {
   const t = useTranslations('home');
   const tc = useTranslations('common');
@@ -170,7 +173,7 @@ export function HomeScreen({
         ) : null}
 
         <div className="mt-5">
-          <StayCard profile={profile} />
+          <StayCard profile={profile} dnd={dnd} />
         </div>
 
         <div className="mt-7">

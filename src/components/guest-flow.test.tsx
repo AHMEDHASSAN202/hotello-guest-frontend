@@ -146,3 +146,44 @@ describe('GuestFlow boot branching (14.2 AC4)', () => {
     replaceSpy.mockRestore();
   });
 });
+
+describe('Epic 20 — guest DND toggle (20.4)', () => {
+  beforeEach(() => {
+    apiMock.mockReset();
+    tokenStore.get.mockReturnValue(null);
+    tokenStore.set.mockClear();
+    deathHandlers.clear();
+  });
+
+  it('toggling posts /guest/dnd with {active:true} and flips optimistically', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockImplementation((path: string) => {
+      if (path === '/guest/me') return Promise.resolve(profile);
+      if (path === '/guest/dnd') return Promise.resolve({ dndActive: true });
+      return Promise.reject(new Error(`unexpected call: ${path}`));
+    });
+
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={{ ...hotel, enabledModules: ['housekeeping'] }}>
+          <GuestFlow slug="sunrise" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.getByTestId('dnd-switch')).toBeTruthy());
+    const sw = screen.getByTestId('dnd-switch');
+    expect(sw.getAttribute('aria-checked')).toBe('false');
+
+    fireEvent.click(sw);
+    // Optimistic flip — before the echo lands (recorded decision 10).
+    expect(sw.getAttribute('aria-checked')).toBe('true');
+    await waitFor(() =>
+      expect(apiMock).toHaveBeenCalledWith('/guest/dnd', {
+        method: 'POST',
+        body: JSON.stringify({ active: true }),
+      }),
+    );
+    // The server echo confirms — the switch stays on.
+    expect(sw.getAttribute('aria-checked')).toBe('true');
+  });
+});

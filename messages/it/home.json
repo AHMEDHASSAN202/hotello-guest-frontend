@@ -4,7 +4,13 @@
     "room": "Camera",
     "nights": "{count, plural, one {# notte rimanente} other {# notti rimanenti}}",
     "checkout": "fino al {date} · {time}",
-    "checkoutToday": "Check-out oggi alle {time} — speriamo che il soggiorno ti sia piaciuto"
+    "checkoutToday": "Check-out oggi alle {time} — speriamo che il soggiorno ti sia piaciuto",
+    "dnd": {
+      "label": "Non disturbare oggi",
+      "explainer": "Oggi le pulizie salteranno la tua camera",
+      "resetNote": "Domani le pulizie riprenderanno automaticamente",
+      "crossLink": "Ti serve una pulizia adesso? Richiedila dai servizi"
+    }
   },
   "services": {
     "title": "Al tuo servizio",

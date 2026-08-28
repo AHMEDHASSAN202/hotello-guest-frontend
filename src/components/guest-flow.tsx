@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError, onSessionDeath } from '@/lib/api';
 import { tokenStore } from '@/lib/auth';
@@ -68,6 +69,7 @@ export function GuestFlow({
   spotParam?: string;
 }) {
   const { hotel, isModuleEnabled } = useHotel();
+  const router = useRouter();
   // Boot decides instantly: a stored token means we probe (skeleton), never
   // the entry form — a valid session must not see a flash of login (AC4).
   const [state, setState] = useState<GuestState>(() =>
@@ -167,6 +169,49 @@ export function GuestFlow({
     );
   }, []);
 
+  // Epic 20 (20.4) — DND is optimistic-apply with server echo (recorded
+  // decision 10: no shared profile poller in this app). Seeded from the
+  // profile, re-seeded whenever the profile refreshes (boot probe, entry,
+  // pull-to-refresh) — that is the reconciliation path.
+  const [dndActive, setDndActive] = useState(false);
+  const [dndBusy, setDndBusy] = useState(false);
+  const homeProfile = state.phase === 'home' ? state.profile : null;
+  useEffect(() => {
+    if (homeProfile) setDndActive(homeProfile.dndActive ?? false);
+  }, [homeProfile]);
+
+  // Module disabled mid-stay: ask the server layout to re-read the hotel
+  // profile so the row disappears — once, not per tap (requests idiom).
+  const dndModuleRefreshed = useRef(false);
+  const toggleDnd = useCallback(
+    async (active: boolean) => {
+      if (dndBusy) return; // the switch is disabled too — belt and braces
+      setDndBusy(true);
+      setDndActive(active); // optimistic flip — instant apply (AC1)
+      try {
+        const result = await api<{ dndActive: boolean }>('/guest/dnd', {
+          method: 'POST',
+          body: JSON.stringify({ active }),
+        });
+        setDndActive(result.dndActive); // reconcile with the server echo
+      } catch (err) {
+        setDndActive(!active); // revert — no toast, the switch is the truth
+        if (
+          err instanceof ApiError &&
+          (err.code === 'MODULE_NOT_ENABLED' ||
+            err.code === 'HOTEL_UNAVAILABLE') &&
+          !dndModuleRefreshed.current
+        ) {
+          dndModuleRefreshed.current = true;
+          router.refresh();
+        }
+      } finally {
+        setDndBusy(false);
+      }
+    },
+    [dndBusy, router],
+  );
+
   // A location-QR scan lands the guest straight in Dining — once.
   const prefillRouted = useRef(false);
   const diningLiveNow = isModuleEnabled('fnb');
@@ -214,6 +259,7 @@ export function GuestFlow({
       const infoLive =
         isModuleEnabled('hotel_info') && hotel.hotelInfoHasContent;
       const navLive = requestsLive || diningLive || infoLive;
+      const housekeepingLive = isModuleEnabled('housekeeping');
       return (
         <>
           <LocaleSync stayLanguage={state.profile.language} />
@@ -260,6 +306,18 @@ export function GuestFlow({
                             );
                             if (banner) announcementsFeed.markRead(banner.id);
                           },
+                        }
+                      : null
+                  }
+                  dnd={
+                    housekeepingLive
+                      ? {
+                          active: dndActive,
+                          busy: dndBusy,
+                          onToggle: toggleDnd,
+                          onRequestCleaning: requestsLive
+                            ? () => setSection('requests')
+                            : undefined,
                         }
                       : null
                   }

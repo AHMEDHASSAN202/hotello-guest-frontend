@@ -4,7 +4,13 @@
     "room": "Room",
     "nights": "{count, plural, one {# night} other {# nights}} remaining",
     "checkout": "until {date} · {time}",
-    "checkoutToday": "Checkout today at {time} — we hope you enjoyed your stay"
+    "checkoutToday": "Checkout today at {time} — we hope you enjoyed your stay",
+    "dnd": {
+      "label": "Do not disturb today",
+      "explainer": "Housekeeping will skip your room today",
+      "resetNote": "Cleaning resumes automatically tomorrow",
+      "crossLink": "Need cleaning now? Request it from services"
+    }
   },
   "services": {
     "title": "At your service",

@@ -18,6 +18,12 @@ export interface GuestProfile {
   stayType: string;
   /** Keys the client-persisted cart per stay (Epic 16, note 9). */
   stayId: string;
+  /**
+   * Do-Not-Disturb for today (Epic 20, 20.4) — optimistic toggle state
+   * reconciles from this on boot/pull-to-refresh (recorded decision 10).
+   * Optional: absent (older payloads/fixtures) reads as false.
+   */
+  dndActive?: boolean;
 }
 
 export interface GuestSessionResponse {
