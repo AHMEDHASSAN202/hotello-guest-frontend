@@ -19,7 +19,6 @@
   "tiles": {
     "requests": "Demandes",
     "dining": "Restauration",
-    "housekeeping": "Ménage",
     "transport": "Transport",
     "info": "Infos hôtel"
   },

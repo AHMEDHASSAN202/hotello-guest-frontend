@@ -19,7 +19,6 @@
   "tiles": {
     "requests": "Запросы",
     "dining": "Ресторан",
-    "housekeeping": "Уборка",
     "transport": "Трансфер",
     "info": "Об отеле"
   },

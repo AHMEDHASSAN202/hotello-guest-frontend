@@ -2,7 +2,6 @@ import {
   CarFront,
   Compass,
   ConciergeBell,
-  Sparkles,
   UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
@@ -13,7 +12,7 @@ import {
  * is unconditional; otherwise the hotel's plan `enabledModules` gates it.
  */
 export interface GuestTile {
-  key: 'requests' | 'dining' | 'housekeeping' | 'transport' | 'info';
+  key: 'requests' | 'dining' | 'transport' | 'info';
   icon: LucideIcon;
   moduleKey: string | null;
   live: boolean;
@@ -23,7 +22,6 @@ export const GUEST_TILES: GuestTile[] = [
   // Epic 15 (15.2 AC1) — the first live tile.
   { key: 'requests', icon: ConciergeBell, moduleKey: 'requests', live: true },
   { key: 'dining', icon: UtensilsCrossed, moduleKey: 'fnb', live: true },
-  { key: 'housekeeping', icon: Sparkles, moduleKey: 'housekeeping', live: false },
   { key: 'transport', icon: CarFront, moduleKey: 'transportation', live: false },
   // Epic 17 (17.2 AC1) — live, with the AC4 tri-state applied in visibleTiles.
   { key: 'info', icon: Compass, moduleKey: 'hotel_info', live: true },

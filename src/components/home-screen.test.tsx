@@ -86,9 +86,9 @@ describe('HomeScreen (14.4)', () => {
 });
 
 describe('ServicesGrid gating (14.4 AC3)', () => {
-  it('shows all five tiles when every module is enabled', () => {
+  it('shows all four tiles when every module is enabled', () => {
     wrap(<ServicesGrid />);
-    for (const key of ['requests', 'dining', 'housekeeping', 'transport', 'info']) {
+    for (const key of ['requests', 'dining', 'transport', 'info']) {
       expect(screen.getByTestId(`tile-${key}`)).toBeTruthy();
     }
   });
@@ -97,7 +97,6 @@ describe('ServicesGrid gating (14.4 AC3)', () => {
     wrap(<ServicesGrid />, { ...baseHotel, enabledModules: ['requests'] });
     expect(screen.getByTestId('tile-requests')).toBeTruthy();
     expect(screen.queryByTestId('tile-dining')).toBeNull();
-    expect(screen.queryByTestId('tile-housekeeping')).toBeNull();
     expect(screen.queryByTestId('tile-transport')).toBeNull();
   });
 
@@ -124,7 +123,7 @@ describe('ServicesGrid gating (14.4 AC3)', () => {
 
   it('soon tiles are visibly ambitious but inert: aria-disabled, no button role', () => {
     wrap(<ServicesGrid />);
-    const tile = screen.getByTestId('tile-housekeeping');
+    const tile = screen.getByTestId('tile-transport');
     expect(tile.getAttribute('aria-disabled')).toBe('true');
     expect(tile.getAttribute('role')).toBeNull();
     expect(screen.getAllByText('Soon').length).toBeGreaterThan(0);

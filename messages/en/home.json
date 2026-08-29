@@ -19,7 +19,6 @@
   "tiles": {
     "requests": "Requests",
     "dining": "Dining",
-    "housekeeping": "Housekeeping",
     "transport": "Transport",
     "info": "Hotel info"
   },

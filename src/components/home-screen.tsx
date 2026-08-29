@@ -39,7 +39,7 @@ export function HomeScreen({
 }: {
   profile: GuestProfile;
   onRefresh?: () => Promise<void>;
-  onOpenTile?: (key: 'requests' | 'dining' | 'housekeeping' | 'transport' | 'info') => void;
+  onOpenTile?: (key: 'requests' | 'dining' | 'transport' | 'info') => void;
   /** null/absent = module off → no bell, no banner (19.4 AC4). */
   announcements?: HomeAnnouncements | null;
   /** null/absent = housekeeping module off → no DND row (Epic 20, 20.4). */
