@@ -147,6 +147,39 @@ describe('GuestFlow boot branching (14.2 AC4)', () => {
   });
 });
 
+describe('Epic 21 — Events tile/section wiring', () => {
+  beforeEach(() => {
+    apiMock.mockReset();
+    tokenStore.get.mockReturnValue(null);
+    tokenStore.set.mockClear();
+    deathHandlers.clear();
+  });
+
+  it('an events-only plan still gives the guest a way back to home (bottom nav renders)', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockResolvedValue(profile);
+
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={{ ...hotel, enabledModules: ['events'] }}>
+          <GuestFlow slug="sunrise" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+
+    // No requests/dining/info module is live, only events — the bottom nav
+    // must still appear (navLive includes eventsLive) so there is a way
+    // back once the guest opens the Events tile.
+    fireEvent.click(screen.getByTestId('tile-events'));
+    await waitFor(() => expect(screen.getByTestId('bottom-nav')).toBeTruthy());
+    expect(screen.queryByTestId('home-root')).toBeNull();
+
+    fireEvent.click(screen.getByText('Home'));
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+  });
+});
+
 describe('Epic 20 — guest DND toggle (20.4)', () => {
   beforeEach(() => {
     apiMock.mockReset();

@@ -265,7 +265,12 @@ export function GuestFlow({
       const infoLive =
         isModuleEnabled('hotel_info') && hotel.hotelInfoHasContent;
       const eventsLive = isModuleEnabled('events');
-      const navLive = requestsLive || diningLive || infoLive;
+      // Events has no dedicated nav slot (home-tile access only), but it
+      // must still count toward the nav's existence — otherwise a plan with
+      // ONLY events enabled strands the guest on the Events screen with no
+      // way back to home (no nav, no in-screen back, no browser-back in
+      // this state machine).
+      const navLive = requestsLive || diningLive || infoLive || eventsLive;
       const housekeepingLive = isModuleEnabled('housekeeping');
       return (
         <>
