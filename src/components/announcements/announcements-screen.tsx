@@ -35,6 +35,15 @@ export interface AnnouncementsFeedHandle {
  * Epic 21 Task 23 — the event chip mirrors the info chip's shape and visual
  * treatment exactly (same pill, same button pattern); it deep-links into
  * the Events section, opening that event's detail sheet.
+ *
+ * FINAL-REVIEW FIX (whole-branch review) — `onOpenEvent` is nullable and the
+ * chip is not rendered without it. The backend puts `eventChip` on an
+ * announcement regardless of the hotel's plan, so on a hotel WITHOUT the
+ * events module the chip used to render and then do nothing at all when
+ * tapped (`guest-flow.tsx` no-ops it when events aren't live) — a dead tap,
+ * the one thing an app is never allowed to have. Capability arrives as a
+ * nullable prop, the `HomeScreen` `announcements`/`dnd` idiom, rather than
+ * as a new boolean or a context read.
  */
 export function AnnouncementsScreen({
   feed,
@@ -47,7 +56,8 @@ export function AnnouncementsScreen({
   profile: GuestProfile;
   onBack: () => void;
   onOpenInfo: (chip: GuestAnnouncementChip) => void;
-  onOpenEvent: (chip: GuestAnnouncementEventChip) => void;
+  /** `null` when the events section isn't live — the chip then isn't rendered. */
+  onOpenEvent: ((chip: GuestAnnouncementEventChip) => void) | null;
 }) {
   const t = useTranslations('announcements');
   const router = useRouter();
@@ -190,7 +200,7 @@ export function AnnouncementsScreen({
                 </span>
               </button>
             ) : null}
-            {detail.eventChip ? (
+            {detail.eventChip && onOpenEvent ? (
               <button
                 type="button"
                 onClick={() => onOpenEvent(detail.eventChip!)}

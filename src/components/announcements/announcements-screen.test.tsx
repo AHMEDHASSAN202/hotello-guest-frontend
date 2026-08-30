@@ -141,6 +141,29 @@ describe('AnnouncementsScreen (19.4 AC2)', () => {
     expect(onOpenEvent).toHaveBeenCalledWith(chip);
   });
 
+  it('final-review fix — no event chip when the events section is not live (no dead tap)', () => {
+    // The backend attaches `eventChip` regardless of the hotel's plan; with
+    // events off, `onOpenEvent` arrives null and the chip must not render.
+    const chip = { eventId: 'event-1', title: 'Sunset Yoga', startAtLocal: '2099-01-01 18:00' };
+    const feed = makeFeed({
+      announcements: [make({ id: 'a1', eventChip: chip })],
+      unreadCount: 1,
+    });
+    wrap(
+      <AnnouncementsScreen
+        feed={feed}
+        profile={profile}
+        onBack={vi.fn()}
+        onOpenInfo={vi.fn()}
+        onOpenEvent={null}
+      />,
+    );
+    fireEvent.click(screen.getByText('Pool closed tomorrow'));
+    expect(screen.getByTestId('bottom-sheet')).toBeTruthy();
+    expect(screen.queryByText(/Sunset Yoga/)).toBeNull();
+    expect(screen.queryByText(/Details in Events/)).toBeNull();
+  });
+
   it('does not render either chip when both are null (manually-composed announcement)', () => {
     const feed = makeFeed({
       announcements: [make({ id: 'a1' })],

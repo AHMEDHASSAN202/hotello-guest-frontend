@@ -298,12 +298,17 @@ export function GuestFlow({
                     setSection('info');
                   }
                 }}
-                onOpenEvent={(chip) => {
-                  if (eventsLive) {
-                    setEventsEventId(chip.eventId);
-                    setSection('events');
-                  }
-                }}
+                // Null when events aren't live: the backend attaches an
+                // eventChip regardless of plan, and a chip whose handler
+                // no-ops is a dead tap — so the chip isn't rendered at all.
+                onOpenEvent={
+                  eventsLive
+                    ? (chip) => {
+                        setEventsEventId(chip.eventId);
+                        setSection('events');
+                      }
+                    : null
+                }
               />
             ) : state.section === 'requests' && requestsLive ? (
               <RequestsScreen profile={state.profile} />
