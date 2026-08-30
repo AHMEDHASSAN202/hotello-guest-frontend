@@ -376,11 +376,18 @@ export function GuestFlow({
                     here, on a flex column both strips render into (each
                     still independently returns null when it has nothing to
                     show) — whichever combination is present stacks instead
-                    of overlapping. */}
+                    of overlapping.
+
+                    The column is gated on the MODULES being live, not on the
+                    strips having content, so when both render null it is an
+                    empty transparent box sitting over the last tile row of a
+                    scrolled home — hence `pointer-events-none` here and
+                    `pointer-events-auto` on each strip's own button: the
+                    wrapper never eats a tap, the pills still take theirs. */}
                 {diningLive || eventsLive ? (
                   <div
                     data-testid="home-strips"
-                    className="fixed inset-x-0 bottom-[64px] z-30 mx-auto flex max-w-[430px] flex-col gap-2 px-5 pb-2"
+                    className="pointer-events-none fixed inset-x-0 bottom-[64px] z-30 mx-auto flex max-w-[430px] flex-col gap-2 px-5 pb-2"
                   >
                     {diningLive ? (
                       <ActiveOrderStrip

@@ -43,7 +43,7 @@ export function TodayEventStrip({
     <button
       data-testid="today-event-strip"
       onClick={() => onOpen(booking.id)}
-      className="pressable animate-fade-in flex min-h-[52px] w-full items-center gap-3 rounded-card bg-card p-3 shadow-sheet"
+      className="pressable animate-fade-in pointer-events-auto flex min-h-[52px] w-full items-center gap-3 rounded-card bg-card p-3 shadow-sheet"
     >
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft">
         <PartyPopper className="h-4 w-4 text-accent" aria-hidden />

@@ -279,6 +279,42 @@ describe('Final-review fix — home strips stack instead of overlapping', () => 
     expect(strips.className).toContain('flex-col');
     expect(activeOrderStrip.className).not.toMatch(/\bfixed\b/);
     expect(todayEventStrip.className).not.toMatch(/\bfixed\b/);
+
+    // The column itself never takes a tap; each pill takes its own.
+    expect(strips.className).toContain('pointer-events-none');
+    expect(activeOrderStrip.className).toContain('pointer-events-auto');
+    expect(todayEventStrip.className).toContain('pointer-events-auto');
+  });
+
+  it('with the modules live but NO strip content, the column swallows no taps (pointer-events-none)', async () => {
+    // The column is gated on the modules being enabled, not on content, so
+    // with nothing to show it is an invisible box hovering over the home
+    // screen's last tile row — it must be transparent to touch.
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockImplementation((path: string) => {
+      if (path === '/guest/me') return Promise.resolve(profile);
+      if (path === '/guest/fnb/orders') {
+        return Promise.resolve({ data: [], serverTime: '2026-08-30T09:10:00.000Z' });
+      }
+      if (path.startsWith('/guest/events/bookings')) {
+        return Promise.resolve({ data: [], todayBooking: null });
+      }
+      return Promise.reject(new Error(`unexpected call: ${path}`));
+    });
+
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={{ ...hotel, enabledModules: ['fnb', 'events'] }}>
+          <GuestFlow slug="sunrise" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+
+    const strips = screen.getByTestId('home-strips');
+    expect(screen.queryByTestId('active-order-strip')).toBeNull();
+    expect(screen.queryByTestId('today-event-strip')).toBeNull();
+    expect(strips.className).toContain('pointer-events-none');
   });
 });
 
