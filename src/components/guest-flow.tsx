@@ -292,15 +292,18 @@ export function GuestFlow({
                 feed={announcementsFeed}
                 profile={state.profile}
                 onBack={() => setSection('home')}
-                onOpenInfo={(chip) => {
-                  if (infoLive) {
-                    setInfoEntryId(chip.entryId);
-                    setSection('info');
-                  }
-                }}
-                // Null when events aren't live: the backend attaches an
-                // eventChip regardless of plan, and a chip whose handler
-                // no-ops is a dead tap — so the chip isn't rendered at all.
+                // Both chips: null when their section isn't live. The backend
+                // attaches infoChip/eventChip regardless of the hotel's plan,
+                // and a chip whose handler no-ops is a dead tap — so the chip
+                // isn't rendered at all rather than rendered and inert.
+                onOpenInfo={
+                  infoLive
+                    ? (chip) => {
+                        setInfoEntryId(chip.entryId);
+                        setSection('info');
+                      }
+                    : null
+                }
                 onOpenEvent={
                   eventsLive
                     ? (chip) => {

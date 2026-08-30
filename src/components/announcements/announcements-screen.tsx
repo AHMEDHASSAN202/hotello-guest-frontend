@@ -55,7 +55,8 @@ export function AnnouncementsScreen({
   feed: AnnouncementsFeedHandle;
   profile: GuestProfile;
   onBack: () => void;
-  onOpenInfo: (chip: GuestAnnouncementChip) => void;
+  /** `null` when the hotel-info section isn't live — the chip then isn't rendered. */
+  onOpenInfo: ((chip: GuestAnnouncementChip) => void) | null;
   /** `null` when the events section isn't live — the chip then isn't rendered. */
   onOpenEvent: ((chip: GuestAnnouncementEventChip) => void) | null;
 }) {
@@ -188,7 +189,7 @@ export function AnnouncementsScreen({
                 </p>
               ))}
             </div>
-            {detail.infoChip ? (
+            {detail.infoChip && onOpenInfo ? (
               <button
                 type="button"
                 onClick={() => onOpenInfo(detail.infoChip!)}

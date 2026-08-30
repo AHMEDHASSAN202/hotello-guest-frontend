@@ -365,6 +365,9 @@ describe('EventsScreen — bookings (21.5)', () => {
     // ...and the failed refresh underneath does NOT wipe what's on screen.
     expect(screen.queryByText("We couldn't load your bookings.")).toBeNull();
     expect(screen.getByText('No upcoming bookings.')).toBeTruthy();
+    // ...but the staleness is still SAID. Keeping the list and saying nothing
+    // would present optimistic state as confirmed.
+    expect(screen.getByTestId('bookings-stale')).toBeTruthy();
   });
 
   it('booking rows are list items inside a <ul> — no orphaned <li> for screen readers', async () => {

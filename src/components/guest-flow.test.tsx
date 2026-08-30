@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import en from '../../messages/en';
 import { ApiError } from '@/lib/api';
 import type {
+  GuestAnnouncement,
   GuestEventBooking,
   GuestFnbOrder,
   GuestHotelProfile,
@@ -356,5 +357,81 @@ describe('Epic 20 — guest DND toggle (20.4)', () => {
     );
     // The server echo confirms — the switch stays on.
     expect(sw.getAttribute('aria-checked')).toBe('true');
+  });
+});
+
+describe('Final-review fix — announcement chips are never dead taps', () => {
+  beforeEach(() => {
+    apiMock.mockReset();
+    tokenStore.get.mockReturnValue('stored-token');
+    tokenStore.set.mockClear();
+    deathHandlers.clear();
+  });
+
+  const announcement: GuestAnnouncement = {
+    id: 'ann-1',
+    title: 'Sunrise yoga is on',
+    body: 'Meet at the beach deck.',
+    priority: false,
+    infoChip: { entryId: 'entry-1', section: 'facilities', name: 'Beach deck' },
+    eventChip: {
+      eventId: 'evt-1',
+      title: 'Sunrise Yoga',
+      startAtLocal: '2030-01-02 07:00',
+    },
+    publishedAt: '2026-01-15T09:00:00.000Z',
+    readAt: null,
+    active: true,
+  };
+
+  /**
+   * Drives the REAL `GuestFlow`, not `AnnouncementsScreen` in isolation: the
+   * bug this guards was in the wiring (guest-flow handed down a handler that
+   * silently no-opped), so a component-level test that merely honours a null
+   * it is given cannot catch a regression here.
+   */
+  async function openDetail(enabledModules: string[]) {
+    apiMock.mockImplementation((url: string) =>
+      url.startsWith('/guest/announcements')
+        ? Promise.resolve({
+            data: [announcement],
+            unreadCount: 1,
+            serverTime: '2026-01-15T09:00:00.000Z',
+          })
+        : Promise.resolve(profile),
+    );
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider
+          hotel={{ ...hotel, enabledModules, hotelInfoHasContent: true }}
+        >
+          <GuestFlow slug="sunrise" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+    fireEvent.click(screen.getByTestId('announcements-bell'));
+    await waitFor(() =>
+      expect(screen.getByText('Sunrise yoga is on')).toBeTruthy(),
+    );
+    fireEvent.click(screen.getByText('Sunrise yoga is on'));
+    await waitFor(() => expect(screen.getByTestId('bottom-sheet')).toBeTruthy());
+  }
+
+  it('renders both chips when their sections are live', async () => {
+    await openDetail(['announcements', 'events', 'hotel_info']);
+    expect(screen.getByText(/Sunrise Yoga/)).toBeTruthy();
+    expect(screen.getByText(/Beach deck/)).toBeTruthy();
+  });
+
+  it('renders neither chip when their sections are not live', async () => {
+    // The backend attaches both chips regardless of the hotel's plan; with
+    // the modules off, a rendered chip would be a tap that does nothing.
+    await openDetail(['announcements']);
+    // The sheet really did open with its body — the chips below are absent
+    // because they were not rendered, not because there is nothing on screen.
+    expect(screen.getAllByText('Meet at the beach deck.').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Sunrise Yoga/)).toBeNull();
+    expect(screen.queryByText(/Beach deck/)).toBeNull();
   });
 });

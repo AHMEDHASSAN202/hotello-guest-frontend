@@ -309,6 +309,18 @@ export function EventsScreen({
               ) : null}
             </div>
           )}
+          {/* A refresh that failed while we already have a list to show: the
+              list stays (above), but staleness still has to be visible —
+              silence would present optimistic state as authoritative. Same
+              placement and treatment as dining's `ordersError` line. */}
+          {bookingsError && bookings !== null ? (
+            <p
+              data-testid="bookings-stale"
+              className="mt-3 text-center text-sm text-danger"
+            >
+              {bookingsError}
+            </p>
+          ) : null}
         </div>
       )}
 
