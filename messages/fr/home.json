@@ -25,5 +25,8 @@
   },
   "diningCard": {
     "track": "Suivre la commande"
+  },
+  "eventCard": {
+    "view": "Voir"
   }
 }

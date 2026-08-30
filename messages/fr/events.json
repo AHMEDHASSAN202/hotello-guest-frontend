@@ -55,5 +55,8 @@
     "keep": "La garder",
     "yesCancel": "Oui, annuler",
     "noCancel": "Cet événement a déjà commencé — voyez avec la réception pour tout changement."
+  },
+  "today": {
+    "startsAt": "Aujourd'hui à {time}"
   }
 }

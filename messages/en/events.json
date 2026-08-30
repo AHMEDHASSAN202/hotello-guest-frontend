@@ -55,5 +55,8 @@
     "keep": "Keep it",
     "yesCancel": "Yes, cancel",
     "noCancel": "This event has already started — the front desk can help with any changes."
+  },
+  "today": {
+    "startsAt": "Today at {time}"
   }
 }

@@ -55,5 +55,8 @@
     "keep": "Mantenerla",
     "yesCancel": "Sí, cancelar",
     "noCancel": "Este evento ya ha comenzado — habla con recepción para cualquier cambio."
+  },
+  "today": {
+    "startsAt": "Hoy a las {time}"
   }
 }

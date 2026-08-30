@@ -51,6 +51,11 @@ const EventsScreen = dynamic(
   () => import('./events/events-screen').then((m) => m.EventsScreen),
   { ssr: false },
 );
+const TodayEventStrip = dynamic(
+  () =>
+    import('./events/today-event-strip').then((m) => m.TodayEventStrip),
+  { ssr: false },
+);
 
 type GuestState =
   | { phase: 'probing' }
@@ -85,6 +90,9 @@ export function GuestFlow({
   const [diningOrderId, setDiningOrderId] = useState<string | null>(null);
   // Announcement chip intent: opens Hotel Info scrolled to that entry (19.4).
   const [infoEntryId, setInfoEntryId] = useState<string | null>(null);
+  // "Today's booking" strip intent (Epic 21, Task 22): opens Events directly
+  // on that booking's detail sheet.
+  const [eventsBookingId, setEventsBookingId] = useState<string | null>(null);
 
   // ONE announcements poller app-wide (19.4 AC1 — bell, banner and inbox all
   // share this feed; never a poller per surface).
@@ -299,7 +307,7 @@ export function GuestFlow({
             ) : state.section === 'info' && infoLive ? (
               <InfoScreen initialEntryId={infoEntryId} />
             ) : state.section === 'events' && eventsLive ? (
-              <EventsScreen />
+              <EventsScreen initialBookingId={eventsBookingId} />
             ) : (
               <>
                 <HomeScreen
@@ -355,6 +363,14 @@ export function GuestFlow({
                     }}
                   />
                 ) : null}
+                {eventsLive ? (
+                  <TodayEventStrip
+                    onOpen={(bookingId) => {
+                      setEventsBookingId(bookingId);
+                      setSection('events');
+                    }}
+                  />
+                ) : null}
               </>
             )}
           </div>
@@ -364,6 +380,7 @@ export function GuestFlow({
               onSelect={(section) => {
                 setDiningOrderId(null);
                 setInfoEntryId(null);
+                setEventsBookingId(null);
                 setSection(section);
               }}
               requestsLive={requestsLive}

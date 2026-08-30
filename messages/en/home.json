@@ -25,5 +25,8 @@
   },
   "diningCard": {
     "track": "Track order"
+  },
+  "eventCard": {
+    "view": "View"
   }
 }

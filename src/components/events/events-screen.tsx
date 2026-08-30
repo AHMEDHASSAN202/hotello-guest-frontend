@@ -7,12 +7,8 @@ import type { Locale } from '@/i18n/config';
 import { isLocale } from '@/i18n/config';
 import { api } from '@/lib/api';
 import { useApiError } from '@/lib/errors';
-import type {
-  GuestEvent,
-  GuestEventBooking,
-  GuestEventBookingsResponse,
-  GuestEventsCatalog,
-} from '@/lib/types';
+import type { GuestEvent, GuestEventBooking, GuestEventsCatalog } from '@/lib/types';
+import { useGuestEventBookings } from '@/lib/use-guest-event-bookings';
 import { Button, Screen, Skeleton } from '../ui';
 import { StateShell } from '../state-screens';
 import { BookingDetailSheet } from './booking-detail-sheet';
@@ -28,30 +24,40 @@ import { EventCard } from './event-card';
  *
  * Bookings tab detail: `GET guest/events/bookings` is tab-filtered
  * server-side (`?tab=upcoming|past|cancelled`, ListGuestEventsQueryDto) —
- * there is no single "everything" response. Upcoming is fetched for the
- * primary list; past + cancelled are fetched alongside and merged into one
- * "history" list (newest-created first) behind the `my-requests.tsx`
- * collapsed-disclosure pattern, so a guest sees active bookings first
- * without a second round trip when they open the disclosure.
+ * there is no single "everything" response. Task 22's `useGuestEventBookings`
+ * (`@/lib/use-guest-event-bookings`) owns the three-parallel-call fetch, the
+ * "past + cancelled merged into one history list" logic, and the
+ * `todayBooking` field the home strip reads — this screen only renders what
+ * the hook hands back (dining-screen.tsx's `useGuestFnbOrders` precedent).
  *
  * Task 21: `selectedEvent`/`selectedBookingId` mirror dining-screen.tsx's
  * `sheetItem`/`detailId` exactly (an object for the item being configured, a
  * bare id for the detail lookup) — `selectedBookingId` looks up the booking
- * from the already-loaded `bookings` lists (dining's `detailOrder` pattern;
- * there's no `GET .../bookings/:id`, only the tab-filtered list). Booking
- * changes tab-switch into "My bookings" and re-fetch both lists (the new
- * booking reduces the event's own spots-left too); cancellation just
- * re-fetches the bookings lists (the detail sheet renders its own snapshot
- * so nothing needs a local patch before that resolves).
+ * from the hook's already-loaded lists (dining's `detailOrder` pattern;
+ * there's no `GET .../bookings/:id`, only the tab-filtered list).
+ * `initialBookingId` (Task 22 — the home strip's "today" tap) seeds both the
+ * tab and the selection the same way `dining-screen.tsx`'s `initialOrderId`
+ * does. A fresh booking applies instantly via `applyLocal` (dining's
+ * `onPlaced` precedent — no forced re-fetch, the poll confirms it); a
+ * cancellation applies locally AND triggers a background `refresh` (dining's
+ * `OrderDetailSheet.onChanged` precedent, since a cancellation can also free
+ * up a spot for other guests visible on the events tab).
  */
-export function EventsScreen() {
+export function EventsScreen({
+  initialBookingId,
+}: {
+  /** "Today's booking" strip intent — opens the bookings tab on this booking's detail sheet. */
+  initialBookingId?: string | null;
+} = {}) {
   const t = useTranslations('events');
   const tc = useTranslations('common');
   const resolveError = useApiError();
   const activeLocale = useLocale();
   const locale: Locale = isLocale(activeLocale) ? activeLocale : 'en';
 
-  const [tab, setTab] = useState<'events' | 'bookings'>('events');
+  const [tab, setTab] = useState<'events' | 'bookings'>(
+    initialBookingId ? 'bookings' : 'events',
+  );
 
   const [events, setEvents] = useState<GuestEvent[] | null>(null);
   const [eventsError, setEventsError] = useState<string | null>(null);
@@ -69,49 +75,33 @@ export function EventsScreen() {
     void loadEvents();
   }, [loadEvents]);
 
-  const [bookings, setBookings] = useState<{
-    upcoming: GuestEventBooking[];
-    history: GuestEventBooking[];
-  } | null>(null);
-  const [bookingsError, setBookingsError] = useState<string | null>(null);
-  const loadBookings = useCallback(async () => {
-    setBookingsError(null);
-    try {
-      const [upcoming, past, cancelled] = await Promise.all([
-        api<GuestEventBookingsResponse>('/guest/events/bookings?tab=upcoming'),
-        api<GuestEventBookingsResponse>('/guest/events/bookings?tab=past'),
-        api<GuestEventBookingsResponse>('/guest/events/bookings?tab=cancelled'),
-      ]);
-      const history = [...past.data, ...cancelled.data].sort((a, b) =>
-        b.createdAt.localeCompare(a.createdAt),
-      );
-      setBookings({ upcoming: upcoming.data, history });
-    } catch (err) {
-      setBookings(null);
-      setBookingsError(resolveError(err));
-    }
-  }, [resolveError]);
-  useEffect(() => {
-    void loadBookings();
-  }, [loadBookings]);
+  // Task 22 — the shared delta-polling bookings hook (replaces Task 20's
+  // ad-hoc 3-parallel-`api()`-calls that lived inline here).
+  const {
+    feed: bookings,
+    error: bookingsErrorRaw,
+    refresh: refreshBookings,
+    applyLocal,
+  } = useGuestEventBookings(true);
+  const bookingsError = bookingsErrorRaw ? resolveError(bookingsErrorRaw) : null;
 
   const [historyOpen, setHistoryOpen] = useState(false);
 
   // Task 21 — see file doc above.
   const [selectedEvent, setSelectedEvent] = useState<GuestEvent | null>(null);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
-    null,
+    initialBookingId ?? null,
   );
   const selectedBooking =
     bookings?.upcoming.find((b) => b.id === selectedBookingId) ??
     bookings?.history.find((b) => b.id === selectedBookingId) ??
     null;
 
-  function onBooked() {
+  function onBooked(booking: GuestEventBooking) {
     setSelectedEvent(null);
     setTab('bookings');
-    void loadEvents();
-    void loadBookings();
+    applyLocal(booking);
+    void loadEvents(); // a fresh booking moves the event's own spots-left
   }
 
   return (
@@ -168,7 +158,7 @@ export function EventsScreen() {
           {bookingsError ? (
             <StateShell icon={Ticket} title={t('bookings.loadError')} body="">
               <button
-                onClick={() => void loadBookings()}
+                onClick={() => void refreshBookings()}
                 className="pressable mt-2 rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-accent-contrast"
               >
                 {tc('retry')}
@@ -245,7 +235,10 @@ export function EventsScreen() {
         booking={selectedBooking}
         locale={locale}
         onClose={() => setSelectedBookingId(null)}
-        onChanged={() => void loadBookings()}
+        onChanged={(booking) => {
+          applyLocal(booking);
+          void refreshBookings();
+        }}
       />
     </Screen>
   );
