@@ -55,10 +55,10 @@ function makeBooking(overrides: Partial<GuestEventBooking> = {}): GuestEventBook
   };
 }
 
-function wrap() {
+function wrap(props: Parameters<typeof EventsScreen>[0] = {}) {
   return render(
     <NextIntlClientProvider locale="en" messages={en} timeZone="Africa/Cairo">
-      <EventsScreen />
+      <EventsScreen {...props} />
     </NextIntlClientProvider>,
   );
 }
@@ -187,6 +187,22 @@ describe('EventsScreen — browse (21.4 AC1)', () => {
     // the sheet itself (party size, payment, submit) is Task 21's own
     // component and gets its full coverage in event-booking-sheet.test.tsx.
     expect(await screen.findByTestId('bottom-sheet')).toBeTruthy();
+  });
+
+  it('Task 23 — initialEventId opens that event\'s own detail sheet once the catalog loads', async () => {
+    stubApi({
+      events: [makeEvent({ id: 'ev-1' }), makeEvent({ id: 'ev-2', title: 'Cooking Class' })],
+    });
+    wrap({ initialEventId: 'ev-2' });
+    const sheet = await screen.findByTestId('bottom-sheet');
+    expect(sheet.textContent).toContain('Cooking Class');
+  });
+
+  it("Task 23 — a dangling initialEventId (not in the catalog) doesn't open a sheet or crash", async () => {
+    stubApi({ events: [makeEvent({ id: 'ev-1' })] });
+    wrap({ initialEventId: 'ev-missing' });
+    expect(await screen.findByText('Sunset Yoga')).toBeTruthy();
+    expect(screen.queryByTestId('bottom-sheet')).toBeNull();
   });
 
   it('a load error shows the retry state, which re-fetches on tap', async () => {

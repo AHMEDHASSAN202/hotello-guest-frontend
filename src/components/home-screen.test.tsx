@@ -156,6 +156,7 @@ describe('Epic 19 — bell + priority banner (19.4 AC1/AC3/AC4)', () => {
     body: 'Maintenance 9-12',
     priority: true,
     infoChip: null,
+    eventChip: null,
     publishedAt: '2026-01-15T09:00:00.000Z',
     readAt: null,
     active: true,

@@ -30,24 +30,31 @@ import { EventCard } from './event-card';
  * `todayBooking` field the home strip reads — this screen only renders what
  * the hook hands back (dining-screen.tsx's `useGuestFnbOrders` precedent).
  *
- * Task 21: `selectedEvent`/`selectedBookingId` mirror dining-screen.tsx's
- * `sheetItem`/`detailId` exactly (an object for the item being configured, a
- * bare id for the detail lookup) — `selectedBookingId` looks up the booking
- * from the hook's already-loaded lists (dining's `detailOrder` pattern;
- * there's no `GET .../bookings/:id`, only the tab-filtered list).
+ * Task 21: `selectedEventId`/`selectedBookingId` both look up their object
+ * from the already-loaded lists (dining's `detailOrder` pattern; there's no
+ * `GET .../bookings/:id`, only the tab-filtered list, and the browse list is
+ * already in memory once the events tab has loaded) — deriving from an id
+ * rather than stashing the picked object means a deep-linked id (Task 23's
+ * `initialEventId`) resolves the same way a card tap does, once the list is
+ * in.
  * `initialBookingId` (Task 22 — the home strip's "today" tap) seeds both the
  * tab and the selection the same way `dining-screen.tsx`'s `initialOrderId`
- * does. A fresh booking applies instantly via `applyLocal` (dining's
- * `onPlaced` precedent — no forced re-fetch, the poll confirms it); a
- * cancellation applies locally AND triggers a background `refresh` (dining's
- * `OrderDetailSheet.onChanged` precedent, since a cancellation can also free
- * up a spot for other guests visible on the events tab).
+ * does. `initialEventId` (Task 23 — an announcement's event chip) does the
+ * same for the events tab. A fresh booking applies instantly via
+ * `applyLocal` (dining's `onPlaced` precedent — no forced re-fetch, the poll
+ * confirms it); a cancellation applies locally AND triggers a background
+ * `refresh` (dining's `OrderDetailSheet.onChanged` precedent, since a
+ * cancellation can also free up a spot for other guests visible on the
+ * events tab).
  */
 export function EventsScreen({
   initialBookingId,
+  initialEventId,
 }: {
   /** "Today's booking" strip intent — opens the bookings tab on this booking's detail sheet. */
   initialBookingId?: string | null;
+  /** An announcement's event chip intent — opens the events tab on this event's detail sheet. */
+  initialEventId?: string | null;
 } = {}) {
   const t = useTranslations('events');
   const tc = useTranslations('common');
@@ -87,8 +94,12 @@ export function EventsScreen({
 
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  // Task 21 — see file doc above.
-  const [selectedEvent, setSelectedEvent] = useState<GuestEvent | null>(null);
+  // Task 21/23 — see file doc above.
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(
+    initialEventId ?? null,
+  );
+  const selectedEvent: GuestEvent | null =
+    events?.find((e) => e.id === selectedEventId) ?? null;
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     initialBookingId ?? null,
   );
@@ -98,7 +109,7 @@ export function EventsScreen({
     null;
 
   function onBooked(booking: GuestEventBooking) {
-    setSelectedEvent(null);
+    setSelectedEventId(null);
     setTab('bookings');
     applyLocal(booking);
     void loadEvents(); // a fresh booking moves the event's own spots-left
@@ -151,7 +162,11 @@ export function EventsScreen({
             <StateShell icon={PartyPopper} title={t('browse.empty')} body="" />
           </div>
         ) : (
-          <EventCard events={events} locale={locale} onPick={setSelectedEvent} />
+          <EventCard
+            events={events}
+            locale={locale}
+            onPick={(event) => setSelectedEventId(event.id)}
+          />
         )
       ) : (
         <div className="mt-6">
@@ -228,7 +243,7 @@ export function EventsScreen({
       <EventBookingSheet
         event={selectedEvent}
         locale={locale}
-        onClose={() => setSelectedEvent(null)}
+        onClose={() => setSelectedEventId(null)}
         onBooked={onBooked}
       />
       <BookingDetailSheet

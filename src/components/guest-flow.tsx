@@ -93,6 +93,9 @@ export function GuestFlow({
   // "Today's booking" strip intent (Epic 21, Task 22): opens Events directly
   // on that booking's detail sheet.
   const [eventsBookingId, setEventsBookingId] = useState<string | null>(null);
+  // An announcement's event chip intent (Epic 21, Task 23): opens Events
+  // directly on that event's detail sheet.
+  const [eventsEventId, setEventsEventId] = useState<string | null>(null);
 
   // ONE announcements poller app-wide (19.4 AC1 — bell, banner and inbox all
   // share this feed; never a poller per surface).
@@ -295,6 +298,12 @@ export function GuestFlow({
                     setSection('info');
                   }
                 }}
+                onOpenEvent={(chip) => {
+                  if (eventsLive) {
+                    setEventsEventId(chip.eventId);
+                    setSection('events');
+                  }
+                }}
               />
             ) : state.section === 'requests' && requestsLive ? (
               <RequestsScreen profile={state.profile} />
@@ -307,7 +316,10 @@ export function GuestFlow({
             ) : state.section === 'info' && infoLive ? (
               <InfoScreen initialEntryId={infoEntryId} />
             ) : state.section === 'events' && eventsLive ? (
-              <EventsScreen initialBookingId={eventsBookingId} />
+              <EventsScreen
+                initialBookingId={eventsBookingId}
+                initialEventId={eventsEventId}
+              />
             ) : (
               <>
                 <HomeScreen
@@ -381,6 +393,7 @@ export function GuestFlow({
                 setDiningOrderId(null);
                 setInfoEntryId(null);
                 setEventsBookingId(null);
+                setEventsEventId(null);
                 setSection(section);
               }}
               requestsLive={requestsLive}

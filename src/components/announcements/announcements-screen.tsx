@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, BookOpen, Megaphone } from 'lucide-react';
+import { ArrowLeft, BookOpen, Megaphone, PartyPopper } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -10,6 +10,7 @@ import type { ApiError } from '@/lib/api';
 import type {
   GuestAnnouncement,
   GuestAnnouncementChip,
+  GuestAnnouncementEventChip,
   GuestProfile,
 } from '@/lib/types';
 import { BottomSheet } from '../bottom-sheet';
@@ -30,17 +31,23 @@ export interface AnnouncementsFeedHandle {
  * treatment, unread styled distinctly, opening an item marks it read, the
  * Hotel Info chip deep-links. Reached from the bell, not the bottom nav —
  * the back arrow returns home.
+ *
+ * Epic 21 Task 23 — the event chip mirrors the info chip's shape and visual
+ * treatment exactly (same pill, same button pattern); it deep-links into
+ * the Events section, opening that event's detail sheet.
  */
 export function AnnouncementsScreen({
   feed,
   profile,
   onBack,
   onOpenInfo,
+  onOpenEvent,
 }: {
   feed: AnnouncementsFeedHandle;
   profile: GuestProfile;
   onBack: () => void;
   onOpenInfo: (chip: GuestAnnouncementChip) => void;
+  onOpenEvent: (chip: GuestAnnouncementEventChip) => void;
 }) {
   const t = useTranslations('announcements');
   const router = useRouter();
@@ -180,6 +187,18 @@ export function AnnouncementsScreen({
                 <BookOpen className="h-4 w-4" strokeWidth={1.75} aria-hidden />
                 <span>
                   {t('infoChip')} · {detail.infoChip.name}
+                </span>
+              </button>
+            ) : null}
+            {detail.eventChip ? (
+              <button
+                type="button"
+                onClick={() => onOpenEvent(detail.eventChip!)}
+                className="pressable mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-full bg-accent-soft px-4 text-sm font-semibold text-accent"
+              >
+                <PartyPopper className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                <span>
+                  {t('eventChip')} · {detail.eventChip.title}
                 </span>
               </button>
             ) : null}

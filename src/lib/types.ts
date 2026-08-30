@@ -267,6 +267,17 @@ export interface GuestAnnouncementChip {
 }
 
 /**
+ * "Details in Events" deep-link chip (Epic 21 backend Task 5) — mirrors
+ * `GuestAnnouncementChip`'s shape. Batch-loaded server-side; silently
+ * dropped (null) for dangling or cancelled event references.
+ */
+export interface GuestAnnouncementEventChip {
+  eventId: string;
+  title: string;
+  startAtLocal: string;
+}
+
+/**
  * GET /guest/announcements — server-localized (stay language, EN fallback).
  * Delta rows with `active: false` are tombstones: the item was retracted or
  * expired and must leave the inbox (19.2 AC2).
@@ -277,6 +288,7 @@ export interface GuestAnnouncement {
   body: string;
   priority: boolean;
   infoChip: GuestAnnouncementChip | null;
+  eventChip: GuestAnnouncementEventChip | null;
   publishedAt: string | null;
   readAt: string | null;
   active: boolean;

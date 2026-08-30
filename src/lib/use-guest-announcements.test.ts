@@ -12,6 +12,7 @@ const make = (o: Partial<GuestAnnouncement> = {}): GuestAnnouncement => ({
   body: 'Maintenance 9-12',
   priority: false,
   infoChip: null,
+  eventChip: null,
   publishedAt: '2026-01-14T09:00:00.000Z',
   readAt: null,
   active: true,

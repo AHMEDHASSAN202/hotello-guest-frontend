@@ -5,6 +5,7 @@
   "priority": "Important",
   "unread": "Nouveau",
   "infoChip": "Détails dans Infos hôtel",
+  "eventChip": "Détails dans Événements",
   "banner": {
     "open": "Lire la suite",
     "dismiss": "Masquer"

@@ -49,6 +49,7 @@ const make = (o: Partial<GuestAnnouncement> = {}): GuestAnnouncement => ({
   body: 'Maintenance from 9 to 12.\n\nSorry for the inconvenience.',
   priority: false,
   infoChip: null,
+  eventChip: null,
   publishedAt: '2026-01-15T09:00:00.000Z',
   readAt: null,
   active: true,
@@ -89,7 +90,7 @@ describe('AnnouncementsScreen (19.4 AC2)', () => {
       unreadCount: 1,
     });
     wrap(
-      <AnnouncementsScreen feed={feed} profile={profile} onBack={vi.fn()} onOpenInfo={vi.fn()} />,
+      <AnnouncementsScreen feed={feed} profile={profile} onBack={vi.fn()} onOpenInfo={vi.fn()} onOpenEvent={vi.fn()} />,
     );
     expect(screen.getByText('Beach bar closes early')).toBeTruthy();
     expect(screen.getByText('Important')).toBeTruthy();
@@ -106,7 +107,7 @@ describe('AnnouncementsScreen (19.4 AC2)', () => {
     });
     const onOpenInfo = vi.fn();
     wrap(
-      <AnnouncementsScreen feed={feed} profile={profile} onBack={vi.fn()} onOpenInfo={onOpenInfo} />,
+      <AnnouncementsScreen feed={feed} profile={profile} onBack={vi.fn()} onOpenInfo={onOpenInfo} onOpenEvent={vi.fn()} />,
     );
     fireEvent.click(screen.getByText('Pool closed tomorrow'));
     expect(feed.markRead).toHaveBeenCalledWith('a1');
@@ -117,14 +118,57 @@ describe('AnnouncementsScreen (19.4 AC2)', () => {
     expect(onOpenInfo).toHaveBeenCalledWith(chip);
   });
 
+  it('opening an item shows the event chip and fires the events deep link', () => {
+    const chip = { eventId: 'event-1', title: 'Sunset Yoga', startAtLocal: '2099-01-01 18:00' };
+    const feed = makeFeed({
+      announcements: [make({ id: 'a1', eventChip: chip })],
+      unreadCount: 1,
+    });
+    const onOpenEvent = vi.fn();
+    wrap(
+      <AnnouncementsScreen
+        feed={feed}
+        profile={profile}
+        onBack={vi.fn()}
+        onOpenInfo={vi.fn()}
+        onOpenEvent={onOpenEvent}
+      />,
+    );
+    fireEvent.click(screen.getByText('Pool closed tomorrow'));
+    expect(screen.getByTestId('bottom-sheet')).toBeTruthy();
+    // The event chip carries the event title and fires the deep link.
+    fireEvent.click(screen.getByText(/Sunset Yoga/));
+    expect(onOpenEvent).toHaveBeenCalledWith(chip);
+  });
+
+  it('does not render either chip when both are null (manually-composed announcement)', () => {
+    const feed = makeFeed({
+      announcements: [make({ id: 'a1' })],
+      unreadCount: 1,
+    });
+    wrap(
+      <AnnouncementsScreen
+        feed={feed}
+        profile={profile}
+        onBack={vi.fn()}
+        onOpenInfo={vi.fn()}
+        onOpenEvent={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByText('Pool closed tomorrow'));
+    expect(screen.getByTestId('bottom-sheet')).toBeTruthy();
+    expect(screen.queryByText(/Details in Hotel Info/)).toBeNull();
+    expect(screen.queryByText(/Details in Events/)).toBeNull();
+  });
+
   it('warm empty state in English and Russian', () => {
     wrap(
-      <AnnouncementsScreen feed={makeFeed()} profile={profile} onBack={vi.fn()} onOpenInfo={vi.fn()} />,
+      <AnnouncementsScreen feed={makeFeed()} profile={profile} onBack={vi.fn()} onOpenInfo={vi.fn()} onOpenEvent={vi.fn()} />,
     );
     expect(screen.getByText('Nothing new right now')).toBeTruthy();
     cleanup();
     wrap(
-      <AnnouncementsScreen feed={makeFeed()} profile={profile} onBack={vi.fn()} onOpenInfo={vi.fn()} />,
+      <AnnouncementsScreen feed={makeFeed()} profile={profile} onBack={vi.fn()} onOpenInfo={vi.fn()} onOpenEvent={vi.fn()} />,
       'ru',
       ru as unknown as typeof en,
     );
@@ -136,7 +180,7 @@ describe('AnnouncementsScreen (19.4 AC2)', () => {
       error: new ApiError(403, 'nope', { code: 'MODULE_NOT_ENABLED' }),
     });
     wrap(
-      <AnnouncementsScreen feed={feed} profile={profile} onBack={vi.fn()} onOpenInfo={vi.fn()} />,
+      <AnnouncementsScreen feed={feed} profile={profile} onBack={vi.fn()} onOpenInfo={vi.fn()} onOpenEvent={vi.fn()} />,
     );
     expect(screen.getByText('Announcements are taking a break')).toBeTruthy();
     expect(routerRefresh).toHaveBeenCalledTimes(1);
@@ -145,7 +189,7 @@ describe('AnnouncementsScreen (19.4 AC2)', () => {
   it('back button returns home', () => {
     const onBack = vi.fn();
     wrap(
-      <AnnouncementsScreen feed={makeFeed()} profile={profile} onBack={onBack} onOpenInfo={vi.fn()} />,
+      <AnnouncementsScreen feed={makeFeed()} profile={profile} onBack={onBack} onOpenInfo={vi.fn()} onOpenEvent={vi.fn()} />,
     );
     fireEvent.click(screen.getByTestId('announcements-back'));
     expect(onBack).toHaveBeenCalled();
@@ -158,6 +202,7 @@ describe('AnnouncementsScreen (19.4 AC2)', () => {
         profile={profile}
         onBack={vi.fn()}
         onOpenInfo={vi.fn()}
+        onOpenEvent={vi.fn()}
       />,
     );
     const text = container.textContent?.toLowerCase() ?? '';
