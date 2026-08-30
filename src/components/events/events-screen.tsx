@@ -227,7 +227,16 @@ export function EventsScreen({
         )
       ) : (
         <div className="mt-6">
-          {bookingsError ? (
+          {/* FINAL-REVIEW FIX (whole-branch review) — the error shell is
+              reachable ONLY while there is nothing to show. A failed FULL
+              refresh (e.g. the background one an optimistic cancel triggers)
+              used to replace an already-populated, perfectly valid bookings
+              list with the "couldn't load" shell on a transient network blip.
+              With a feed in hand we keep rendering it; the next poll tick
+              self-heals the staleness and clears the error. (Dining's
+              precedent: `dining-screen.tsx` also never lets `ordersError`
+              displace a loaded orders list.) */}
+          {bookingsError && bookings === null ? (
             <StateShell icon={Ticket} title={t('bookings.loadError')} body="">
               <button
                 onClick={() => void refreshBookings()}
@@ -254,14 +263,20 @@ export function EventsScreen({
                   {t('bookings.noUpcoming')}
                 </p>
               ) : (
-                bookings.upcoming.map((booking) => (
-                  <BookingRow
-                    key={booking.id}
-                    booking={booking}
-                    locale={locale}
-                    onOpen={() => setSelectedBookingId(booking.id)}
-                  />
-                ))
+                // `BookingRow` emits an `<li>` (order-row.tsx's shape), so it
+                // needs a real list parent — dining-screen.tsx's `<ul>` around
+                // `OrderRow`. The `flex flex-col gap-3` moves onto the list so
+                // the rendered spacing is byte-identical to the old flat map.
+                <ul className="flex flex-col gap-3">
+                  {bookings.upcoming.map((booking) => (
+                    <BookingRow
+                      key={booking.id}
+                      booking={booking}
+                      locale={locale}
+                      onOpen={() => setSelectedBookingId(booking.id)}
+                    />
+                  ))}
+                </ul>
               )}
 
               {bookings.history.length > 0 ? (
@@ -278,7 +293,7 @@ export function EventsScreen({
                     />
                   </button>
                   {historyOpen ? (
-                    <div className="animate-fade-in mt-2 flex flex-col gap-3">
+                    <ul className="animate-fade-in mt-2 flex flex-col gap-3">
                       {bookings.history.map((booking) => (
                         <BookingRow
                           key={booking.id}
@@ -288,7 +303,7 @@ export function EventsScreen({
                           muted
                         />
                       ))}
-                    </div>
+                    </ul>
                   ) : null}
                 </div>
               ) : null}

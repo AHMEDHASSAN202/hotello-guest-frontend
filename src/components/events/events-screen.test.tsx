@@ -319,13 +319,73 @@ describe('EventsScreen — bookings (21.5)', () => {
     expect(row.textContent).toContain('✓ Included');
   });
 
-  it('a bookings load error shows the retry state', async () => {
+  it('a bookings load error with NOTHING loaded shows the retry state', async () => {
     stubApi({ bookingsError: new ApiError(500, 'boom') });
     wrap();
     fireEvent.click(await screen.findByRole('button', { name: 'My bookings' }));
     expect(
       await screen.findByText("We couldn't load your bookings."),
     ).toBeTruthy();
+    expect(screen.getByText('Try again')).toBeTruthy();
+  });
+
+  it('final-review fix — a failed refresh never replaces an already-loaded bookings list with the error shell', async () => {
+    // The exact reported sequence: a successful load, an optimistic cancel,
+    // and the background refresh that cancel triggers hitting a network blip.
+    // The guest's real, valid bookings must stay on screen.
+    const booking = makeBooking();
+    const cancelledBooking = makeBooking({
+      status: 'cancelled',
+      cancelledBy: 'guest',
+      cancelledAt: '2026-08-20T11:00:00.000Z',
+    });
+    let bookingsFail = false;
+    apiMock.api.mockImplementation(async (path: string) => {
+      if (path === '/guest/events') return { data: [makeEvent()] };
+      if (path === `/guest/events/bookings/${booking.id}/cancel`) {
+        return cancelledBooking;
+      }
+      if (path.startsWith('/guest/events/bookings')) {
+        if (bookingsFail) throw new ApiError(500, 'boom');
+        const tab = new URL(path, 'http://x').searchParams.get('tab');
+        return { data: tab === 'upcoming' ? [booking] : [], todayBooking: null };
+      }
+      throw new Error(`unmocked ${path}`);
+    });
+
+    wrap();
+    fireEvent.click(await screen.findByRole('button', { name: 'My bookings' }));
+    fireEvent.click(await screen.findByTestId('event-booking-row-bk-1'));
+    fireEvent.click(await screen.findByTestId('cancel-booking'));
+    bookingsFail = true; // the refresh the cancel fires off will now blow up
+    fireEvent.click(screen.getByTestId('confirm-cancel-booking'));
+
+    // The optimistic cancel lands: the booking moves into history...
+    await waitFor(() => expect(screen.getByText('1 earlier booking')).toBeTruthy());
+    // ...and the failed refresh underneath does NOT wipe what's on screen.
+    expect(screen.queryByText("We couldn't load your bookings.")).toBeNull();
+    expect(screen.getByText('No upcoming bookings.')).toBeTruthy();
+  });
+
+  it('booking rows are list items inside a <ul> — no orphaned <li> for screen readers', async () => {
+    stubApi({
+      upcoming: [makeBooking()],
+      cancelled: [makeBooking({ id: 'bk-cancelled', status: 'cancelled' })],
+    });
+    wrap();
+    fireEvent.click(await screen.findByRole('button', { name: 'My bookings' }));
+
+    const row = await screen.findByTestId('event-booking-row-bk-1');
+    expect(row.closest('li')?.parentElement?.tagName).toBe('UL');
+
+    fireEvent.click(screen.getByText('1 earlier booking'));
+    const historyRow = screen.getByTestId('event-booking-row-bk-cancelled');
+    expect(historyRow.closest('li')?.parentElement?.tagName).toBe('UL');
+
+    // Every rendered list item has a real list parent.
+    for (const li of screen.getAllByRole('listitem')) {
+      expect(li.parentElement?.tagName).toBe('UL');
+    }
   });
 
   it('no bookings at all shows the empty state with a way back to Events', async () => {
