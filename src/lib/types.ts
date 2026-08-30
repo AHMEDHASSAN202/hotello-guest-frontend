@@ -281,3 +281,66 @@ export interface GuestAnnouncement {
   readAt: string | null;
   active: boolean;
 }
+
+/* ---- Events (Epic 21) ---- */
+
+export type EventBookingStatus = 'booked' | 'cancelled';
+
+export const OPEN_EVENT_BOOKING_STATUSES: EventBookingStatus[] = ['booked'];
+
+export type EventBookingCancelledBy = 'guest' | 'staff' | 'system';
+
+/** `GET /guest/events` browse card — mirrors `GuestEventCardView` (Tasks 4/7). */
+export interface GuestEvent {
+  id: string;
+  title: string;
+  photoThumbUrl: string | null;
+  startAtLocal: string;
+  endAtLocal: string | null;
+  locationText: string;
+  capacity: number | null;
+  spotsLeft: number | null;
+  soldOut: boolean;
+  price: { included: boolean; unitPrice: number };
+  currency: string;
+}
+
+/** `GET /guest/events/:id` — the card fields plus the booking-sheet fields. */
+export interface GuestEventDetail extends GuestEvent {
+  status: string;
+  description: string;
+  photoDetailUrl: string | null;
+  maxPartySize: number;
+  paymentMethods: FnbPaymentMethod[];
+}
+
+/** `GET /guest/events` response envelope. */
+export interface GuestEventsCatalog {
+  data: GuestEvent[];
+}
+
+/** A guest's own booking — mirrors `GuestEventBookingView`. */
+export interface GuestEventBooking {
+  id: string;
+  eventId: string;
+  title: string;
+  startAtLocal: string;
+  endAtLocal: string | null;
+  locationText: string;
+  partySize: number;
+  unitPrice: number;
+  included: boolean;
+  totalAmount: number;
+  currency: string;
+  paymentMethod: FnbPaymentMethod | null;
+  status: EventBookingStatus;
+  cancelledBy: EventBookingCancelledBy | null;
+  cancelledAt: string | null;
+  createdAt: string;
+}
+
+/** `GET /guest/events/bookings` response envelope — mirrors `GuestMyBookingsView`. */
+export interface GuestEventBookingsResponse {
+  data: GuestEventBooking[];
+  todayBooking: GuestEventBooking | null;
+}

@@ -1,4 +1,5 @@
 import {
+  CalendarDays,
   CarFront,
   Compass,
   ConciergeBell,
@@ -12,7 +13,7 @@ import {
  * is unconditional; otherwise the hotel's plan `enabledModules` gates it.
  */
 export interface GuestTile {
-  key: 'requests' | 'dining' | 'transport' | 'info';
+  key: 'requests' | 'dining' | 'transport' | 'info' | 'events';
   icon: LucideIcon;
   moduleKey: string | null;
   live: boolean;
@@ -25,6 +26,8 @@ export const GUEST_TILES: GuestTile[] = [
   { key: 'transport', icon: CarFront, moduleKey: 'transportation', live: false },
   // Epic 17 (17.2 AC1) — live, with the AC4 tri-state applied in visibleTiles.
   { key: 'info', icon: Compass, moduleKey: 'hotel_info', live: true },
+  // Epic 21 (21.4) — plain module gating, no tri-state like Hotel Info.
+  { key: 'events', icon: CalendarDays, moduleKey: 'events', live: true },
 ];
 
 /**

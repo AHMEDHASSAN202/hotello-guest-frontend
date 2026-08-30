@@ -45,6 +45,12 @@ const AnnouncementsScreen = dynamic(
     ),
   { ssr: false },
 );
+// Events rides a dynamic chunk too — the /[slug] JS budget stays untouched
+// for guests who never open it (Epic 21, bundle-budget law).
+const EventsScreen = dynamic(
+  () => import('./events/events-screen').then((m) => m.EventsScreen),
+  { ssr: false },
+);
 
 type GuestState =
   | { phase: 'probing' }
@@ -258,6 +264,7 @@ export function GuestFlow({
       // Epic 17 AC4 tri-state: live only when enabled AND content exists.
       const infoLive =
         isModuleEnabled('hotel_info') && hotel.hotelInfoHasContent;
+      const eventsLive = isModuleEnabled('events');
       const navLive = requestsLive || diningLive || infoLive;
       const housekeepingLive = isModuleEnabled('housekeeping');
       return (
@@ -286,6 +293,8 @@ export function GuestFlow({
               />
             ) : state.section === 'info' && infoLive ? (
               <InfoScreen initialEntryId={infoEntryId} />
+            ) : state.section === 'events' && eventsLive ? (
+              <EventsScreen />
             ) : (
               <>
                 <HomeScreen
@@ -328,6 +337,8 @@ export function GuestFlow({
                       setSection('dining');
                     } else if (key === 'info' && infoLive) {
                       setSection('info');
+                    } else if (key === 'events' && eventsLive) {
+                      setSection('events');
                     }
                   }}
                 />

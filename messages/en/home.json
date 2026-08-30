@@ -20,7 +20,8 @@
     "requests": "Requests",
     "dining": "Dining",
     "transport": "Transport",
-    "info": "Hotel info"
+    "info": "Hotel info",
+    "events": "Events"
   },
   "diningCard": {
     "track": "Track order"

@@ -4,7 +4,13 @@ import { Compass, ConciergeBell, House, UtensilsCrossed } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 /** 'announcements' is reached from the header bell, never a nav slot (19.4). */
-export type GuestSection = 'home' | 'requests' | 'dining' | 'info' | 'announcements';
+export type GuestSection =
+  | 'home'
+  | 'requests'
+  | 'dining'
+  | 'info'
+  | 'announcements'
+  | 'events';
 
 /**
  * The bottom nav (14.5 AC3, activated by Epic 15) — exists only once a
