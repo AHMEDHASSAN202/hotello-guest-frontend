@@ -269,7 +269,13 @@ export interface GuestAnnouncementChip {
 /**
  * "Details in Events" deep-link chip (Epic 21 backend Task 5) — mirrors
  * `GuestAnnouncementChip`'s shape. Batch-loaded server-side; silently
- * dropped (null) for dangling or cancelled event references.
+ * dropped (null) only for a `cancelled` event. It is NOT nulled once the
+ * event's start time has passed — `resolveEventChips` has no time filter,
+ * unlike `GET /guest/events` (the browse catalog), which only lists
+ * upcoming events. So a non-null chip can still point at an event that has
+ * already started; the frontend (`events-screen.tsx`) handles that by
+ * falling back to `GET /guest/events/:id` when the browse catalog doesn't
+ * contain the id, since that endpoint still serves past events.
  */
 export interface GuestAnnouncementEventChip {
   eventId: string;

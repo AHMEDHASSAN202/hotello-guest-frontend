@@ -3,7 +3,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import en from '../../../messages/en';
 import { ApiError } from '@/lib/api';
-import type { GuestEvent, GuestEventBooking } from '@/lib/types';
+import type { GuestEvent, GuestEventBooking, GuestEventDetail } from '@/lib/types';
 
 /** Epic 21, Stories 21.4/21.5 — browse + bookings (Task 19's stub replaced). */
 
@@ -29,6 +29,18 @@ function makeEvent(overrides: Partial<GuestEvent> = {}): GuestEvent {
     soldOut: false,
     price: { included: false, unitPrice: 300 },
     currency: 'EGP',
+    ...overrides,
+  };
+}
+
+function makeDetail(overrides: Partial<GuestEventDetail> = {}): GuestEventDetail {
+  return {
+    ...makeEvent(),
+    status: 'published',
+    description: 'A relaxing sunrise yoga session on the beach.',
+    photoDetailUrl: null,
+    maxPartySize: 6,
+    paymentMethods: ['cash', 'room_charge'],
     ...overrides,
   };
 }
@@ -63,7 +75,13 @@ function wrap(props: Parameters<typeof EventsScreen>[0] = {}) {
   );
 }
 
-/** Routes both the events browse call and the three tab-filtered bookings calls. */
+/**
+ * Routes the events browse call, the three tab-filtered bookings calls, and
+ * (Task 23) `GET /guest/events/:id` — the direct-fetch fallback for a
+ * deep-linked event id the browse catalog doesn't contain (e.g. it already
+ * started). `byId` entries not present 404, matching a genuinely dangling
+ * or cross-hotel id.
+ */
 function stubApi({
   events = [makeEvent()],
   upcoming = [] as GuestEventBooking[],
@@ -71,6 +89,7 @@ function stubApi({
   cancelled = [] as GuestEventBooking[],
   eventsError = null as ApiError | null,
   bookingsError = null as ApiError | null,
+  byId = {} as Record<string, GuestEventDetail>,
 }: {
   events?: GuestEvent[];
   upcoming?: GuestEventBooking[];
@@ -78,6 +97,7 @@ function stubApi({
   cancelled?: GuestEventBooking[];
   eventsError?: ApiError | null;
   bookingsError?: ApiError | null;
+  byId?: Record<string, GuestEventDetail>;
 } = {}) {
   apiMock.api.mockImplementation(async (path: string) => {
     if (path === '/guest/events') {
@@ -89,6 +109,12 @@ function stubApi({
       const tab = new URL(path, 'http://x').searchParams.get('tab');
       const data = tab === 'past' ? past : tab === 'cancelled' ? cancelled : upcoming;
       return { data, todayBooking: null };
+    }
+    const idMatch = /^\/guest\/events\/([^/]+)$/.exec(path);
+    if (idMatch) {
+      const detail = byId[idMatch[1]];
+      if (!detail) throw new ApiError(404, 'not found', { code: 'EVENT_NOT_FOUND' });
+      return detail;
     }
     throw new Error(`unmocked ${path}`);
   });
@@ -198,11 +224,32 @@ describe('EventsScreen — browse (21.4 AC1)', () => {
     expect(sheet.textContent).toContain('Cooking Class');
   });
 
-  it("Task 23 — a dangling initialEventId (not in the catalog) doesn't open a sheet or crash", async () => {
-    stubApi({ events: [makeEvent({ id: 'ev-1' })] });
+  it('Task 23 — an event that already started (not in the browse catalog) still opens via the direct-fetch fallback', async () => {
+    // `GET /guest/events` only returns upcoming events, so an announcement's
+    // eventChip pointing at one that already started is legitimately absent
+    // from `events` here — the screen must fall back to `GET
+    // /guest/events/:id`, which the backend still serves for past events.
+    stubApi({
+      events: [makeEvent({ id: 'ev-1' })], // catalog: no ev-started
+      byId: {
+        'ev-started': makeDetail({
+          id: 'ev-started',
+          title: 'Morning Yoga (started)',
+          startAtLocal: '2000-01-01 08:00',
+        }),
+      },
+    });
+    wrap({ initialEventId: 'ev-started' });
+    const sheet = await screen.findByTestId('bottom-sheet');
+    expect(sheet.textContent).toContain('Morning Yoga (started)');
+  });
+
+  it('Task 23 — a genuinely dangling initialEventId (404s on direct fetch too) shows an unavailable notice, not a dead tap', async () => {
+    stubApi({ events: [makeEvent({ id: 'ev-1' })] }); // no byId entry → 404
     wrap({ initialEventId: 'ev-missing' });
-    expect(await screen.findByText('Sunset Yoga')).toBeTruthy();
-    expect(screen.queryByTestId('bottom-sheet')).toBeNull();
+    expect(await screen.findByText('Sunset Yoga')).toBeTruthy(); // catalog still renders
+    const sheet = await screen.findByTestId('bottom-sheet');
+    expect(sheet.textContent).toContain("We couldn't load this event.");
   });
 
   it('a load error shows the retry state, which re-fetches on tap', async () => {

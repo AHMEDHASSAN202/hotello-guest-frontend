@@ -7,9 +7,15 @@ import type { Locale } from '@/i18n/config';
 import { isLocale } from '@/i18n/config';
 import { api } from '@/lib/api';
 import { useApiError } from '@/lib/errors';
-import type { GuestEvent, GuestEventBooking, GuestEventsCatalog } from '@/lib/types';
+import type {
+  GuestEvent,
+  GuestEventBooking,
+  GuestEventDetail,
+  GuestEventsCatalog,
+} from '@/lib/types';
 import { useGuestEventBookings } from '@/lib/use-guest-event-bookings';
 import { Button, Screen, Skeleton } from '../ui';
+import { BottomSheet } from '../bottom-sheet';
 import { StateShell } from '../state-screens';
 import { BookingDetailSheet } from './booking-detail-sheet';
 import { BookingRow } from './booking-row';
@@ -40,12 +46,22 @@ import { EventCard } from './event-card';
  * `initialBookingId` (Task 22 — the home strip's "today" tap) seeds both the
  * tab and the selection the same way `dining-screen.tsx`'s `initialOrderId`
  * does. `initialEventId` (Task 23 — an announcement's event chip) does the
- * same for the events tab. A fresh booking applies instantly via
- * `applyLocal` (dining's `onPlaced` precedent — no forced re-fetch, the poll
- * confirms it); a cancellation applies locally AND triggers a background
- * `refresh` (dining's `OrderDetailSheet.onChanged` precedent, since a
- * cancellation can also free up a spot for other guests visible on the
- * events tab).
+ * same for the events tab — BUT `GET /guest/events` (the loaded catalog)
+ * only returns `published` events that haven't started yet, while an
+ * announcement's `eventChip` is only nulled server-side for `cancelled`
+ * events, not for ones that have already started. So a chip can legitimately
+ * point at an id the catalog will never contain. When the catalog has
+ * settled (loaded or errored) and the id still isn't in it, `events-screen`
+ * falls back to `GET /guest/events/:id` directly — the same endpoint
+ * `EventBookingSheet` itself already trusts over the list snapshot, and one
+ * that explicitly still serves past events — so the sheet still opens with
+ * that event's real detail. If even that direct fetch fails (id genuinely
+ * gone), a small sheet says so instead of the tap doing nothing.
+ * A fresh booking applies instantly via `applyLocal` (dining's `onPlaced`
+ * precedent — no forced re-fetch, the poll confirms it); a cancellation
+ * applies locally AND triggers a background `refresh` (dining's
+ * `OrderDetailSheet.onChanged` precedent, since a cancellation can also free
+ * up a spot for other guests visible on the events tab).
  */
 export function EventsScreen({
   initialBookingId,
@@ -94,12 +110,53 @@ export function EventsScreen({
 
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  // Task 21/23 — see file doc above.
+  // Task 21/23 — see file doc above. The catalog is the primary source; a
+  // direct-by-id fetch is the fallback for an id the catalog doesn't (and,
+  // for an already-started event, never will) contain.
   const [selectedEventId, setSelectedEventId] = useState<string | null>(
     initialEventId ?? null,
   );
+  const [fallbackEvent, setFallbackEvent] = useState<GuestEventDetail | null>(
+    null,
+  );
+  const [fallbackEventError, setFallbackEventError] = useState(false);
+  const catalogSettled = events !== null || eventsError !== null;
+
+  // Reset the fallback whenever the selection changes to a different id.
+  useEffect(() => {
+    setFallbackEvent(null);
+    setFallbackEventError(false);
+  }, [selectedEventId]);
+
+  useEffect(() => {
+    if (!selectedEventId) return;
+    if (!catalogSettled) return; // give the primary catalog lookup a chance first
+    if (events?.some((e) => e.id === selectedEventId)) return; // resolved via the catalog
+    if (fallbackEvent || fallbackEventError) return; // already resolved (or failed) for this id
+    let cancelled = false;
+    void api<GuestEventDetail>(`/guest/events/${selectedEventId}`)
+      .then((detail) => {
+        if (!cancelled) setFallbackEvent(detail);
+      })
+      .catch(() => {
+        if (!cancelled) setFallbackEventError(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedEventId, catalogSettled, events, fallbackEvent, fallbackEventError]);
+
   const selectedEvent: GuestEvent | null =
-    events?.find((e) => e.id === selectedEventId) ?? null;
+    events?.find((e) => e.id === selectedEventId) ??
+    (fallbackEvent?.id === selectedEventId ? fallbackEvent : null);
+  // The chip's id resolved to neither the catalog nor the direct fetch —
+  // a genuinely dead reference. Say so instead of a silent dead tap.
+  const selectedEventUnavailable =
+    selectedEventId !== null &&
+    catalogSettled &&
+    !selectedEvent &&
+    fallbackEventError;
+
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     initialBookingId ?? null,
   );
@@ -246,6 +303,14 @@ export function EventsScreen({
         onClose={() => setSelectedEventId(null)}
         onBooked={onBooked}
       />
+      <BottomSheet
+        open={selectedEventUnavailable}
+        onClose={() => setSelectedEventId(null)}
+      >
+        <p role="alert" className="py-6 text-center text-sm text-danger">
+          {t('sheet.loadError')}
+        </p>
+      </BottomSheet>
       <BookingDetailSheet
         booking={selectedBooking}
         locale={locale}
