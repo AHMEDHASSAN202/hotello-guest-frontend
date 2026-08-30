@@ -1,0 +1,29 @@
+{
+  "title": "Eventos",
+  "tabs": {
+    "events": "Eventos",
+    "bookings": "Mis reservas"
+  },
+  "browse": {
+    "loadError": "No pudimos cargar los eventos.",
+    "empty": "No hay eventos por ahora — vuelve pronto.",
+    "included": "✓ Incluido",
+    "free": "Gratis",
+    "spotsLeft": "{count, plural, one {Queda # plaza} other {Quedan # plazas}}",
+    "soldOut": "Completo",
+    "ended": "Este evento ha terminado"
+  },
+  "bookings": {
+    "loadError": "No pudimos cargar tus reservas.",
+    "empty": "Aún no hay reservas — reserva tu plaza desde Eventos.",
+    "browseCta": "Ver eventos",
+    "noUpcoming": "No tienes reservas próximas.",
+    "history": "{count, plural, one {# reserva anterior} other {# reservas anteriores}}",
+    "included": "✓ Incluido",
+    "roomCharge": "Cargo a la habitación"
+  },
+  "status": {
+    "booked": "Reservado",
+    "cancelled": "Cancelado"
+  }
+}

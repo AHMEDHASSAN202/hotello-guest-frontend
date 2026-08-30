@@ -1,0 +1,29 @@
+{
+  "title": "Veranstaltungen",
+  "tabs": {
+    "events": "Veranstaltungen",
+    "bookings": "Meine Buchungen"
+  },
+  "browse": {
+    "loadError": "Die Veranstaltungen konnten nicht geladen werden.",
+    "empty": "Im Moment keine Veranstaltungen — schauen Sie bald wieder vorbei.",
+    "included": "✓ Inbegriffen",
+    "free": "Kostenlos",
+    "spotsLeft": "{count, plural, one {Noch # Platz frei} other {Noch # Plätze frei}}",
+    "soldOut": "Ausgebucht",
+    "ended": "Diese Veranstaltung ist bereits vorbei"
+  },
+  "bookings": {
+    "loadError": "Ihre Buchungen konnten nicht geladen werden.",
+    "empty": "Noch keine Buchungen — reservieren Sie einen Platz unter Veranstaltungen.",
+    "browseCta": "Veranstaltungen ansehen",
+    "noUpcoming": "Keine bevorstehenden Buchungen.",
+    "history": "{count, plural, one {# frühere Buchung} other {# frühere Buchungen}}",
+    "included": "✓ Inbegriffen",
+    "roomCharge": "Zimmerrechnung"
+  },
+  "status": {
+    "booked": "Gebucht",
+    "cancelled": "Storniert"
+  }
+}

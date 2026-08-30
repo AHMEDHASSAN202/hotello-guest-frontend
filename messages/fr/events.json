@@ -1,0 +1,29 @@
+{
+  "title": "Événements",
+  "tabs": {
+    "events": "Événements",
+    "bookings": "Mes réservations"
+  },
+  "browse": {
+    "loadError": "Impossible de charger les événements.",
+    "empty": "Aucun événement pour le moment — revenez bientôt.",
+    "included": "✓ Inclus",
+    "free": "Gratuit",
+    "spotsLeft": "{count, plural, one {# place restante} other {# places restantes}}",
+    "soldOut": "Complet",
+    "ended": "Cet événement est terminé"
+  },
+  "bookings": {
+    "loadError": "Impossible de charger vos réservations.",
+    "empty": "Aucune réservation pour l'instant — réservez une place dans Événements.",
+    "browseCta": "Parcourir les événements",
+    "noUpcoming": "Aucune réservation à venir.",
+    "history": "{count, plural, one {# réservation passée} other {# réservations passées}}",
+    "included": "✓ Inclus",
+    "roomCharge": "Note de chambre"
+  },
+  "status": {
+    "booked": "Réservé",
+    "cancelled": "Annulé"
+  }
+}

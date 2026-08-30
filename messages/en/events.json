@@ -1,0 +1,29 @@
+{
+  "title": "Events",
+  "tabs": {
+    "events": "Events",
+    "bookings": "My bookings"
+  },
+  "browse": {
+    "loadError": "We couldn't load the events.",
+    "empty": "No events right now — check back soon.",
+    "included": "✓ Included",
+    "free": "Free",
+    "spotsLeft": "{count, plural, one {# spot left} other {# spots left}}",
+    "soldOut": "Sold out",
+    "ended": "This event has ended"
+  },
+  "bookings": {
+    "loadError": "We couldn't load your bookings.",
+    "empty": "No bookings yet — reserve a spot from Events.",
+    "browseCta": "Browse events",
+    "noUpcoming": "No upcoming bookings.",
+    "history": "{count, plural, one {# earlier booking} other {# earlier bookings}}",
+    "included": "✓ Included",
+    "roomCharge": "Room bill"
+  },
+  "status": {
+    "booked": "Booked",
+    "cancelled": "Cancelled"
+  }
+}
