@@ -145,6 +145,17 @@ export function EventBookingSheet({
   const total = detail.price.unitPrice * partySize;
   const singleMethod = detail.paymentMethods.length === 1;
   const start = parseLocalStamp(detail.startAtLocal);
+  // FINAL-REVIEW CRITICAL FIX (whole-branch review) — this sheet used to
+  // render the stepper/payment/submit off `spotsLeft`/`maxPartySize` alone,
+  // never checking `detail.status` or the start time. The backend's book()
+  // only rejects on status !== 'published' (no time check), the completion
+  // scheduler doesn't flip published → completed until well after the event
+  // starts, and auto-generated event-publish announcements never expire —
+  // so a deep-linked past/non-published event stayed fully bookable for the
+  // guest's whole stay. `EventCard` and `BookingDetailSheet` already guard
+  // this exact condition elsewhere in this branch; this sheet was the one
+  // surface missing it.
+  const ended = detail.status !== 'published' || start.getTime() <= Date.now();
 
   async function book() {
     setPlacing(true);
@@ -208,7 +219,15 @@ export function EventBookingSheet({
         </p>
       ) : null}
 
-      {noSpotsAvailable ? (
+      {ended ? (
+        <p
+          role="alert"
+          data-testid="event-ended-notice"
+          className="mt-5 rounded-xl bg-ink/[0.05] p-3 text-center text-sm font-medium text-ink-soft"
+        >
+          {t('browse.ended')}
+        </p>
+      ) : noSpotsAvailable ? (
         <p
           role="alert"
           data-testid="sold-out-notice"

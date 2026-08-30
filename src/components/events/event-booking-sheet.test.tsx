@@ -272,4 +272,56 @@ describe('EventBookingSheet (21.4)', () => {
     wrap(null);
     expect(screen.queryByTestId('bottom-sheet')).toBeNull();
   });
+
+  // FINAL-REVIEW CRITICAL FIX — the sheet used to render the bookable UI off
+  // spotsLeft/maxPartySize alone, never checking status or start time, so a
+  // deep-linked past/non-published event stayed fully bookable. Mirrors
+  // events-screen.test.tsx's "already started" pattern.
+  describe('ended event guard (final-review CRITICAL fix)', () => {
+    it('a non-published event (e.g. cancelled) shows the ended state, no bookable submit', async () => {
+      apiMock.api.mockImplementation(async (path: string) => {
+        if (path === '/guest/events/ev-1') return makeDetail({ status: 'cancelled' });
+        throw new Error(`unmocked ${path}`);
+      });
+      wrap();
+      expect(await screen.findByTestId('event-ended-notice')).toHaveProperty(
+        'textContent',
+        'This event has ended',
+      );
+      expect(screen.queryByTestId('party-size')).toBeNull();
+      expect(screen.queryByTestId('book-event')).toBeNull();
+      expect(screen.queryByTestId('pay-cash')).toBeNull();
+    });
+
+    it('an event whose startAtLocal has already passed shows the ended state, no bookable submit', async () => {
+      apiMock.api.mockImplementation(async (path: string) => {
+        if (path === '/guest/events/ev-1')
+          return makeDetail({ startAtLocal: '2000-01-01 08:00' });
+        throw new Error(`unmocked ${path}`);
+      });
+      wrap();
+      expect(await screen.findByTestId('event-ended-notice')).toHaveProperty(
+        'textContent',
+        'This event has ended',
+      );
+      expect(screen.queryByTestId('party-size')).toBeNull();
+      expect(screen.queryByTestId('book-event')).toBeNull();
+    });
+
+    it('does not attempt to book — the sheet never sends a request past the ended guard', async () => {
+      const bookSpy = vi.fn();
+      apiMock.api.mockImplementation(async (path: string, init?: RequestInit) => {
+        if (path === '/guest/events/ev-1')
+          return makeDetail({ startAtLocal: '2000-01-01 08:00' });
+        if (path === '/guest/events/ev-1/book' && init?.method === 'POST') {
+          bookSpy();
+          return makeBooking();
+        }
+        throw new Error(`unmocked ${path}`);
+      });
+      wrap();
+      await screen.findByTestId('event-ended-notice');
+      expect(bookSpy).not.toHaveBeenCalled();
+    });
+  });
 });
