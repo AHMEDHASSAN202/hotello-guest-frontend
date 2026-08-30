@@ -1,9 +1,20 @@
-import { describe, expect, it } from 'vitest';
-import type { GuestEventBooking } from './types';
+// @vitest-environment jsdom
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { GuestEventBooking, GuestEventBookingsResponse } from './types';
+
+const apiMock = vi.hoisted(() => ({ api: vi.fn() }));
+
+vi.mock('@/lib/api', async (importOriginal) => {
+  const mod = await importOriginal<typeof import('@/lib/api')>();
+  return { ...mod, api: apiMock.api };
+});
+
 import {
   applyBookingLocal,
   mergeBookings,
   sortBookings,
+  useGuestEventBookings,
 } from './use-guest-event-bookings';
 
 /**
@@ -112,5 +123,70 @@ describe('applyBookingLocal — optimistic insert/cancel (Task 22)', () => {
     expect(feed.todayBooking?.id).toBe('today-1');
     expect(feed.upcoming.map((b) => b.id)).toEqual(['today-1']);
     expect(feed.history.map((b) => b.id)).toEqual(['other-1']);
+  });
+});
+
+describe('useGuestEventBookings — stale-poll race guard (final-review IMPORTANT fix)', () => {
+  const empty = (): GuestEventBookingsResponse => ({ data: [], todayBooking: null });
+
+  beforeEach(() => {
+    apiMock.api.mockReset();
+  });
+
+  it("a poll's load() response resolving AFTER applyLocal() must not erase the local booking", async () => {
+    // Initial mount: full load resolves immediately, empty feed.
+    apiMock.api.mockImplementation(async () => empty());
+    const { result } = renderHook(() => useGuestEventBookings(true));
+    await waitFor(() => expect(result.current.feed).not.toBeNull());
+    expect(result.current.feed!.upcoming).toEqual([]);
+
+    // A poll's load() begins (`refresh()` drives the same `load` fn a
+    // background tick would) — its `tab=upcoming` leg is left in flight to
+    // simulate the slowest of the 3 concurrent legs.
+    let resolveUpcoming!: (v: GuestEventBookingsResponse) => void;
+    apiMock.api.mockImplementation(async (path: string) => {
+      if (path.includes('tab=upcoming')) {
+        return new Promise<GuestEventBookingsResponse>((res) => {
+          resolveUpcoming = res;
+        });
+      }
+      return empty();
+    });
+    act(() => {
+      void result.current.refresh();
+    });
+
+    // The optimistic booking lands locally WHILE that poll is still pending
+    // — the ~1100ms optimistic-success beat landing mid-poll (final-review
+    // finding's concrete sequence).
+    const fresh = booking({ id: 'bk-fresh' });
+    act(() => result.current.applyLocal(fresh));
+    expect(result.current.feed!.upcoming.map((b) => b.id)).toEqual(['bk-fresh']);
+
+    // The stale poll leg finally resolves with a snapshot that PREDATES the
+    // booking (empty upcoming). Without the generation guard this REPLACEs
+    // the feed and the fresh booking silently disappears.
+    await act(async () => resolveUpcoming(empty()));
+    expect(result.current.feed!.upcoming.map((b) => b.id)).toEqual(['bk-fresh']);
+  });
+
+  it('a load() that resolves BEFORE any newer applyLocal() still applies normally', async () => {
+    apiMock.api.mockImplementation(async (path: string) => {
+      if (path.includes('tab=upcoming')) {
+        return { data: [booking({ id: 'bk-server' })], todayBooking: null };
+      }
+      return empty();
+    });
+    const { result } = renderHook(() => useGuestEventBookings(true));
+    await waitFor(() =>
+      expect(result.current.feed?.upcoming.map((b) => b.id)).toEqual(['bk-server']),
+    );
+
+    // A later local update still applies on top of the settled server state.
+    act(() => result.current.applyLocal(booking({ id: 'bk-local' })));
+    expect(result.current.feed!.upcoming.map((b) => b.id).sort()).toEqual([
+      'bk-local',
+      'bk-server',
+    ]);
   });
 });

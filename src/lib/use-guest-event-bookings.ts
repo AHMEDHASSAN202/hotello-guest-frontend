@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError } from '@/lib/api';
 import type { GuestEventBooking, GuestEventBookingsResponse } from '@/lib/types';
 
@@ -24,6 +24,16 @@ import type { GuestEventBooking, GuestEventBookingsResponse } from '@/lib/types'
  * payload from the network. Reconciles Task 20's ad-hoc 3-parallel-`api()`-
  * calls (previously inline in `events-screen.tsx`) into this one shared
  * hook.
+ *
+ * FINAL-REVIEW FIX (whole-branch review): because a poll replaces rather
+ * than merges, a stale in-flight poll response (its 3 parallel legs racing
+ * against an `applyLocal()` optimistic insert) could land AFTER a fresh
+ * booking was applied locally and silently erase it from the feed until the
+ * next tick. `generation` is a request-fencing counter: `applyLocal` bumps
+ * it, each `load()` captures the value it saw at the start, and a response
+ * that resolves after the generation has moved on is dropped rather than
+ * applied -- a newer local truth must never be clobbered by an older
+ * network snapshot.
  */
 const POLL_MS = Number(
   process.env.NEXT_PUBLIC_EVENTS_POLL_MS ??
@@ -93,14 +103,20 @@ export function applyBookingLocal(
 export function useGuestEventBookings(active: boolean) {
   const [feed, setFeed] = useState<GuestEventBookingsFeed | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
+  // Request-fencing counter (final-review fix) — bumped by `applyLocal`.
+  // A `load()` that resolves after the generation it saw has moved on is
+  // stale relative to a fresher optimistic update and must be dropped.
+  const generation = useRef(0);
 
   const load = useCallback(async (mode: 'full' | 'delta') => {
+    const gen = generation.current;
     try {
       const [upcoming, past, cancelled] = await Promise.all([
         api<GuestEventBookingsResponse>('/guest/events/bookings?tab=upcoming'),
         api<GuestEventBookingsResponse>('/guest/events/bookings?tab=past'),
         api<GuestEventBookingsResponse>('/guest/events/bookings?tab=cancelled'),
       ]);
+      if (generation.current !== gen) return; // superseded by a local update
       setError(null);
       setFeed({
         upcoming: sortBookings(upcoming.data),
@@ -110,6 +126,7 @@ export function useGuestEventBookings(active: boolean) {
         todayBooking: upcoming.todayBooking,
       });
     } catch (err) {
+      if (generation.current !== gen) return;
       if (mode === 'full') setError(err as ApiError);
     }
   }, []);
@@ -129,8 +146,14 @@ export function useGuestEventBookings(active: boolean) {
     return () => clearInterval(timer);
   }, [active, load]);
 
-  /** Optimistic local insert/update (book + cancel land instantly). */
+  /**
+   * Optimistic local insert/update (book + cancel land instantly). Bumps
+   * `generation` first so any poll `load()` already in flight — which can
+   * only be carrying a server snapshot that predates this update — gets
+   * fenced off and can't overwrite it when it resolves.
+   */
   const applyLocal = useCallback((booking: GuestEventBooking) => {
+    generation.current += 1;
     setFeed((prev) => applyBookingLocal(prev, booking));
   }, []);
 
