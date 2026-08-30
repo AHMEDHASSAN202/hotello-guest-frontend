@@ -4,7 +4,12 @@ import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import en from '../../messages/en';
 import { ApiError } from '@/lib/api';
-import type { GuestHotelProfile, GuestProfile } from '@/lib/types';
+import type {
+  GuestEventBooking,
+  GuestFnbOrder,
+  GuestHotelProfile,
+  GuestProfile,
+} from '@/lib/types';
 import { HotelProvider } from './hotel-provider';
 import { GuestFlow } from './guest-flow';
 
@@ -177,6 +182,103 @@ describe('Epic 21 — Events tile/section wiring', () => {
 
     fireEvent.click(screen.getByText('Home'));
     await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+  });
+});
+
+describe('Final-review fix — home strips stack instead of overlapping', () => {
+  beforeEach(() => {
+    apiMock.mockReset();
+    tokenStore.get.mockReturnValue(null);
+    tokenStore.set.mockClear();
+    deathHandlers.clear();
+  });
+
+  const openOrder: GuestFnbOrder = {
+    id: 'order-1',
+    status: 'preparing',
+    destinationType: 'room',
+    locationName: null,
+    spot: null,
+    roomNumber: '304',
+    paymentMethod: 'cash',
+    totalAmount: 150,
+    currency: 'EGP',
+    slaTargetMinutes: 30,
+    createdAt: '2026-08-30T09:00:00.000Z',
+    startedAt: '2026-08-30T09:05:00.000Z',
+    outForDeliveryAt: null,
+    deliveredAt: null,
+    cancelledAt: null,
+    cancelledReason: null,
+    settled: false,
+    updatedAt: '2026-08-30T09:05:00.000Z',
+    lines: [
+      { id: 'l1', itemName: 'Club Sandwich', variantOptionName: null, quantity: 1, unitPrice: 150, included: false, lineTotal: 150, note: null, photoThumbUrl: null },
+    ],
+  };
+
+  const todayBooking: GuestEventBooking = {
+    id: 'bk-1',
+    eventId: 'ev-1',
+    title: 'Sunset Yoga',
+    startAtLocal: '2026-08-30 18:00',
+    endAtLocal: null,
+    locationText: 'Beach',
+    partySize: 2,
+    unitPrice: 300,
+    included: false,
+    totalAmount: 600,
+    currency: 'EGP',
+    paymentMethod: 'room_charge',
+    status: 'booked',
+    cancelledBy: null,
+    cancelledAt: null,
+    createdAt: '2026-08-29T10:00:00.000Z',
+  };
+
+  it('an active F&B order AND a today\'s-event booking both render, stacked (not overlapping) in one fixed column', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockImplementation((path: string) => {
+      if (path === '/guest/me') return Promise.resolve(profile);
+      if (path === '/guest/fnb/orders') {
+        return Promise.resolve({ data: [openOrder], serverTime: '2026-08-30T09:10:00.000Z' });
+      }
+      if (path.startsWith('/guest/events/bookings')) {
+        const tab = new URL(path, 'http://x').searchParams.get('tab');
+        return Promise.resolve({
+          data: tab === 'upcoming' ? [todayBooking] : [],
+          todayBooking: tab === 'upcoming' ? todayBooking : null,
+        });
+      }
+      return Promise.reject(new Error(`unexpected call: ${path}`));
+    });
+
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={{ ...hotel, enabledModules: ['fnb', 'events'] }}>
+          <GuestFlow slug="sunrise" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+
+    const activeOrderStrip = await screen.findByTestId('active-order-strip');
+    const todayEventStrip = await screen.findByTestId('today-event-strip');
+    // Both surfaces are present and tappable — neither silently covers the
+    // other (final-review fix: both used to share byte-identical `fixed
+    // inset-x-0 bottom-[64px]` coordinates).
+    expect(activeOrderStrip).toBeTruthy();
+    expect(todayEventStrip).toBeTruthy();
+
+    // Both are laid out inside the single positioned column, in normal flow
+    // (no `fixed`/`bottom-*` classes on the individual strips themselves) —
+    // that column is what stacks them instead of overlapping.
+    const strips = screen.getByTestId('home-strips');
+    expect(strips.contains(activeOrderStrip)).toBe(true);
+    expect(strips.contains(todayEventStrip)).toBe(true);
+    expect(strips.className).toContain('flex-col');
+    expect(activeOrderStrip.className).not.toMatch(/\bfixed\b/);
+    expect(todayEventStrip.className).not.toMatch(/\bfixed\b/);
   });
 });
 

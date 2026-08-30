@@ -367,21 +367,38 @@ export function GuestFlow({
                     }
                   }}
                 />
-                {diningLive ? (
-                  <ActiveOrderStrip
-                    onOpen={(orderId) => {
-                      setDiningOrderId(orderId);
-                      setSection('dining');
-                    }}
-                  />
-                ) : null}
-                {eventsLive ? (
-                  <TodayEventStrip
-                    onOpen={(bookingId) => {
-                      setEventsBookingId(bookingId);
-                      setSection('events');
-                    }}
-                  />
+                {/* FINAL-REVIEW FIX (whole-branch review) — ActiveOrderStrip
+                    (Epic 16) and TodayEventStrip (Epic 21) used to each carry
+                    their own identical `fixed inset-x-0 bottom-[64px]`
+                    wrapper, so a guest with both an in-progress F&B order AND
+                    a today's-event booking got the Events strip silently
+                    covering the F&B one. Fixed positioning now lives once,
+                    here, on a flex column both strips render into (each
+                    still independently returns null when it has nothing to
+                    show) — whichever combination is present stacks instead
+                    of overlapping. */}
+                {diningLive || eventsLive ? (
+                  <div
+                    data-testid="home-strips"
+                    className="fixed inset-x-0 bottom-[64px] z-30 mx-auto flex max-w-[430px] flex-col gap-2 px-5 pb-2"
+                  >
+                    {diningLive ? (
+                      <ActiveOrderStrip
+                        onOpen={(orderId) => {
+                          setDiningOrderId(orderId);
+                          setSection('dining');
+                        }}
+                      />
+                    ) : null}
+                    {eventsLive ? (
+                      <TodayEventStrip
+                        onOpen={(bookingId) => {
+                          setEventsBookingId(bookingId);
+                          setSection('events');
+                        }}
+                      />
+                    ) : null}
+                  </div>
                 ) : null}
               </>
             )}

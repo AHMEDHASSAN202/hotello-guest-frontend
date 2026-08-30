@@ -8,6 +8,14 @@ import { useGuestFnbOrders } from '@/lib/use-guest-fnb-orders';
 /**
  * 16.6 AC1 — the active order surfaces on the app home as a compact
  * progress strip floating above the bottom nav; tapping it opens Dining.
+ *
+ * FINAL-REVIEW FIX (whole-branch review, Epic 21): this used to carry its
+ * own `fixed inset-x-0 bottom-[64px]` wrapper, which put it at byte-identical
+ * coordinates to `TodayEventStrip` — when both an active order and a
+ * today's-event booking exist simultaneously, the Events strip silently
+ * covered this one. Fixed positioning now lives once, on the shared
+ * `home-strips` column in `guest-flow.tsx`, so multiple strips stack in
+ * normal flow instead of overlapping; this component renders only its pill.
  */
 export function ActiveOrderStrip({
   onOpen,
@@ -24,27 +32,25 @@ export function ActiveOrderStrip({
   if (!active) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-[64px] z-30 mx-auto max-w-[430px] px-5 pb-2">
-      <button
-        data-testid="active-order-strip"
-        onClick={() => onOpen(active.id)}
-        className="pressable animate-fade-in flex min-h-[52px] w-full items-center gap-3 rounded-card bg-card p-3 shadow-sheet"
-      >
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft">
-          <ChefHat className="h-4 w-4 text-accent" aria-hidden />
+    <button
+      data-testid="active-order-strip"
+      onClick={() => onOpen(active.id)}
+      className="pressable animate-fade-in flex min-h-[52px] w-full items-center gap-3 rounded-card bg-card p-3 shadow-sheet"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft">
+        <ChefHat className="h-4 w-4 text-accent" aria-hidden />
+      </span>
+      <span className="min-w-0 flex-1 text-start">
+        <span className="block text-sm font-semibold text-ink">
+          {t(`status.${active.status}`)}
         </span>
-        <span className="min-w-0 flex-1 text-start">
-          <span className="block text-sm font-semibold text-ink">
-            {t(`status.${active.status}`)}
-          </span>
-          <span className="block truncate text-xs text-ink-soft">
-            {active.lines.map((l) => `${l.quantity}× ${l.itemName}`).join(' · ')}
-          </span>
+        <span className="block truncate text-xs text-ink-soft">
+          {active.lines.map((l) => `${l.quantity}× ${l.itemName}`).join(' · ')}
         </span>
-        <span className="shrink-0 text-xs font-bold text-accent">
-          {tHome('diningCard.track')}
-        </span>
-      </button>
-    </div>
+      </span>
+      <span className="shrink-0 text-xs font-bold text-accent">
+        {tHome('diningCard.track')}
+      </span>
+    </button>
   );
 }
