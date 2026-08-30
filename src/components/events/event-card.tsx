@@ -83,7 +83,7 @@ export function EventCard({
                 <span className="block truncate font-semibold text-ink">
                   {event.title}
                 </span>
-                <span className="mt-0.5 block text-[13px] text-ink-soft" dir="ltr">
+                <span className="mt-0.5 block text-[13px] text-ink-soft">
                   {formatCheckoutDate(localStampDate(event.startAtLocal), locale)}
                   {' · '}
                   {formatTimeOfDay(start, locale)}

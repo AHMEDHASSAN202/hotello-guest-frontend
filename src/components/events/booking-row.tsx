@@ -46,7 +46,7 @@ export function BookingRow({
           >
             {t(`status.${booking.status}`)}
           </span>
-          <span className="text-xs tabular-nums text-ink-faint" dir="ltr">
+          <span className="text-xs tabular-nums text-ink-faint">
             {formatCheckoutDate(localStampDate(booking.startAtLocal), locale)}
             {' · '}
             {formatTimeOfDay(parseLocalStamp(booking.startAtLocal), locale)}
