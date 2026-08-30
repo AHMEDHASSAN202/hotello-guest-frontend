@@ -25,5 +25,35 @@
   "status": {
     "booked": "Booked",
     "cancelled": "Cancelled"
+  },
+  "sheet": {
+    "partySize": "Party size",
+    "less": "Less",
+    "more": "More",
+    "book": "Book your spot",
+    "bookFor": "Book · {price}",
+    "booking": "Booking…",
+    "soldOut": "Spots just filled up",
+    "loadError": "We couldn't load this event."
+  },
+  "checkout": {
+    "payment": "How would you like to pay?",
+    "cash": "Pay in cash on the day",
+    "roomCharge": "Add to my room bill — pay at checkout",
+    "includedNote": "This event is included in your stay."
+  },
+  "success": {
+    "title": "You're booked!",
+    "body": "See you there — find it under My bookings."
+  },
+  "detail": {
+    "payCash": "Have {amount} ready in cash",
+    "payRoom": "On your room bill — pay at checkout",
+    "included": "✓ Included in your stay",
+    "cancel": "Cancel booking",
+    "cancelConfirm": "Cancel this booking?",
+    "keep": "Keep it",
+    "yesCancel": "Yes, cancel",
+    "noCancel": "This event has already started — the front desk can help with any changes."
   }
 }

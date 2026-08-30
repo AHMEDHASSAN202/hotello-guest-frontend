@@ -11,6 +11,13 @@
     "FNB_LIMIT_OPEN": "لديك عدة طلبات قيد التنفيذ — انتظر وصول أحدها أولًا.",
     "FNB_LIMIT_DAILY": "وصلت إلى حد الطلبات اليوم — الاستقبال جاهز لمساعدتك في أي شيء آخر.",
     "FNB_ITEM_DISABLED": "هذا الصنف لم يعد متاحًا — اختر شيئًا آخر.",
-    "FNB_PAYMENT_METHOD_INVALID": "اختر طريقة الدفع من فضلك."
+    "FNB_PAYMENT_METHOD_INVALID": "اختر طريقة الدفع من فضلك.",
+    "EVENT_NOT_BOOKABLE": "لم يعد الحجز في هذه الفعالية متاحًا.",
+    "EVENT_PARTY_SIZE_INVALID": "يرجى اختيار عدد أشخاص صحيح.",
+    "EVENT_PAYMENT_METHOD_UNAVAILABLE": "طريقة الدفع هذه غير متاحة — يرجى اختيار طريقة أخرى.",
+    "EVENT_NOT_FOUND": "هذه الفعالية لم تعد متاحة.",
+    "EVENT_BOOKING_NOT_FOUND": "تعذّر العثور على هذا الحجز.",
+    "EVENT_BOOKING_INVALID_STATUS": "لم يعد بالإمكان تعديل هذا الحجز.",
+    "EVENT_BOOKING_PAST_START": "بدأت هذه الفعالية بالفعل — يرجى التواصل مع الاستقبال."
   }
 }

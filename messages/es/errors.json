@@ -11,6 +11,13 @@
     "FNB_LIMIT_OPEN": "Ya tienes varios pedidos en curso — espera a que llegue uno primero.",
     "FNB_LIMIT_DAILY": "Has alcanzado el límite de pedidos de hoy — recepción puede ayudarte.",
     "FNB_ITEM_DISABLED": "Ese plato acaba de agotarse — elige otra cosa.",
-    "FNB_PAYMENT_METHOD_INVALID": "Elige cómo quieres pagar."
+    "FNB_PAYMENT_METHOD_INVALID": "Elige cómo quieres pagar.",
+    "EVENT_NOT_BOOKABLE": "Este evento ya no admite reservas.",
+    "EVENT_PARTY_SIZE_INVALID": "Elige un número de personas válido.",
+    "EVENT_PAYMENT_METHOD_UNAVAILABLE": "Ese método de pago no está disponible — elige otro.",
+    "EVENT_NOT_FOUND": "Este evento ya no está disponible.",
+    "EVENT_BOOKING_NOT_FOUND": "No se encontró esta reserva.",
+    "EVENT_BOOKING_INVALID_STATUS": "Esta reserva ya no se puede modificar.",
+    "EVENT_BOOKING_PAST_START": "Este evento ya ha comenzado — habla con recepción."
   }
 }

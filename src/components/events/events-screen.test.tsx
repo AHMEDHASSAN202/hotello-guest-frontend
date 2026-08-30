@@ -175,14 +175,18 @@ describe('EventsScreen — browse (21.4 AC1)', () => {
     expect(card.textContent).toContain('This event has ended');
   });
 
-  it('an open card is tappable (Task 21 hook — selects the event, no sheet built yet)', async () => {
+  it('an open card opens the booking sheet (Task 21 wiring)', async () => {
     stubApi({ events: [makeEvent()] });
     wrap();
     const card = (await screen.findByTestId(
       'event-card-ev-1',
     )) as HTMLButtonElement;
     expect(card.disabled).toBe(false);
-    expect(() => fireEvent.click(card)).not.toThrow();
+    fireEvent.click(card);
+    // Awaiting lets the sheet's own detail fetch settle within `act` —
+    // the sheet itself (party size, payment, submit) is Task 21's own
+    // component and gets its full coverage in event-booking-sheet.test.tsx.
+    expect(await screen.findByTestId('bottom-sheet')).toBeTruthy();
   });
 
   it('a load error shows the retry state, which re-fetches on tap', async () => {
@@ -234,7 +238,12 @@ describe('EventsScreen — bookings (21.5)', () => {
     expect(row.textContent).toContain('2×');
     expect(row.textContent).toMatch(/600/);
     expect(row.textContent).toContain('Room bill');
-    expect(() => fireEvent.click(row)).not.toThrow(); // Task 21 hook smoke test
+
+    // Task 21 wiring — opens the booking detail sheet on its snapshot; full
+    // coverage of the sheet itself lives in booking-detail-sheet.test.tsx.
+    fireEvent.click(row);
+    const sheet = await screen.findByTestId('bottom-sheet');
+    expect(sheet.textContent).toContain('Sunset Yoga');
   });
 
   it('an included booking shows ✓Included instead of a price', async () => {

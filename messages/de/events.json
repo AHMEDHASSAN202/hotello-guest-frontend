@@ -25,5 +25,35 @@
   "status": {
     "booked": "Gebucht",
     "cancelled": "Storniert"
+  },
+  "sheet": {
+    "partySize": "Personenzahl",
+    "less": "Weniger",
+    "more": "Mehr",
+    "book": "Platz buchen",
+    "bookFor": "Buchen · {price}",
+    "booking": "Wird gebucht…",
+    "soldOut": "Die Plätze sind gerade ausgebucht",
+    "loadError": "Diese Veranstaltung konnte nicht geladen werden."
+  },
+  "checkout": {
+    "payment": "Wie möchten Sie zahlen?",
+    "cash": "Bar am Veranstaltungstag zahlen",
+    "roomCharge": "Auf die Zimmerrechnung — Zahlung beim Check-out",
+    "includedNote": "Diese Veranstaltung ist in Ihrem Aufenthalt inbegriffen."
+  },
+  "success": {
+    "title": "Platz gebucht!",
+    "body": "Bis dahin — zu finden unter Meine Buchungen."
+  },
+  "detail": {
+    "payCash": "Halten Sie {amount} in bar bereit",
+    "payRoom": "Auf Ihrer Zimmerrechnung — Zahlung beim Check-out",
+    "included": "✓ In Ihrem Aufenthalt inbegriffen",
+    "cancel": "Buchung stornieren",
+    "cancelConfirm": "Diese Buchung stornieren?",
+    "keep": "Behalten",
+    "yesCancel": "Ja, stornieren",
+    "noCancel": "Diese Veranstaltung hat bereits begonnen — bei Änderungen wenden Sie sich bitte an die Rezeption."
   }
 }

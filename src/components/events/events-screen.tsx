@@ -15,7 +15,9 @@ import type {
 } from '@/lib/types';
 import { Button, Screen, Skeleton } from '../ui';
 import { StateShell } from '../state-screens';
+import { BookingDetailSheet } from './booking-detail-sheet';
 import { BookingRow } from './booking-row';
+import { EventBookingSheet } from './event-booking-sheet';
 import { EventCard } from './event-card';
 
 /**
@@ -32,15 +34,15 @@ import { EventCard } from './event-card';
  * collapsed-disclosure pattern, so a guest sees active bookings first
  * without a second round trip when they open the disclosure.
  *
- * Task 21 hooks: `selectedEvent`/`selectedBookingId` are the natural shape
- * a future booking sheet / detail sheet would consume — mirrors
- * dining-screen.tsx's `sheetItem`/`detailId` exactly (an object for the
- * item being configured, a bare id for the detail lookup). Tapping an open
- * event card or a booking row sets them; nothing renders from them yet
- * because Task 21's sheets don't exist yet — there is deliberately no
- * placeholder modal here for Task 21 to tear out, just the wiring it will
- * plug a `<EventBookingSheet event={selectedEvent} .../>` /
- * `<EventDetailSheet booking={...} .../>` into.
+ * Task 21: `selectedEvent`/`selectedBookingId` mirror dining-screen.tsx's
+ * `sheetItem`/`detailId` exactly (an object for the item being configured, a
+ * bare id for the detail lookup) — `selectedBookingId` looks up the booking
+ * from the already-loaded `bookings` lists (dining's `detailOrder` pattern;
+ * there's no `GET .../bookings/:id`, only the tab-filtered list). Booking
+ * changes tab-switch into "My bookings" and re-fetch both lists (the new
+ * booking reduces the event's own spots-left too); cancellation just
+ * re-fetches the bookings lists (the detail sheet renders its own snapshot
+ * so nothing needs a local patch before that resolves).
  */
 export function EventsScreen() {
   const t = useTranslations('events');
@@ -95,11 +97,22 @@ export function EventsScreen() {
 
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  // Task 21 hooks — see file doc above.
+  // Task 21 — see file doc above.
   const [selectedEvent, setSelectedEvent] = useState<GuestEvent | null>(null);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
     null,
   );
+  const selectedBooking =
+    bookings?.upcoming.find((b) => b.id === selectedBookingId) ??
+    bookings?.history.find((b) => b.id === selectedBookingId) ??
+    null;
+
+  function onBooked() {
+    setSelectedEvent(null);
+    setTab('bookings');
+    void loadEvents();
+    void loadBookings();
+  }
 
   return (
     <Screen>
@@ -221,6 +234,19 @@ export function EventsScreen() {
           )}
         </div>
       )}
+
+      <EventBookingSheet
+        event={selectedEvent}
+        locale={locale}
+        onClose={() => setSelectedEvent(null)}
+        onBooked={onBooked}
+      />
+      <BookingDetailSheet
+        booking={selectedBooking}
+        locale={locale}
+        onClose={() => setSelectedBookingId(null)}
+        onChanged={() => void loadBookings()}
+      />
     </Screen>
   );
 }

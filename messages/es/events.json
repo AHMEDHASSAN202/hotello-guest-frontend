@@ -25,5 +25,35 @@
   "status": {
     "booked": "Reservado",
     "cancelled": "Cancelado"
+  },
+  "sheet": {
+    "partySize": "Número de personas",
+    "less": "Menos",
+    "more": "Más",
+    "book": "Reserva tu plaza",
+    "bookFor": "Reservar · {price}",
+    "booking": "Reservando…",
+    "soldOut": "Las plazas se acaban de agotar",
+    "loadError": "No pudimos cargar este evento."
+  },
+  "checkout": {
+    "payment": "¿Cómo quieres pagar?",
+    "cash": "Paga en efectivo el mismo día",
+    "roomCharge": "Cargar a mi habitación — pago al hacer check-out",
+    "includedNote": "Este evento está incluido en tu estancia."
+  },
+  "success": {
+    "title": "¡Reserva confirmada!",
+    "body": "Nos vemos allí — consúltala en Mis reservas."
+  },
+  "detail": {
+    "payCash": "Ten listos {amount} en efectivo",
+    "payRoom": "En la cuenta de tu habitación — pago al check-out",
+    "included": "✓ Incluido en tu estancia",
+    "cancel": "Cancelar reserva",
+    "cancelConfirm": "¿Cancelar esta reserva?",
+    "keep": "Mantenerla",
+    "yesCancel": "Sí, cancelar",
+    "noCancel": "Este evento ya ha comenzado — habla con recepción para cualquier cambio."
   }
 }
