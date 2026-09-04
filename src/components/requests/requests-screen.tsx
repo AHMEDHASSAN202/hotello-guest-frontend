@@ -26,17 +26,31 @@ type Tab = 'browse' | 'mine';
  * sheets on top for submit + detail. Everything is a state transition; the
  * poller runs while this section is mounted.
  */
-export function RequestsScreen({ profile }: { profile: GuestProfile }) {
+export function RequestsScreen({
+  profile,
+  initialRequestId,
+}: {
+  profile: GuestProfile;
+  /** Push notification "track this request" intent (Epic 23, Task 10) —
+   * opens the "mine" tab already showing that request's detail sheet.
+   * Mirrors `DiningScreen`'s `initialOrderId`: an id, not an object, so the
+   * detail sheet resolves against the list once it (and the row) has
+   * loaded, the same way a tap on the row would. */
+  initialRequestId?: string | null;
+}) {
   const t = useTranslations('requests');
   const router = useRouter();
 
-  const [tab, setTab] = useState<Tab>('browse');
+  const [tab, setTab] = useState<Tab>(initialRequestId ? 'mine' : 'browse');
   const [catalog, setCatalog] = useState<GuestCatalogCategory[] | null>(null);
   const [catalogError, setCatalogError] = useState<ApiError | null>(null);
   const [submitItem, setSubmitItem] = useState<GuestCatalogItem | null>(null);
-  const [detail, setDetail] = useState<GuestRequest | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(
+    initialRequestId ?? null,
+  );
 
   const { requests, error: listError, refresh, applyLocal } = useGuestRequests(true);
+  const detail = requests?.find((r) => r.id === detailId) ?? null;
   const moduleGone =
     isModuleGone(catalogError) || isModuleGone(listError);
 
@@ -66,14 +80,6 @@ export function RequestsScreen({ profile }: { profile: GuestProfile }) {
       router.refresh();
     }
   }, [moduleGone, router]);
-
-  // Keep the freshest copy of the open detail row as polls land.
-  const detailId = detail?.id ?? null;
-  useEffect(() => {
-    if (!detailId || !requests) return;
-    const fresh = requests.find((r) => r.id === detailId);
-    if (fresh) setDetail(fresh);
-  }, [detailId, requests]);
 
   if (moduleGone) {
     return (
@@ -138,7 +144,7 @@ export function RequestsScreen({ profile }: { profile: GuestProfile }) {
           <MyRequests
             requests={requests}
             language={profile.language}
-            onOpen={setDetail}
+            onOpen={(request) => setDetailId(request.id)}
             onRetry={refresh}
             error={listError}
             onOrder={() => setTab('browse')}
@@ -158,7 +164,7 @@ export function RequestsScreen({ profile }: { profile: GuestProfile }) {
       <RequestDetailSheet
         request={detail}
         language={profile.language}
-        onClose={() => setDetail(null)}
+        onClose={() => setDetailId(null)}
         onChanged={applyLocal}
       />
     </Screen>

@@ -36,6 +36,12 @@ export interface AnnouncementsFeedHandle {
  * treatment exactly (same pill, same button pattern); it deep-links into
  * the Events section, opening that event's detail sheet.
  *
+ * Epic 23, Task 10 — `initialAnnouncementId` (a tapped push notification)
+ * scrolls the inbox to that entry once it has loaded, mirroring
+ * `InfoScreen`'s `initialEntryId` exactly: a dangling/unknown id is a
+ * silent no-op, not an error, since the row it points at may have been
+ * deleted or already scrolled past by the time the tap lands.
+ *
  * FINAL-REVIEW FIX (whole-branch review) — `onOpenEvent` is nullable and the
  * chip is not rendered without it. The backend puts `eventChip` on an
  * announcement regardless of the hotel's plan, so on a hotel WITHOUT the
@@ -51,6 +57,7 @@ export function AnnouncementsScreen({
   onBack,
   onOpenInfo,
   onOpenEvent,
+  initialAnnouncementId = null,
 }: {
   feed: AnnouncementsFeedHandle;
   profile: GuestProfile;
@@ -59,6 +66,9 @@ export function AnnouncementsScreen({
   onOpenInfo: ((chip: GuestAnnouncementChip) => void) | null;
   /** `null` when the events section isn't live — the chip then isn't rendered. */
   onOpenEvent: ((chip: GuestAnnouncementEventChip) => void) | null;
+  /** Push notification deep-link (Epic 23, Task 10) — scroll this entry
+   * into view once the feed has loaded. */
+  initialAnnouncementId?: string | null;
 }) {
   const t = useTranslations('announcements');
   const router = useRouter();
@@ -91,6 +101,24 @@ export function AnnouncementsScreen({
       router.refresh();
     }
   }, [moduleGone, router]);
+
+  // Push notification deep-link (Task 10): once the feed is in, scroll the
+  // linked entry into view — the `InfoScreen`/`initialEntryId` precedent. A
+  // dangling id (deleted/expired announcement) is a silent no-op. Placed
+  // before the early returns below (rules of hooks) — feed.announcements is
+  // read directly since the `rows` alias is declared after them.
+  useEffect(() => {
+    if (
+      !feed.announcements ||
+      !initialAnnouncementId ||
+      typeof document === 'undefined'
+    ) {
+      return;
+    }
+    document
+      .getElementById(`announcement-${initialAnnouncementId}`)
+      ?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+  }, [feed.announcements, initialAnnouncementId]);
 
   if (moduleGone) {
     return (
@@ -145,18 +173,19 @@ export function AnnouncementsScreen({
         ) : (
           <div className="space-y-3">
             {rows.map((row) => (
-              <AnnouncementRow
-                key={`${row.id}-${row.readAt ? 'read' : 'unread'}`}
-                announcement={row}
-                locale={locale}
-                now={now}
-                priorityLabel={t('priority')}
-                unreadLabel={t('unread')}
-                onOpen={() => {
-                  feed.markRead(row.id);
-                  setDetail(row);
-                }}
-              />
+              <div key={`${row.id}-${row.readAt ? 'read' : 'unread'}`} id={`announcement-${row.id}`}>
+                <AnnouncementRow
+                  announcement={row}
+                  locale={locale}
+                  now={now}
+                  priorityLabel={t('priority')}
+                  unreadLabel={t('unread')}
+                  onOpen={() => {
+                    feed.markRead(row.id);
+                    setDetail(row);
+                  }}
+                />
+              </div>
             ))}
           </div>
         )}

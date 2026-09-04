@@ -209,6 +209,58 @@ describe('AnnouncementsScreen (19.4 AC2)', () => {
     expect(routerRefresh).toHaveBeenCalledTimes(1);
   });
 
+  it('Epic 23 Task 10 — initialAnnouncementId scrolls that entry into view once loaded', () => {
+    const feed = makeFeed({
+      announcements: [make({ id: 'a1' }), make({ id: 'a2', title: 'Second' })],
+      unreadCount: 2,
+    });
+    const scrollSpy = vi.fn();
+    const originalGetById = document.getElementById.bind(document);
+    const getByIdSpy = vi
+      .spyOn(document, 'getElementById')
+      .mockImplementation((id: string) => {
+        const el = originalGetById(id);
+        if (el && id === 'announcement-a2') {
+          (el as HTMLElement).scrollIntoView = scrollSpy;
+        }
+        return el;
+      });
+
+    wrap(
+      <AnnouncementsScreen
+        feed={feed}
+        profile={profile}
+        onBack={vi.fn()}
+        onOpenInfo={vi.fn()}
+        onOpenEvent={vi.fn()}
+        initialAnnouncementId="a2"
+      />,
+    );
+
+    expect(scrollSpy).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
+    getByIdSpy.mockRestore();
+  });
+
+  it('Epic 23 Task 10 — a dangling initialAnnouncementId is a silent no-op (no matching element, no throw)', () => {
+    const feed = makeFeed({
+      announcements: [make({ id: 'a1' })],
+      unreadCount: 1,
+    });
+    expect(() =>
+      wrap(
+        <AnnouncementsScreen
+          feed={feed}
+          profile={profile}
+          onBack={vi.fn()}
+          onOpenInfo={vi.fn()}
+          onOpenEvent={vi.fn()}
+          initialAnnouncementId="does-not-exist"
+        />,
+      ),
+    ).not.toThrow();
+    expect(screen.getByText('Pool closed tomorrow')).toBeTruthy();
+  });
+
   it('back button returns home', () => {
     const onBack = vi.fn();
     wrap(

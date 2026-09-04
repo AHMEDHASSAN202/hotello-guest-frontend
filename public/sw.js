@@ -63,3 +63,38 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+
+// --- Web Push (Epic 23) — the SW renders, never composes. The payload
+// arrives from the backend as fully-formed JSON (`title`/`body`/`url`, and
+// optionally `tag` for collapse); this file never builds strings, it only
+// shows the notification and routes the tap.
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+  let data;
+  try {
+    data = event.data.json();
+  } catch {
+    return;
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || '', {
+      body: data.body || '',
+      tag: data.tag || undefined, // collapse on-device too
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      data: { url: data.url || '/' },
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data && event.notification.data.url ? event.notification.data.url : '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      const client = list.find((c) => 'focus' in c);
+      if (client) return client.focus().then((c) => ('navigate' in c ? c.navigate(url) : undefined));
+      return self.clients.openWindow(url);
+    }),
+  );
+});

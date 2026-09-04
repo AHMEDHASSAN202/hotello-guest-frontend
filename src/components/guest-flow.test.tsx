@@ -360,6 +360,173 @@ describe('Epic 20 — guest DND toggle (20.4)', () => {
   });
 });
 
+describe('Epic 23 — push notification `?open=` deep links (Task 10)', () => {
+  beforeEach(() => {
+    apiMock.mockReset();
+    tokenStore.get.mockReturnValue(null);
+    tokenStore.set.mockClear();
+    deathHandlers.clear();
+  });
+
+  it('an already-sessioned guest with ?open=order:o1 lands directly on the dining section with that order', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockImplementation((path: string) => {
+      if (path === '/guest/me') return Promise.resolve(profile);
+      if (path === '/guest/fnb/menus') return Promise.resolve({ menus: [], currency: 'EGP' });
+      if (path === '/guest/fnb/orders') {
+        return Promise.resolve({ data: [], serverTime: '2026-08-30T09:00:00.000Z' });
+      }
+      return Promise.reject(new Error(`unexpected call: ${path}`));
+    });
+
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={{ ...hotel, enabledModules: ['fnb'] }}>
+          <GuestFlow slug="sunrise" openParam="order:o1" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+
+    // Straight to Dining's "orders" tab — never a flash of home.
+    await waitFor(() => expect(apiMock).toHaveBeenCalledWith('/guest/fnb/orders'));
+    expect(screen.queryByTestId('home-root')).toBeNull();
+  });
+
+  it('?open=event:ev-9 lands on the events section', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockImplementation((path: string) => {
+      if (path === '/guest/me') return Promise.resolve(profile);
+      if (path === '/guest/events') return Promise.resolve({ data: [] });
+      if (path.startsWith('/guest/events/bookings')) {
+        return Promise.resolve({ data: [], todayBooking: null });
+      }
+      return Promise.reject(new Error(`unexpected call: ${path}`));
+    });
+
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={{ ...hotel, enabledModules: ['events'] }}>
+          <GuestFlow slug="sunrise" openParam="event:ev-9" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+
+    await waitFor(() => expect(apiMock).toHaveBeenCalledWith('/guest/events'));
+    expect(screen.queryByTestId('home-root')).toBeNull();
+  });
+
+  it('?open=request:req-1 lands on the requests section', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockImplementation((path: string) => {
+      if (path === '/guest/me') return Promise.resolve(profile);
+      if (path === '/guest/catalog') return Promise.resolve({ categories: [] });
+      if (path.startsWith('/guest/requests')) {
+        return Promise.resolve({ data: [], serverTime: '2026-08-30T09:00:00.000Z' });
+      }
+      return Promise.reject(new Error(`unexpected call: ${path}`));
+    });
+
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={{ ...hotel, enabledModules: ['requests'] }}>
+          <GuestFlow slug="sunrise" openParam="request:req-1" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByRole('tablist')).toBeTruthy());
+    expect(screen.getByRole('tab', { name: /My requests/ }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('?open=announcement:ann-1 lands on the announcements inbox', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockImplementation((path: string) => {
+      if (path === '/guest/me') return Promise.resolve(profile);
+      if (path.startsWith('/guest/announcements')) {
+        return Promise.resolve({
+          data: [
+            {
+              id: 'ann-1',
+              title: 'Pool closed tomorrow',
+              body: 'Maintenance from 9 to 12.',
+              priority: false,
+              infoChip: null,
+              eventChip: null,
+              publishedAt: '2026-01-15T09:00:00.000Z',
+              readAt: null,
+              active: true,
+            },
+          ],
+          unreadCount: 1,
+          serverTime: '2026-01-15T09:00:00.000Z',
+        });
+      }
+      return Promise.reject(new Error(`unexpected call: ${path}`));
+    });
+
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={{ ...hotel, enabledModules: ['announcements'] }}>
+          <GuestFlow slug="sunrise" openParam="announcement:ann-1" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByText('Pool closed tomorrow')).toBeTruthy());
+    expect(screen.getByTestId('announcements-back')).toBeTruthy();
+  });
+
+  it('?open=home is a no-op — the guest lands on the regular home screen', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockResolvedValue(profile);
+
+    wrap(<GuestFlow slug="sunrise" openParam="home" />);
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+  });
+
+  it('a malformed ?open= value is silently ignored — home renders normally', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockResolvedValue(profile);
+
+    wrap(<GuestFlow slug="sunrise" openParam="garbage" />);
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+  });
+
+  it('survives the entry→home transition: no session yet, deep link applies only after login succeeds', async () => {
+    // No stored token — boots straight to the entry screen, not probing.
+    apiMock.mockImplementation((path: string) => {
+      if (path === '/guest/sunrise/session') {
+        return Promise.resolve({ accessToken: 'fresh', profile });
+      }
+      if (path === '/guest/fnb/menus') return Promise.resolve({ menus: [], currency: 'EGP' });
+      if (path === '/guest/fnb/orders') {
+        return Promise.resolve({ data: [], serverTime: '2026-08-30T09:00:00.000Z' });
+      }
+      return Promise.reject(new Error(`unexpected call: ${path}`));
+    });
+
+    render(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <HotelProvider hotel={{ ...hotel, enabledModules: ['fnb'] }}>
+          <GuestFlow slug="sunrise" openParam="order:o1" roomParam="304" />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+    // Still on the entry screen — the deep link has NOT fired yet.
+    expect(screen.getByLabelText('code-input')).toBeTruthy();
+    expect(apiMock).not.toHaveBeenCalledWith('/guest/fnb/orders');
+
+    fireEvent.change(screen.getByLabelText('code-input'), { target: { value: '123456' } });
+
+    // Once login lands on `home`, the held deep link applies — straight
+    // through to Dining's orders tab, never a flash of the home screen.
+    await waitFor(() =>
+      expect(apiMock).toHaveBeenCalledWith('/guest/fnb/orders'),
+    );
+    expect(screen.queryByTestId('home-root')).toBeNull();
+  });
+});
+
 describe('Final-review fix — announcement chips are never dead taps', () => {
   beforeEach(() => {
     apiMock.mockReset();

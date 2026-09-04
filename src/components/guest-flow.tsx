@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError, onSessionDeath } from '@/lib/api';
 import { tokenStore } from '@/lib/auth';
 import { cartStore } from '@/lib/cart';
+import { parseOpenParam } from '@/lib/deep-link';
 import type { GuestProfile, GuestSessionResponse } from '@/lib/types';
 import {
   latestUnreadPriority,
@@ -73,11 +74,14 @@ export function GuestFlow({
   roomParam,
   locationParam,
   spotParam,
+  openParam,
 }: {
   slug: string;
   roomParam?: string;
   locationParam?: string;
   spotParam?: string;
+  /** Epic 23 — `?open=<kind>:<id>` from a tapped push notification. */
+  openParam?: string;
 }) {
   const { hotel, isModuleEnabled } = useHotel();
   const router = useRouter();
@@ -96,6 +100,21 @@ export function GuestFlow({
   // An announcement's event chip intent (Epic 21, Task 23): opens Events
   // directly on that event's detail sheet.
   const [eventsEventId, setEventsEventId] = useState<string | null>(null);
+  // Push notification deep-link intent (Epic 23, Task 10): opens Requests
+  // on that request's detail, or Announcements scrolled to that entry.
+  const [requestsRequestId, setRequestsRequestId] = useState<string | null>(
+    null,
+  );
+  const [announcementsFocusId, setAnnouncementsFocusId] = useState<
+    string | null
+  >(null);
+  // The push notification's `?open=` intent — parsed once (a ref, not state,
+  // so re-renders never re-parse or re-fire it) and applied the first time
+  // the flow reaches `phase: 'home'` (see the effect right after `setSection`
+  // is defined below). If boot lands on `entry` first (no active session —
+  // e.g. iOS cold-relaunched the PWA from the notification), the ref simply
+  // survives the entry screen and applies once login succeeds.
+  const deepLinkRef = useRef(parseOpenParam(openParam));
 
   // ONE announcements poller app-wide (19.4 AC1 — bell, banner and inbox all
   // share this feed; never a poller per surface).
@@ -185,6 +204,41 @@ export function GuestFlow({
       prev.phase === 'home' ? { ...prev, section } : prev,
     );
   }, []);
+
+  // Applies the push notification's `?open=` deep link exactly once, the
+  // first time (and only the first time) the flow reaches `phase: 'home'` —
+  // whether that's immediate (a valid stored token) or after the guest logs
+  // in from the entry screen. Clearing the ref (not a state flag) is what
+  // makes "once" genuine: it can't be re-armed by a later re-render, and it
+  // survives the entry→home transition because it isn't tied to `state`.
+  useEffect(() => {
+    if (state.phase !== 'home') return;
+    const link = deepLinkRef.current;
+    if (!link) return;
+    deepLinkRef.current = null;
+    switch (link.kind) {
+      case 'announcement':
+        setAnnouncementsFocusId(link.id);
+        setSection('announcements');
+        break;
+      case 'request':
+        setRequestsRequestId(link.id);
+        setSection('requests');
+        break;
+      case 'order':
+        setDiningOrderId(link.id);
+        setSection('dining');
+        break;
+      case 'event':
+        setEventsEventId(link.id);
+        setSection('events');
+        break;
+      case 'home':
+      case 'announcements':
+        // No section to jump to — the guest is already headed home.
+        break;
+    }
+  }, [state.phase, setSection]);
 
   // Epic 20 (20.4) — DND is optimistic-apply with server echo (recorded
   // decision 10: no shared profile poller in this app). Seeded from the
@@ -292,6 +346,7 @@ export function GuestFlow({
                 feed={announcementsFeed}
                 profile={state.profile}
                 onBack={() => setSection('home')}
+                initialAnnouncementId={announcementsFocusId}
                 // Both chips: null when their section isn't live. The backend
                 // attaches infoChip/eventChip regardless of the hotel's plan,
                 // and a chip whose handler no-ops is a dead tap — so the chip
@@ -314,7 +369,10 @@ export function GuestFlow({
                 }
               />
             ) : state.section === 'requests' && requestsLive ? (
-              <RequestsScreen profile={state.profile} />
+              <RequestsScreen
+                profile={state.profile}
+                initialRequestId={requestsRequestId}
+              />
             ) : state.section === 'dining' && diningLive ? (
               <DiningScreen
                 profile={state.profile}
@@ -426,6 +484,8 @@ export function GuestFlow({
                 setInfoEntryId(null);
                 setEventsBookingId(null);
                 setEventsEventId(null);
+                setRequestsRequestId(null);
+                setAnnouncementsFocusId(null);
                 setSection(section);
               }}
               requestsLive={requestsLive}

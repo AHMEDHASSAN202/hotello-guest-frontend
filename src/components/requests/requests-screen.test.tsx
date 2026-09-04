@@ -259,6 +259,32 @@ describe('My requests (15.3)', () => {
     ).toBeTruthy();
   });
 
+  it('Epic 23 Task 10 — initialRequestId opens the mine tab already showing that request\'s detail', async () => {
+    stubApi({ requests: [makeRequest({ id: 'req-9', itemName: 'Extra pillow' })] });
+    wrap(<RequestsScreen profile={profile} initialRequestId="req-9" />);
+
+    // The "mine" tab is selected up front — no click needed.
+    expect(await screen.findByRole('tab', { name: /My requests/ })).toHaveProperty(
+      'ariaSelected',
+      'true',
+    );
+    // The detail sheet resolves once the list has loaded, the same way a
+    // tap on the row would (dining-screen.tsx's initialOrderId precedent).
+    expect(await screen.findByTestId('bottom-sheet')).toBeTruthy();
+    expect(screen.getByText('Extra pillow')).toBeTruthy();
+  });
+
+  it('Epic 23 Task 10 — a dangling initialRequestId is a silent no-op (no matching request)', async () => {
+    stubApi({ requests: [] });
+    wrap(<RequestsScreen profile={profile} initialRequestId="does-not-exist" />);
+
+    expect(await screen.findByRole('tab', { name: /My requests/ })).toHaveProperty(
+      'ariaSelected',
+      'true',
+    );
+    expect(screen.queryByTestId('bottom-sheet')).toBeNull();
+  });
+
   it('AC4 — the Russian bundle renders the status chips', async () => {
     stubApi({ requests: [makeRequest({ status: 'in_progress' })] });
     wrap(
