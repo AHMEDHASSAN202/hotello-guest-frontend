@@ -99,7 +99,7 @@ describe('NotificationsRow (Epic 23, Task 13, 23.2 AC3)', () => {
     expect(screen.queryByTestId('notifications-enable')).toBeNull();
   });
 
-  it('unsupported → explanatory text, no switch, no enable button', async () => {
+  it('unsupported (non-iOS, no push at all) → explanatory text, no switch, no enable button', async () => {
     pushLib.getPushState.mockResolvedValue('unsupported');
     wrap();
     await screen.findByText('Not available on this browser');
@@ -112,6 +112,26 @@ describe('NotificationsRow (Epic 23, Task 13, 23.2 AC3)', () => {
     wrap();
     expect(await screen.findByTestId('notifications-enable')).toBeTruthy();
     expect(screen.queryByTestId('notifications-switch')).toBeNull();
+  });
+
+  /**
+   * FINAL-REVIEW FIX (23.2 AC2) — 'ios-install' used to fall through the old
+   * blanket 'unsupported' branch, leaving a real iOS guest with dead text
+   * and no way to reach the A2HS guide from settings. It must now render the
+   * same enable-style affordance as 'promptable', which opens the sheet via
+   * `openDirect` — the sheet's own `isIosSafariBrowser()` branch renders the
+   * install guide, not the standard enable/decline sheet.
+   */
+  it("ios-install → an enable-style button (not dead text), opening the A2HS guide", async () => {
+    pushLib.getPushState.mockResolvedValue('ios-install');
+    pushLib.isIosSafariBrowser.mockReturnValue(true);
+    wrap();
+    expect(screen.queryByText('Not available on this browser')).toBeNull();
+    const btn = await screen.findByTestId('notifications-enable');
+    expect(screen.queryByTestId('notifications-switch')).toBeNull();
+
+    fireEvent.click(btn);
+    expect(await screen.findByTestId('push-prompt-ios-guide')).toBeTruthy();
   });
 
   it('toggling off calls unsubscribeFromPush', async () => {

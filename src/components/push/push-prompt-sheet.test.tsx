@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import en from '../../../messages/en';
-import type { PromptMoment } from '@/lib/push';
+import type { PromptMoment, PushUiState } from '@/lib/push';
 
 /**
  * Epic 23, Task 12 (23.2 AC1/AC2) — the contextual pre-prompt sheet + iOS
@@ -14,7 +14,7 @@ const pushLib = vi.hoisted(() => {
   const shown = new Set<string>();
   return {
     shown,
-    getPushState: vi.fn(async () => 'promptable' as const),
+    getPushState: vi.fn(async (): Promise<PushUiState> => 'promptable'),
     subscribeToPush: vi.fn(async () => true),
     isIosSafariBrowser: vi.fn(() => false),
     shouldPrompt: vi.fn(
@@ -189,5 +189,33 @@ describe('PushPromptProvider + usePushPrompt — the per-stay shown-twice cap (2
     fireEvent.click(screen.getByText('trigger'));
     await new Promise((r) => setTimeout(r, 0));
     expect(screen.queryByTestId('push-prompt-standard')).toBeNull();
+  });
+
+  /**
+   * FINAL-REVIEW FIX (23.2 AC2) — 'ios-install' is the real-device iOS path
+   * (no Notification API yet, needs A2HS first). `maybePrompt` must treat it
+   * the same as 'promptable': open the sheet (which then renders the guide,
+   * since `isIosSafariBrowser()` agrees with the state in reality) and count
+   * it against the per-stay shown-twice cap, so an iOS guest isn't shown the
+   * install guide a third time either.
+   */
+  it("maybePrompt opens the sheet for 'ios-install' and records the moment", async () => {
+    pushLib.getPushState.mockResolvedValue('ios-install');
+    pushLib.isIosSafariBrowser.mockReturnValue(true);
+    wrapProvider('post_order');
+    fireEvent.click(screen.getByText('trigger'));
+    expect(await screen.findByTestId('push-prompt-ios-guide')).toBeTruthy();
+    expect(pushLib.recordShown).toHaveBeenCalledWith('stay-1', 'post_order');
+  });
+
+  it("does not prompt a third time for 'ios-install' once two moments have already been shown this stay", async () => {
+    pushLib.getPushState.mockResolvedValue('ios-install');
+    pushLib.isIosSafariBrowser.mockReturnValue(true);
+    pushLib.shown.add('post_request');
+    pushLib.shown.add('inbox_open');
+    wrapProvider('post_order');
+    fireEvent.click(screen.getByText('trigger'));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(screen.queryByTestId('push-prompt-ios-guide')).toBeNull();
   });
 });

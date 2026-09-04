@@ -86,7 +86,12 @@ export function PushPromptProvider({
     (target: PromptMoment) => {
       void (async () => {
         const state = await getPushState();
-        if (state !== 'promptable') return;
+        // FINAL-REVIEW FIX (23.2 AC2) — 'ios-install' is the real-device iOS
+        // path (no Notification API yet, needs A2HS first); it opens the
+        // same sheet, which branches to the install guide via
+        // `isIosSafariBrowser()`. Both count against the max-twice cap below
+        // — a guest shown the install guide twice shouldn't be nagged again.
+        if (state !== 'promptable' && state !== 'ios-install') return;
         if (!pushPromptStore.shouldPrompt(stayId, target)) return;
         // Recorded before the sheet even opens (Task 11 bookkeeping is
         // permission-independent — a moment counts as "shown" whether the

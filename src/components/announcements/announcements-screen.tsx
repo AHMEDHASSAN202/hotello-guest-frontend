@@ -107,17 +107,31 @@ export function AnnouncementsScreen({
   // dangling id (deleted/expired announcement) is a silent no-op. Placed
   // before the early returns below (rules of hooks) — feed.announcements is
   // read directly since the `rows` alias is declared after them.
+  //
+  // FINAL-REVIEW FIX (upgraded from parked) — `feed.announcements` gets a
+  // new array identity on every poll AND on `markRead` (optimistic update),
+  // so this effect used to re-fire on every such change and re-run
+  // `scrollIntoView`. A deep-linked guest who opened any OTHER announcement
+  // (which calls `markRead`) got smooth-scrolled back to the pushed item the
+  // moment they closed its detail sheet. `scrolledRef` makes the scroll
+  // one-shot: it only flips once the target row is actually found and
+  // scrolled to, so a feed that hasn't loaded yet at first render (or whose
+  // target arrives on a later poll) still gets the initial scroll — it just
+  // never repeats it once done.
+  const scrolledRef = useRef(false);
   useEffect(() => {
     if (
+      scrolledRef.current ||
       !feed.announcements ||
       !initialAnnouncementId ||
       typeof document === 'undefined'
     ) {
       return;
     }
-    document
-      .getElementById(`announcement-${initialAnnouncementId}`)
-      ?.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
+    const el = document.getElementById(`announcement-${initialAnnouncementId}`);
+    if (!el) return; // not rendered yet — retry on the next feed update
+    scrolledRef.current = true;
+    el.scrollIntoView?.({ behavior: 'smooth', block: 'start' });
   }, [feed.announcements, initialAnnouncementId]);
 
   if (moduleGone) {

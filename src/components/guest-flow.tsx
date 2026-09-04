@@ -7,7 +7,7 @@ import { api, ApiError, onSessionDeath } from '@/lib/api';
 import { tokenStore } from '@/lib/auth';
 import { cartStore } from '@/lib/cart';
 import { parseOpenParam } from '@/lib/deep-link';
-import { getPushState, unsubscribeFromPush } from '@/lib/push';
+import { getPushState, subscribeToPush, unsubscribeFromPush } from '@/lib/push';
 import type { GuestAnnouncement, GuestProfile, GuestSessionResponse } from '@/lib/types';
 import {
   latestUnreadPriority,
@@ -145,11 +145,35 @@ export function GuestFlow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // FINAL-REVIEW FIX (23.2 AC4/AC3) — a browser subscription from a PRIOR
+  // stay on this device is never re-POSTed anywhere else in the app
+  // (`subscribeToPush`'s only other callers are user-initiated: the sheet's
+  // enable tap and the settings toggle). Left alone, a guest re-entering on
+  // a new stay with the old subscription still present sees settings show
+  // "On" while the subscription row is still bound to the ENDED stay
+  // server-side — push silently dead. Firing this once at session
+  // establishment (probe-success and login-success, the two paths that land
+  // on `phase: 'home'`) re-POSTs an already-subscribed browser's endpoint so
+  // the backend's idempotent per-endpoint upsert re-binds it to the new
+  // stay. `Notification.requestPermission()` resolves 'granted' WITHOUT a
+  // dialog when permission is already granted, so this never shows the
+  // guest anything — the never-cold-prompt guarantee holds. Fire-and-forget:
+  // never awaited, never blocks the transition to home, and `subscribeToPush`
+  // already never throws.
+  const rebindPushIfSubscribed = useCallback(() => {
+    void (async () => {
+      if ((await getPushState()) === 'subscribed') {
+        void subscribeToPush();
+      }
+    })();
+  }, []);
+
   const probe = useCallback(async () => {
     setState({ phase: 'probing' });
     try {
       const profile = await api<GuestProfile>('/guest/me');
       setState({ phase: 'home', profile, section: 'home' });
+      rebindPushIfSubscribed();
     } catch (err) {
       if (err instanceof ApiError && err.code === 'NETWORK') {
         setState({ phase: 'error', kind: 'offline' });
@@ -161,7 +185,7 @@ export function GuestFlow({
         setState({ phase: 'error', kind: 'generic' });
       }
     }
-  }, []);
+  }, [rebindPushIfSubscribed]);
 
   useEffect(() => {
     if (tokenStore.get()) void probe();
@@ -205,7 +229,8 @@ export function GuestFlow({
       window.history.replaceState(null, '', window.location.pathname);
     }
     setState({ phase: 'home', profile: session.profile, section: 'home' });
-  }, []);
+    rebindPushIfSubscribed();
+  }, [rebindPushIfSubscribed]);
 
   const refresh = useCallback(async () => {
     try {

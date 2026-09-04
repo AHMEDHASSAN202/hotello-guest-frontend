@@ -157,10 +157,53 @@ describe('getPushState', () => {
     expect(await getPushState()).toBe('unsupported');
   });
 
-  it('unsupported when Notification API is missing (iOS non-standalone)', async () => {
+  it('unsupported (not iOS) when the Notification API is missing on a non-iOS browser', async () => {
     stubPushManagerGlobal(true);
-    defineNav({ serviceWorker: { ready: Promise.resolve({}) } });
+    defineNav({
+      serviceWorker: { ready: Promise.resolve({}) },
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    });
     expect(await getPushState()).toBe('unsupported');
+  });
+
+  /**
+   * FINAL-REVIEW FIX (23.2 AC2) — the old blanket 'unsupported' result here
+   * made the iOS A2HS install guide unreachable on a real device: both
+   * routes that open the guide sheet required 'promptable', but 'promptable'
+   * implies the Notification API exists, which on iOS means the app is
+   * already installed — so `isIosSafariBrowser()` (which checks NOT
+   * standalone) would always be false by the time the guide could show.
+   * This is the real, reachable device path: an iOS Safari tab, not
+   * installed, has no Notification API at all.
+   */
+  it("'ios-install' when the Notification API is missing on iOS Safari, not installed — the real device path (23.2 AC2)", async () => {
+    stubPushManagerGlobal(true);
+    defineNav({
+      serviceWorker: { ready: Promise.resolve({}) },
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_4 like Mac OS X)',
+      standalone: false,
+    });
+    expect(await getPushState()).toBe('ios-install');
+  });
+
+  it("'ios-install' even when serviceWorker/PushManager are also missing on iOS Safari, not installed", async () => {
+    stubPushManagerGlobal(false);
+    defineNav({
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_4 like Mac OS X)',
+      standalone: false,
+    });
+    expect(await getPushState()).toBe('ios-install');
+  });
+
+  it("stays 'unsupported' once installed (standalone) even with no push APIs — isIosSafariBrowser is false there", async () => {
+    stubPushManagerGlobal(false);
+    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as never;
+    defineNav({
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_4 like Mac OS X)',
+    });
+    expect(await getPushState()).toBe('unsupported');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (window as any).matchMedia;
   });
 
   it('blocked when permission is denied', async () => {

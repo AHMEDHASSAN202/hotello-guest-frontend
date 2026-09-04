@@ -14,11 +14,15 @@ import { usePushPrompt } from './push-prompt-context';
 /** `PushUiState` → the `push.settings.*` status-line key for that state.
  * `promptable` reads "off" — permission simply hasn't been asked yet, which
  * is a kind of off the guest already understands; the "enable" button next
- * to it is what actually distinguishes it from a plain off toggle. */
+ * to it is what actually distinguishes it from a plain off toggle.
+ * `ios-install` (FINAL-REVIEW FIX, 23.2 AC2) reads the same "off" — it's the
+ * same "not yet enabled, one step required" bucket, just with the A2HS guide
+ * as that step instead of the permission dialog. */
 const STATUS_KEY: Record<PushUiState, 'on' | 'off' | 'blocked' | 'unsupported'> = {
   subscribed: 'on',
   off: 'off',
   promptable: 'off',
+  'ios-install': 'off',
   blocked: 'blocked',
   unsupported: 'unsupported',
 };
@@ -38,17 +42,21 @@ const STATUS_KEY: Record<PushUiState, 'on' | 'off' | 'blocked' | 'unsupported'> 
  *
  * `subscribed`/`off` render the Epic 20 `Switch` directly — toggling on from
  * `off` means permission is already granted, so `subscribeToPush()` can
- * (re)subscribe without ever showing a sheet. `blocked`/`unsupported` are
- * plain text with no control — nothing this UI can do fixes either.
- * `promptable` renders an "enable" button that opens the full pre-prompt
- * sheet via `openDirect` — bypassing the per-stay shown-twice cap
- * (`pushPromptStore`) entirely, because a guest who explicitly visits
- * settings and taps enable must always get the sheet, even if the
- * contextual pre-prompt already showed (and was declined) twice this stay.
- * `openDirect`'s `onClosed` callback re-fetches `getPushState()` once the
- * sheet closes, so a successful enable is reflected here immediately —
- * this component otherwise has no way to learn the sheet (owned by
- * `PushPromptProvider`, mounted well above `StayCard`) ever ran.
+ * (re)subscribe without ever showing a sheet. `blocked`/genuine `unsupported`
+ * (a non-iOS browser with no push at all) are plain text with no control —
+ * nothing this UI can do fixes either.
+ * `promptable` AND `ios-install` (FINAL-REVIEW FIX, 23.2 AC2) render the same
+ * "enable" button, opening the full pre-prompt sheet via `openDirect` —
+ * bypassing the per-stay shown-twice cap (`pushPromptStore`) entirely,
+ * because a guest who explicitly visits settings and taps enable must
+ * always get the sheet, even if the contextual pre-prompt already showed
+ * (and was declined) twice this stay. For `ios-install` the sheet's own
+ * `isIosSafariBrowser()` branch renders the A2HS guide instead of the
+ * standard enable/decline copy — this row doesn't need to know which one it
+ * opened. `openDirect`'s `onClosed` callback re-fetches `getPushState()`
+ * once the sheet closes, so a successful enable is reflected here
+ * immediately — this component otherwise has no way to learn the sheet
+ * (owned by `PushPromptProvider`, mounted well above `StayCard`) ever ran.
  */
 export function NotificationsRow() {
   const t = useTranslations('push');
@@ -107,7 +115,7 @@ export function NotificationsRow() {
             aria-label={t('settings.label')}
             data-testid="notifications-switch"
           />
-        ) : state === 'promptable' ? (
+        ) : state === 'promptable' || state === 'ios-install' ? (
           <button
             type="button"
             onClick={() =>

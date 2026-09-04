@@ -241,6 +241,120 @@ describe('AnnouncementsScreen (19.4 AC2)', () => {
     getByIdSpy.mockRestore();
   });
 
+  /**
+   * FINAL-REVIEW FIX (upgraded from parked) — the scroll effect used to
+   * re-fire on every `feed.announcements` identity change, including the new
+   * array `markRead` produces on every open. A deep-linked guest who opened
+   * ANY other announcement got smooth-scrolled back to the pushed item the
+   * moment they closed it. The scroll must now be one-shot: it fires once
+   * when the target is found, never again after — even though the array
+   * identity keeps changing underneath it.
+   */
+  it('FINAL-REVIEW FIX — the deep-link scroll fires once, not again when feed.announcements changes identity afterward', () => {
+    const feed = makeFeed({
+      announcements: [make({ id: 'a1' }), make({ id: 'a2', title: 'Second' })],
+      unreadCount: 2,
+    });
+    const scrollSpy = vi.fn();
+    const originalGetById = document.getElementById.bind(document);
+    const getByIdSpy = vi
+      .spyOn(document, 'getElementById')
+      .mockImplementation((id: string) => {
+        const el = originalGetById(id);
+        if (el && id === 'announcement-a2') {
+          (el as HTMLElement).scrollIntoView = scrollSpy;
+        }
+        return el;
+      });
+
+    const { rerender } = wrap(
+      <AnnouncementsScreen
+        feed={feed}
+        profile={profile}
+        onBack={vi.fn()}
+        onOpenInfo={vi.fn()}
+        onOpenEvent={vi.fn()}
+        initialAnnouncementId="a2"
+      />,
+    );
+    expect(scrollSpy).toHaveBeenCalledTimes(1);
+
+    // A brand-new array identity, exactly what `markRead` produces when the
+    // guest opens (and reads) a DIFFERENT announcement — the real trigger
+    // for the jank this fix addresses.
+    const feed2 = makeFeed({
+      announcements: [
+        { ...feed.announcements![0], readAt: '2026-01-15T10:05:00.000Z' },
+        { ...feed.announcements![1] },
+      ],
+      unreadCount: 1,
+    });
+    rerender(
+      <NextIntlClientProvider locale="en" messages={en} timeZone="Africa/Cairo">
+        <HotelProvider hotel={hotel}>
+          <AnnouncementsScreen
+            feed={feed2}
+            profile={profile}
+            onBack={vi.fn()}
+            onOpenInfo={vi.fn()}
+            onOpenEvent={vi.fn()}
+            initialAnnouncementId="a2"
+          />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+
+    expect(scrollSpy).toHaveBeenCalledTimes(1); // still just once
+    getByIdSpy.mockRestore();
+  });
+
+  it('FINAL-REVIEW FIX — still scrolls once the target arrives on a LATER feed load (not present at first render)', () => {
+    const scrollSpy = vi.fn();
+    const originalGetById = document.getElementById.bind(document);
+    const getByIdSpy = vi
+      .spyOn(document, 'getElementById')
+      .mockImplementation((id: string) => {
+        const el = originalGetById(id);
+        if (el && id === 'announcement-a2') {
+          (el as HTMLElement).scrollIntoView = scrollSpy;
+        }
+        return el;
+      });
+
+    const { rerender } = wrap(
+      <AnnouncementsScreen
+        feed={makeFeed({ announcements: null, unreadCount: 0 })}
+        profile={profile}
+        onBack={vi.fn()}
+        onOpenInfo={vi.fn()}
+        onOpenEvent={vi.fn()}
+        initialAnnouncementId="a2"
+      />,
+    );
+    expect(scrollSpy).not.toHaveBeenCalled();
+
+    rerender(
+      <NextIntlClientProvider locale="en" messages={en} timeZone="Africa/Cairo">
+        <HotelProvider hotel={hotel}>
+          <AnnouncementsScreen
+            feed={makeFeed({
+              announcements: [make({ id: 'a1' }), make({ id: 'a2', title: 'Second' })],
+              unreadCount: 2,
+            })}
+            profile={profile}
+            onBack={vi.fn()}
+            onOpenInfo={vi.fn()}
+            onOpenEvent={vi.fn()}
+            initialAnnouncementId="a2"
+          />
+        </HotelProvider>
+      </NextIntlClientProvider>,
+    );
+
+    expect(scrollSpy).toHaveBeenCalledTimes(1);
+    getByIdSpy.mockRestore();
+  });
+
   it('Epic 23 Task 10 — a dangling initialAnnouncementId is a silent no-op (no matching element, no throw)', () => {
     const feed = makeFeed({
       announcements: [make({ id: 'a1' })],

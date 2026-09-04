@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import en from '../../messages/en';
 import { ApiError } from '@/lib/api';
+import type { PushUiState } from '@/lib/push';
 import type {
   GuestAnnouncement,
   GuestEventBooking,
@@ -23,7 +24,8 @@ const { apiMock, tokenStore, deathHandlers, pushLib } = vi.hoisted(() => ({
   },
   deathHandlers: new Set<() => void>(),
   pushLib: {
-    getPushState: vi.fn(async () => 'unsupported' as const),
+    getPushState: vi.fn(async (): Promise<PushUiState> => 'unsupported'),
+    subscribeToPush: vi.fn(async () => true),
     unsubscribeFromPush: vi.fn(async () => {}),
   },
 }));
@@ -43,9 +45,11 @@ vi.mock('@/lib/auth', () => ({ tokenStore }));
 // Epic 23, Task 13 (23.2 AC4) — the goodbye teardown reads/clears push
 // state; mocked so these tests control it without touching jsdom's absent
 // Notification/Push APIs. `NotificationsRow` (rendered inside StayCard on
-// every home screen here) shares this same mock.
+// every home screen here) shares this same mock. `subscribeToPush`
+// (FINAL-REVIEW FIX, 23.2 AC4/AC3) backs the session-establishment re-bind.
 vi.mock('@/lib/push', () => ({
   getPushState: pushLib.getPushState,
+  subscribeToPush: pushLib.subscribeToPush,
   unsubscribeFromPush: pushLib.unsubscribeFromPush,
 }));
 vi.mock('@/i18n/locale', () => ({
@@ -98,6 +102,7 @@ describe('GuestFlow boot branching (14.2 AC4)', () => {
     tokenStore.set.mockClear();
     deathHandlers.clear();
     pushLib.getPushState.mockReset().mockResolvedValue('unsupported');
+    pushLib.subscribeToPush.mockReset().mockResolvedValue(true);
     pushLib.unsubscribeFromPush.mockReset().mockResolvedValue(undefined);
   });
 
@@ -213,6 +218,60 @@ describe('GuestFlow boot branching (14.2 AC4)', () => {
       body: JSON.stringify({ roomNumber: '304', code: '123456' }),
     });
     replaceSpy.mockRestore();
+  });
+
+  /**
+   * FINAL-REVIEW FIX (23.2 AC4/AC3) — nothing else in the app ever re-POSTs
+   * an existing browser subscription. A guest whose previous stay ended but
+   * re-enters on this device with the old subscription still present would
+   * otherwise see settings show "On" while the server-side row stays bound
+   * to the ENDED stay — push silently dead. Session establishment (both the
+   * probe-success and login-success paths that land on `phase: 'home'`)
+   * must silently re-POST it so the backend's idempotent upsert re-binds it
+   * to the new stay.
+   */
+  describe('session establishment silently re-binds an already-subscribed browser (23.2 AC4/AC3)', () => {
+    it('probe success with a subscribed browser calls subscribeToPush exactly once', async () => {
+      tokenStore.get.mockReturnValue('stored-token');
+      apiMock.mockResolvedValue(profile);
+      pushLib.getPushState.mockResolvedValue('subscribed');
+      wrap(<GuestFlow slug="sunrise" />);
+      await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+      await waitFor(() =>
+        expect(pushLib.subscribeToPush).toHaveBeenCalledTimes(1),
+      );
+      // Never an unsubscribe — this is a re-bind, not a teardown.
+      expect(pushLib.unsubscribeFromPush).not.toHaveBeenCalled();
+    });
+
+    it.each(['off', 'promptable', 'blocked', 'unsupported'] as const)(
+      'probe success with push state "%s" never calls subscribeToPush',
+      async (state) => {
+        tokenStore.get.mockReturnValue('stored-token');
+        apiMock.mockResolvedValue(profile);
+        pushLib.getPushState.mockResolvedValue(state);
+        wrap(<GuestFlow slug="sunrise" />);
+        await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+        // Let the fire-and-forget check settle before asserting the negative.
+        await act(async () => {
+          await Promise.resolve();
+        });
+        expect(pushLib.subscribeToPush).not.toHaveBeenCalled();
+      },
+    );
+
+    it('login success (entering) with a subscribed browser calls subscribeToPush exactly once', async () => {
+      apiMock.mockResolvedValue({ accessToken: 'fresh', profile });
+      pushLib.getPushState.mockResolvedValue('subscribed');
+      wrap(<GuestFlow slug="sunrise" roomParam="304" />);
+      fireEvent.change(screen.getByLabelText('code-input'), {
+        target: { value: '123456' },
+      });
+      await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+      await waitFor(() =>
+        expect(pushLib.subscribeToPush).toHaveBeenCalledTimes(1),
+      );
+    });
   });
 });
 

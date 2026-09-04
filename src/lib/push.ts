@@ -7,13 +7,22 @@ const PUSH_KEY = 'gxp_guest_push_v1';
  * platform detection, and the per-stay "don't nag" prompt bookkeeping
  * (23.2 AC1). Same single-purpose-module shape as `cartStore`/`tokenStore`.
  */
-export type PushUiState = 'unsupported' | 'blocked' | 'subscribed' | 'off' | 'promptable';
+export type PushUiState =
+  | 'unsupported'
+  | 'ios-install'
+  | 'blocked'
+  | 'subscribed'
+  | 'off'
+  | 'promptable';
 export type PromptMoment = 'post_request' | 'post_order' | 'inbox_open';
 
 /**
  * True when neither the SW/Push APIs nor the Notification API are usable at
  * all — includes iOS Safari outside of an installed PWA, which has no
- * Notification API until added to the home screen (23.2 AC2).
+ * Notification API until added to the home screen (23.2 AC2). Callers that
+ * need to distinguish "iOS, just needs A2HS" from "genuinely no push here"
+ * should branch on `isIosSafariBrowser()` on top of this, which is exactly
+ * what `getPushState()` does below.
  */
 function pushUnsupported(): boolean {
   if (typeof window === 'undefined') return true;
@@ -22,9 +31,20 @@ function pushUnsupported(): boolean {
   return false;
 }
 
-/** getState() — see the interface doc in the task brief for the branch order. */
+/**
+ * getState() — see the interface doc in the task brief for the branch order.
+ *
+ * FINAL-REVIEW FIX (23.2 AC2) — iOS Safari outside a standalone install has
+ * no Notification API, so the old blanket `'unsupported'` result meant the
+ * A2HS install guide (gated on `'promptable'`/now also `'ios-install'`) was
+ * unreachable on a real device: `promptable` implies the Notification API
+ * exists, which on iOS means the app is already installed, so
+ * `isIosSafariBrowser()` would always be false by the time the guide could
+ * render. Splitting this specific case into its own state lets callers open
+ * the install guide from the real, reachable platform condition instead.
+ */
 export async function getPushState(): Promise<PushUiState> {
-  if (pushUnsupported()) return 'unsupported';
+  if (pushUnsupported()) return isIosSafariBrowser() ? 'ios-install' : 'unsupported';
   if (Notification.permission === 'denied') return 'blocked';
   if (Notification.permission !== 'granted') return 'promptable';
   const reg = await navigator.serviceWorker.ready;
