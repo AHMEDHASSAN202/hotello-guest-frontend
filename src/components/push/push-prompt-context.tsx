@@ -6,6 +6,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -40,8 +41,13 @@ interface PushPromptContextValue {
    * taps enable must always get the sheet, even if the contextual
    * pre-prompt already used up its two shows this stay. Unlike
    * `maybePrompt`, this does not re-check push state first — callers only
-   * offer this action when they already know the state is `promptable`. */
-  openDirect: (moment: PromptMoment) => void;
+   * offer this action when they already know the state is `promptable`.
+   * `onClosed`, if given, fires once the sheet closes — enabled, declined,
+   * or dismissed, the caller can't tell which from here, so it should just
+   * re-read `getPushState()` rather than assume success. Exists so a
+   * caller showing its own push-state snapshot (`NotificationsRow`) can
+   * resync itself instead of going stale until an unrelated remount. */
+  openDirect: (moment: PromptMoment, onClosed?: () => void) => void;
 }
 
 // Outside <PushPromptProvider> (e.g. SubmitSheet/CheckoutSheet rendered in
@@ -72,6 +78,9 @@ export function PushPromptProvider({
   children: ReactNode;
 }) {
   const [moment, setMoment] = useState<PromptMoment | null>(null);
+  // Not state — firing it must never itself trigger a render; it's read
+  // exactly once, from the sheet's own onClose.
+  const onClosedRef = useRef<(() => void) | null>(null);
 
   const maybePrompt = useCallback(
     (target: PromptMoment) => {
@@ -89,7 +98,8 @@ export function PushPromptProvider({
     [stayId],
   );
 
-  const openDirect = useCallback((target: PromptMoment) => {
+  const openDirect = useCallback((target: PromptMoment, onClosed?: () => void) => {
+    onClosedRef.current = onClosed ?? null;
     setMoment(target);
   }, []);
 
@@ -104,7 +114,12 @@ export function PushPromptProvider({
       {moment ? (
         <PushPromptSheet
           moment={moment}
-          onClose={() => setMoment(null)}
+          onClose={() => {
+            setMoment(null);
+            const onClosed = onClosedRef.current;
+            onClosedRef.current = null;
+            onClosed?.();
+          }}
         />
       ) : null}
     </PushPromptContext.Provider>

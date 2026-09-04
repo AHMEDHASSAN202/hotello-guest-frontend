@@ -168,5 +168,30 @@ describe('NotificationsRow (Epic 23, Task 13, 23.2 AC3)', () => {
       expect(pushLib.shouldPrompt).not.toHaveBeenCalled();
       expect(pushLib.recordShown).not.toHaveBeenCalled();
     });
+
+    it('after a successful settings-initiated enable, the row reflects "subscribed" once the sheet closes — no unmount/remount needed', async () => {
+      pushLib.getPushState.mockResolvedValue('promptable');
+      wrap();
+      const btn = await screen.findByTestId('notifications-enable');
+      fireEvent.click(btn);
+      expect(await screen.findByTestId('push-prompt-standard')).toBeTruthy();
+
+      // The guest just granted permission in the browser dialog — from here
+      // on, getPushState() reflects a live subscription. subscribeToPush()
+      // is already mocked to resolve true (the sheet's own success path).
+      pushLib.getPushState.mockResolvedValue('subscribed');
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Turn on notifications' }),
+      );
+
+      await waitFor(() =>
+        expect(screen.queryByTestId('push-prompt-standard')).toBeNull(),
+      );
+      // No remount happened — this is the same NotificationsRow instance
+      // picking up the new state via the sheet's onClosed callback.
+      const sw = await screen.findByTestId('notifications-switch');
+      expect(sw.getAttribute('aria-checked')).toBe('true');
+      expect(screen.queryByTestId('notifications-enable')).toBeNull();
+    });
   });
 });

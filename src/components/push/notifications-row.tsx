@@ -45,6 +45,10 @@ const STATUS_KEY: Record<PushUiState, 'on' | 'off' | 'blocked' | 'unsupported'> 
  * (`pushPromptStore`) entirely, because a guest who explicitly visits
  * settings and taps enable must always get the sheet, even if the
  * contextual pre-prompt already showed (and was declined) twice this stay.
+ * `openDirect`'s `onClosed` callback re-fetches `getPushState()` once the
+ * sheet closes, so a successful enable is reflected here immediately —
+ * this component otherwise has no way to learn the sheet (owned by
+ * `PushPromptProvider`, mounted well above `StayCard`) ever ran.
  */
 export function NotificationsRow() {
   const t = useTranslations('push');
@@ -106,7 +110,16 @@ export function NotificationsRow() {
         ) : state === 'promptable' ? (
           <button
             type="button"
-            onClick={() => openDirect('inbox_open')}
+            onClick={() =>
+              openDirect('inbox_open', () => {
+                // The sheet just closed — enabled, declined, or dismissed,
+                // we can't tell which from here, so re-read the truth
+                // rather than assume success. Without this the row would
+                // go stale after a successful enable until an unrelated
+                // remount (there may be no bottom nav to trigger one).
+                void getPushState().then(setState);
+              })
+            }
             data-testid="notifications-enable"
             className="pressable inline-flex min-h-[44px] shrink-0 items-center rounded-full bg-accent-soft px-4 text-[13px] font-semibold text-accent"
           >
