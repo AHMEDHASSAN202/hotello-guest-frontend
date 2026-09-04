@@ -31,7 +31,7 @@ export function MenuBrowse({
       {menus.map((menu) => (
         <section key={menu.id}>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-semibold text-lg text-ink">{menu.name}</h2>
+            <h2 className="font-semibold text-lg text-ink capitalize">{menu.name}</h2>
             {!menu.availability.available ? (
               <span className="flex items-center gap-1 rounded-full bg-ink/[0.06] px-2.5 py-1 text-xs font-semibold text-ink-soft">
                 <Clock className="h-3 w-3" aria-hidden />

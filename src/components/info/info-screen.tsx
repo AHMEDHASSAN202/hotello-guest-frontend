@@ -390,7 +390,7 @@ function FacilityCard({
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-[15px] font-semibold text-ink">{facility.name}</h3>
+          <h3 className="text-[15px] font-semibold text-ink capitalize">{facility.name}</h3>
           {badge ? (
             <span
               className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
