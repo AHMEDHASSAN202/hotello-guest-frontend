@@ -7,6 +7,7 @@ import { api, ApiError, onSessionDeath } from '@/lib/api';
 import { tokenStore } from '@/lib/auth';
 import { cartStore } from '@/lib/cart';
 import { parseOpenParam } from '@/lib/deep-link';
+import { getPushState, unsubscribeFromPush } from '@/lib/push';
 import type { GuestAnnouncement, GuestProfile, GuestSessionResponse } from '@/lib/types';
 import {
   latestUnreadPriority,
@@ -64,7 +65,7 @@ type GuestState =
   | { phase: 'probing' }
   | { phase: 'entry' }
   | { phase: 'home'; profile: GuestProfile; section: GuestSection }
-  | { phase: 'goodbye' }
+  | { phase: 'goodbye'; pushStopped: boolean }
   | { phase: 'error'; kind: 'offline' | 'generic' };
 
 /**
@@ -174,7 +175,26 @@ export function GuestFlow({
     if (!isHome) return;
     return onSessionDeath(() => {
       cartStore.clear();
-      setState({ phase: 'goodbye' });
+      // The goodbye screen must appear instantly (AC5) — push teardown
+      // (Epic 23, Task 13, 23.2 AC4) is a fire-and-forget side effect
+      // layered on top, never a gate on the transition. `pushStopped`
+      // starts false and flips true once we actually know the guest had a
+      // live subscription; the server-side stay gate already silenced
+      // pushes the moment checkout landed, this is just the warm note plus
+      // the browser-side cleanup (unsubscribe) so the device stops holding
+      // a dead subscription.
+      setState({ phase: 'goodbye', pushStopped: false });
+      void (async () => {
+        // Capture BEFORE unsubscribing — order matters, or there would be
+        // nothing left to capture.
+        const hadPush = (await getPushState()) === 'subscribed';
+        void unsubscribeFromPush();
+        if (hadPush) {
+          setState((prev) =>
+            prev.phase === 'goodbye' ? { ...prev, pushStopped: true } : prev,
+          );
+        }
+      })();
     });
   }, [isHome]);
 
@@ -314,7 +334,7 @@ export function GuestFlow({
       );
     case 'goodbye':
       return (
-        <GoodbyeScreen>
+        <GoodbyeScreen pushStopped={state.pushStopped}>
           <EntryScreen slug={slug} compact onEnter={enter} />
         </GoodbyeScreen>
       );

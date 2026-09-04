@@ -14,7 +14,7 @@ import type {
 import { HotelProvider } from './hotel-provider';
 import { GuestFlow } from './guest-flow';
 
-const { apiMock, tokenStore, deathHandlers } = vi.hoisted(() => ({
+const { apiMock, tokenStore, deathHandlers, pushLib } = vi.hoisted(() => ({
   apiMock: vi.fn(),
   tokenStore: {
     get: vi.fn((): string | null => null),
@@ -22,6 +22,10 @@ const { apiMock, tokenStore, deathHandlers } = vi.hoisted(() => ({
     clear: vi.fn(),
   },
   deathHandlers: new Set<() => void>(),
+  pushLib: {
+    getPushState: vi.fn(async () => 'unsupported' as const),
+    unsubscribeFromPush: vi.fn(async () => {}),
+  },
 }));
 
 vi.mock('@/lib/api', async (importOriginal) => {
@@ -36,6 +40,14 @@ vi.mock('@/lib/api', async (importOriginal) => {
   };
 });
 vi.mock('@/lib/auth', () => ({ tokenStore }));
+// Epic 23, Task 13 (23.2 AC4) — the goodbye teardown reads/clears push
+// state; mocked so these tests control it without touching jsdom's absent
+// Notification/Push APIs. `NotificationsRow` (rendered inside StayCard on
+// every home screen here) shares this same mock.
+vi.mock('@/lib/push', () => ({
+  getPushState: pushLib.getPushState,
+  unsubscribeFromPush: pushLib.unsubscribeFromPush,
+}));
 vi.mock('@/i18n/locale', () => ({
   useSetLocale: () => ({ locale: 'en', setLocale: vi.fn(), pending: false }),
 }));
@@ -85,6 +97,8 @@ describe('GuestFlow boot branching (14.2 AC4)', () => {
     tokenStore.get.mockReturnValue(null);
     tokenStore.set.mockClear();
     deathHandlers.clear();
+    pushLib.getPushState.mockReset().mockResolvedValue('unsupported');
+    pushLib.unsubscribeFromPush.mockReset().mockResolvedValue(undefined);
   });
 
   it('no token → entry screen immediately', () => {
@@ -129,6 +143,55 @@ describe('GuestFlow boot branching (14.2 AC4)', () => {
     act(() => deathHandlers.forEach((h) => h()));
     expect(screen.getByText('This stay has ended')).toBeTruthy();
     expect(screen.getByLabelText('code-input')).toBeTruthy();
+  });
+
+  it('Epic 23, Task 13 (23.2 AC4) — goodbye teardown: transition is instant, unsubscribe never blocks it', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockResolvedValue(profile);
+    // A getPushState() that never resolves — if the transition (or the
+    // unsubscribe call) were gated on it, the goodbye screen would never
+    // appear. It must show up anyway.
+    pushLib.getPushState.mockReturnValue(new Promise<never>(() => {}));
+    wrap(<GuestFlow slug="sunrise" />);
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+
+    act(() => deathHandlers.forEach((h) => h()));
+    expect(screen.getByText('This stay has ended')).toBeTruthy();
+  });
+
+  it('Epic 23, Task 13 (23.2 AC4) — had a live subscription: unsubscribes and shows the stopped note', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockResolvedValue(profile);
+    pushLib.getPushState.mockResolvedValue('subscribed');
+    wrap(<GuestFlow slug="sunrise" />);
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+
+    act(() => deathHandlers.forEach((h) => h()));
+    expect(screen.getByText('This stay has ended')).toBeTruthy();
+    // The note arrives asynchronously (a beat after the instant transition)
+    // once `getPushState()` resolves and confirms there was something to
+    // stop.
+    await waitFor(() =>
+      expect(
+        screen.getByText('Notifications for this stay have stopped automatically'),
+      ).toBeTruthy(),
+    );
+    expect(pushLib.unsubscribeFromPush).toHaveBeenCalledTimes(1);
+  });
+
+  it('Epic 23, Task 13 (23.2 AC4) — no live subscription: unsubscribe is still called, but no stopped note', async () => {
+    tokenStore.get.mockReturnValue('stored-token');
+    apiMock.mockResolvedValue(profile);
+    pushLib.getPushState.mockResolvedValue('off');
+    wrap(<GuestFlow slug="sunrise" />);
+    await waitFor(() => expect(screen.getByTestId('home-root')).toBeTruthy());
+
+    act(() => deathHandlers.forEach((h) => h()));
+    expect(screen.getByText('This stay has ended')).toBeTruthy();
+    await waitFor(() => expect(pushLib.unsubscribeFromPush).toHaveBeenCalledTimes(1));
+    expect(
+      screen.queryByText('Notifications for this stay have stopped automatically'),
+    ).toBeNull();
   });
 
   it('entering stores the token, strips ?room=, lands home (AC1/multi-device: no client-side lock)', async () => {

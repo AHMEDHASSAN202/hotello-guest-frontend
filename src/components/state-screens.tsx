@@ -105,17 +105,39 @@ export function UnavailableScreen({ hotelName }: { hotelName?: string }) {
   );
 }
 
-/** Warm goodbye (14.2 AC5) — no error-red anywhere; entry form beneath. */
-export function GoodbyeScreen({ children }: { children?: ReactNode }) {
+/**
+ * Warm goodbye (14.2 AC5) — no error-red anywhere; entry form beneath.
+ * `pushStopped` (Epic 23, Task 13, 23.2 AC4) adds a quiet note that
+ * notifications for this stay stopped automatically — only ever rendered
+ * when the guest actually had a live subscription at the moment the stay
+ * ended, never as a generic disclaimer.
+ */
+export function GoodbyeScreen({
+  children,
+  pushStopped,
+}: {
+  children?: ReactNode;
+  pushStopped?: boolean;
+}) {
   const t = useTranslations('states');
+  const tp = useTranslations('push');
   return (
     <Screen>
       <div className="pt-10 text-center">
         <Medallion icon={Sparkles} />
         <h1 className="mb-2 text-xl font-semibold text-ink">{t('goodbye.title')}</h1>
-        <p className="mx-auto mb-8 max-w-[36ch] text-[15px] leading-relaxed text-ink-soft">
+        <p
+          className={`mx-auto max-w-[36ch] text-[15px] leading-relaxed text-ink-soft ${
+            pushStopped ? 'mb-2' : 'mb-8'
+          }`}
+        >
           {t('goodbye.body')}
         </p>
+        {pushStopped ? (
+          <p className="mx-auto mb-8 max-w-[36ch] text-[13px] font-medium text-ink-faint">
+            {tp('goodbye.stopped')}
+          </p>
+        ) : null}
       </div>
       {children}
     </Screen>

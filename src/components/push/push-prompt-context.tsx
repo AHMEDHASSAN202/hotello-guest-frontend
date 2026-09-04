@@ -33,13 +33,25 @@ interface PushPromptContextValue {
    * `Notification.requestPermission()` dialog itself — that only ever
    * happens if the guest taps "enable" inside the sheet. */
   maybePrompt: (moment: PromptMoment) => void;
+  /** Task 13 (23.2 AC3) — opens the sheet immediately, bypassing the
+   * per-stay shown-twice cap entirely (never reads or writes
+   * `pushPromptStore`). For user-initiated entry points only (the settings
+   * row's "enable" button): a guest who deliberately opens settings and
+   * taps enable must always get the sheet, even if the contextual
+   * pre-prompt already used up its two shows this stay. Unlike
+   * `maybePrompt`, this does not re-check push state first — callers only
+   * offer this action when they already know the state is `promptable`. */
+  openDirect: (moment: PromptMoment) => void;
 }
 
 // Outside <PushPromptProvider> (e.g. SubmitSheet/CheckoutSheet rendered in
 // isolation in their own component tests) maybePrompt is a safe no-op rather
 // than a throw — this app has no chrome around every sheet consumer that
 // guarantees the provider is mounted higher up.
-const noopContext: PushPromptContextValue = { maybePrompt: () => {} };
+const noopContext: PushPromptContextValue = {
+  maybePrompt: () => {},
+  openDirect: () => {},
+};
 const PushPromptContext = createContext<PushPromptContextValue>(noopContext);
 
 export function usePushPrompt(): PushPromptContextValue {
@@ -77,7 +89,14 @@ export function PushPromptProvider({
     [stayId],
   );
 
-  const value = useMemo<PushPromptContextValue>(() => ({ maybePrompt }), [maybePrompt]);
+  const openDirect = useCallback((target: PromptMoment) => {
+    setMoment(target);
+  }, []);
+
+  const value = useMemo<PushPromptContextValue>(
+    () => ({ maybePrompt, openDirect }),
+    [maybePrompt, openDirect],
+  );
 
   return (
     <PushPromptContext.Provider value={value}>

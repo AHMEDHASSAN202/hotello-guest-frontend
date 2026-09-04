@@ -53,6 +53,20 @@ describe('state screens (14.6)', () => {
     expect(screen.getByRole('form', { name: 'entry' })).toBeTruthy();
   });
 
+  it('Epic 23, Task 13 (23.2 AC4) — pushStopped omitted/false renders no push note', () => {
+    wrap(<GoodbyeScreen />);
+    expect(
+      screen.queryByText('Notifications for this stay have stopped automatically'),
+    ).toBeNull();
+  });
+
+  it('Epic 23, Task 13 (23.2 AC4) — pushStopped=true renders the push note', () => {
+    wrap(<GoodbyeScreen pushStopped />);
+    expect(
+      screen.getByText('Notifications for this stay have stopped automatically'),
+    ).toBeTruthy();
+  });
+
   it('generic error exposes a working retry', () => {
     const onRetry = vi.fn();
     wrap(<GenericErrorScreen onRetry={onRetry} />);

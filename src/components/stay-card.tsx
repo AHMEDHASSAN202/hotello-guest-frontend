@@ -6,6 +6,7 @@ import { useHotel } from '@/components/hotel-provider';
 import type { Locale } from '@/i18n/config';
 import { formatCheckoutDate, isCheckoutDay, nightsRemaining } from '@/i18n/format';
 import type { GuestProfile } from '@/lib/types';
+import { NotificationsRow } from './push/notifications-row';
 import { Bdi, Switch } from './ui';
 
 /**
@@ -26,7 +27,10 @@ export interface StayCardDnd {
  * The stay card (14.4 AC2): room number large, nights remaining, checkout
  * date + the hotel's checkout time. On the last day it turns into a gentle
  * checkout note (AC4) — warm, accent-tinted, never alarming. Epic 20 adds
- * an optional third row: the Do-Not-Disturb toggle (20.4 AC1).
+ * an optional third row: the Do-Not-Disturb toggle (20.4 AC1). Epic 23
+ * (Task 13, 23.2 AC3) adds an unconditional fourth row, `NotificationsRow` —
+ * unlike DND it isn't gated by an `enabledModules` prop, since push state
+ * lives in the browser, not the hotel's plan.
  */
 export function StayCard({
   profile,
@@ -113,6 +117,8 @@ export function StayCard({
           ) : null}
         </div>
       ) : null}
+
+      <NotificationsRow />
     </section>
   );
 }
