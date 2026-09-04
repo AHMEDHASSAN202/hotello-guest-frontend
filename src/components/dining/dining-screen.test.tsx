@@ -340,4 +340,34 @@ describe('DiningScreen (16.5)', () => {
     expect(sheet.textContent).toContain('Preparing');
     expect(sheet.textContent).toContain('Burger');
   });
+
+  it('renders the item photo at card width using the detail rendition when available (guest-polish-v1 item B4)', async () => {
+    const catalogWithPhoto = {
+      ...CATALOG,
+      menus: CATALOG.menus.map((menu) => ({
+        ...menu,
+        sections: menu.sections.map((section) => ({
+          ...section,
+          items: section.items.map((item) =>
+            item.id === 'item-inc'
+              ? { ...item, photoDetailUrl: '/files/item-inc-detail.jpg', photoThumbUrl: '/files/item-inc-thumb.jpg' }
+              : item,
+          ),
+        })),
+      })),
+    };
+    apiMock.api.mockImplementation(async (path: string) => {
+      if (path.startsWith('/guest/fnb/menus')) return catalogWithPhoto;
+      if (path.startsWith('/guest/fnb/orders'))
+        return { data: [], serverTime: new Date().toISOString() };
+      return {};
+    });
+
+    wrap();
+    await screen.findByText('Fresh Juice');
+    const img = screen.getByTestId('fnb-item-item-inc').querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute('src')).toContain('item-inc-detail.jpg');
+    expect(img?.className).toContain('w-full');
+  });
 });

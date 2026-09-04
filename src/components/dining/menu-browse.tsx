@@ -56,24 +56,24 @@ export function MenuBrowse({
                     <button
                       data-testid={`fnb-item-${item.id}`}
                       onClick={() => onPick(item, menu)}
-                      className="pressable flex w-full items-center gap-3 rounded-card bg-card p-3 text-start shadow-card"
+                      className="pressable flex w-full flex-col overflow-hidden rounded-card bg-card text-start shadow-card"
                     >
-                      {item.photoThumbUrl ? (
+                      {item.photoDetailUrl || item.photoThumbUrl ? (
                         <img
-                          src={assetUrl(item.photoThumbUrl) ?? undefined}
+                          src={assetUrl(item.photoDetailUrl ?? item.photoThumbUrl) ?? undefined}
                           alt=""
                           loading="lazy"
-                          className="h-16 w-20 shrink-0 rounded-xl object-cover"
+                          className="aspect-[4/3] w-full object-cover"
                         />
                       ) : (
                         <span
                           aria-hidden
-                          className="flex h-16 w-20 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-lg"
+                          className="flex aspect-[4/3] w-full items-center justify-center bg-accent-soft text-4xl"
                         >
                           🍽
                         </span>
                       )}
-                      <span className="min-w-0 flex-1">
+                      <span className="min-w-0 flex-1 p-3">
                         <span className="block truncate font-semibold text-ink">
                           {item.name}
                         </span>
