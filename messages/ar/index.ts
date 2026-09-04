@@ -6,7 +6,8 @@ import errors from './errors.json';
 import events from './events.json';
 import home from './home.json';
 import info from './info.json';
+import push from './push.json';
 import requests from './requests.json';
 import states from './states.json';
 
-export default { announcements, common, dining, entry, errors, events, home, info, requests, states };
+export default { announcements, common, dining, entry, errors, events, home, info, push, requests, states };

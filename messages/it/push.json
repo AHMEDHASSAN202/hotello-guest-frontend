@@ -1,0 +1,35 @@
+{
+  "prompt": {
+    "postRequest": {
+      "title": "Vuoi essere avvisato appena la tua richiesta è pronta? 🔔",
+      "body": "Attiva le notifiche per ricevere un aggiornamento non appena la tua richiesta avanza — anche a telefono bloccato."
+    },
+    "postOrder": {
+      "title": "Vuoi essere avvisato appena il tuo ordine è in arrivo? 🔔",
+      "body": "Attiva le notifiche per ricevere un avviso non appena il tuo ordine lascia la cucina."
+    },
+    "inbox": {
+      "title": "Non perderti gli annunci dell'hotel 🔔",
+      "body": "Attiva le notifiche per ricevere subito gli aggiornamenti importanti."
+    },
+    "enable": "Attiva le notifiche",
+    "notNow": "Non ora"
+  },
+  "ios": {
+    "title": "Due passaggi per attivare le notifiche",
+    "step1Title": "Aggiungi l'app alla schermata Home",
+    "step1Body": "Apri il menu Condividi, poi scegli \"Aggiungi a Home\"",
+    "step2Title": "Apri l'app dalla nuova icona",
+    "step2Body": "Poi attiva le notifiche dall'interno dell'app",
+    "done": "Capito"
+  },
+  "settings": {
+    "label": "Notifiche",
+    "on": "Attive",
+    "off": "Disattivate",
+    "blocked": "Bloccate dal browser — attivale nelle impostazioni del sito nel tuo browser",
+    "unsupported": "Non disponibili su questo browser",
+    "enable": "Attiva"
+  },
+  "goodbye": { "stopped": "Le notifiche per questo soggiorno si sono interrotte automaticamente" }
+}

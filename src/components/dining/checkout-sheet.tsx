@@ -15,6 +15,7 @@ import type {
   GuestProfile,
 } from '@/lib/types';
 import { BottomSheet } from '../bottom-sheet';
+import { usePushPrompt } from '../push/push-prompt-context';
 import { Bdi } from '../ui';
 import { cartTotal, type ItemIndex } from './cart-sheet';
 import type { DiningPrefill } from './dining-screen';
@@ -49,6 +50,7 @@ export function CheckoutSheet({
 }) {
   const t = useTranslations('dining');
   const resolveError = useApiError();
+  const { maybePrompt } = usePushPrompt();
 
   // Prefill contract (16.5 AC6): the QR params only pre-select fields —
   // both stay editable, unknown/inactive keys fall back to "choose".
@@ -106,9 +108,15 @@ export function CheckoutSheet({
         }),
       });
       // 16.5 AC4 — optimistic success beat (submit-sheet 1100ms pattern),
-      // then straight to tracking.
+      // then straight to tracking. The push pre-prompt (Epic 23, Task 12,
+      // 23.2 AC1 post_order moment) fires at the same handoff point, not
+      // the instant the API resolves — triggering it mid-checkmark would
+      // stack a second BottomSheet on top of this one's own confirmation.
       setConfirmed(true);
-      setTimeout(() => onPlaced(order), 1100);
+      setTimeout(() => {
+        maybePrompt('post_order');
+        onPlaced(order);
+      }, 1100);
     } catch (err) {
       setError(resolveError(err));
       setPlacing(false);

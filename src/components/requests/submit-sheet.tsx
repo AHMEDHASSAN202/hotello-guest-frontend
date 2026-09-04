@@ -7,6 +7,7 @@ import { api, ApiError } from '@/lib/api';
 import { useApiError } from '@/lib/errors';
 import type { GuestCatalogItem, GuestRequest } from '@/lib/types';
 import { BottomSheet } from '../bottom-sheet';
+import { usePushPrompt } from '../push/push-prompt-context';
 import { Button } from '../ui';
 import { requestIcon } from './request-icons';
 
@@ -27,6 +28,7 @@ export function SubmitSheet({
 }) {
   const t = useTranslations('requests');
   const resolveError = useApiError();
+  const { maybePrompt } = usePushPrompt();
 
   const [quantity, setQuantity] = useState(1);
   const [time, setTime] = useState('08:00');
@@ -45,12 +47,18 @@ export function SubmitSheet({
     setConfirmed(null);
   }, [item]);
 
-  // Confirmation beat: ~1.1s of the checkmark, then hand off.
+  // Confirmation beat: ~1.1s of the checkmark, then hand off. The push
+  // pre-prompt (Epic 23, Task 12, 23.2 AC1 post_request moment) fires here,
+  // not the instant the API call resolves — triggering it mid-checkmark
+  // would stack a second BottomSheet on top of this one's own confirmation.
   useEffect(() => {
     if (!confirmed) return;
-    const timer = setTimeout(() => onSubmitted(confirmed), 1100);
+    const timer = setTimeout(() => {
+      maybePrompt('post_request');
+      onSubmitted(confirmed);
+    }, 1100);
     return () => clearTimeout(timer);
-  }, [confirmed, onSubmitted]);
+  }, [confirmed, onSubmitted, maybePrompt]);
 
   if (!item) return null;
   const Icon = requestIcon(item.icon);

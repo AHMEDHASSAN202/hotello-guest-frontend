@@ -1,0 +1,35 @@
+{
+  "prompt": {
+    "postRequest": {
+      "title": "¿Te avisamos en cuanto tu solicitud esté lista? 🔔",
+      "body": "Activa las notificaciones para recibir una actualización en cuanto avance tu solicitud — incluso con el teléfono bloqueado."
+    },
+    "postOrder": {
+      "title": "¿Te avisamos en cuanto tu pedido esté en camino? 🔔",
+      "body": "Activa las notificaciones para recibir un aviso en cuanto tu pedido salga de cocina."
+    },
+    "inbox": {
+      "title": "No te pierdas los avisos del hotel 🔔",
+      "body": "Activa las notificaciones para recibir las novedades importantes al instante."
+    },
+    "enable": "Activar notificaciones",
+    "notNow": "Ahora no"
+  },
+  "ios": {
+    "title": "Dos pasos para activar las notificaciones",
+    "step1Title": "Añade la app a tu pantalla de inicio",
+    "step1Body": "Abre el menú Compartir y elige «Añadir a pantalla de inicio»",
+    "step2Title": "Abre la app desde su nuevo icono",
+    "step2Body": "Luego activa las notificaciones desde dentro",
+    "done": "Entendido"
+  },
+  "settings": {
+    "label": "Notificaciones",
+    "on": "Activadas",
+    "off": "Desactivadas",
+    "blocked": "Bloqueadas por tu navegador — actívalas en la configuración del sitio de tu navegador",
+    "unsupported": "No disponible en este navegador",
+    "enable": "Activar"
+  },
+  "goodbye": { "stopped": "Las notificaciones de esta estancia se han detenido automáticamente" }
+}

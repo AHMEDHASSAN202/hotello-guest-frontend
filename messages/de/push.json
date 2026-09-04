@@ -1,0 +1,35 @@
+{
+  "prompt": {
+    "postRequest": {
+      "title": "Sollen wir Sie informieren, sobald Ihre Anfrage bereit ist? 🔔",
+      "body": "Aktivieren Sie Benachrichtigungen, um sofort ein Update zu erhalten, sobald sich Ihre Anfrage bewegt — auch bei gesperrtem Handy."
+    },
+    "postOrder": {
+      "title": "Sollen wir Sie informieren, sobald Ihre Bestellung unterwegs ist? 🔔",
+      "body": "Aktivieren Sie Benachrichtigungen, um sofort informiert zu werden, sobald Ihre Bestellung die Küche verlässt."
+    },
+    "inbox": {
+      "title": "Verpassen Sie keine Mitteilungen des Hotels 🔔",
+      "body": "Aktivieren Sie Benachrichtigungen, um wichtige Neuigkeiten sofort zu erhalten."
+    },
+    "enable": "Benachrichtigungen aktivieren",
+    "notNow": "Jetzt nicht"
+  },
+  "ios": {
+    "title": "Zwei Schritte zum Aktivieren der Benachrichtigungen",
+    "step1Title": "Fügen Sie die App zum Home-Bildschirm hinzu",
+    "step1Body": "Öffnen Sie das Teilen-Menü und wählen Sie „Zum Home-Bildschirm“",
+    "step2Title": "Öffnen Sie die App über das neue Symbol",
+    "step2Body": "Aktivieren Sie dann die Benachrichtigungen darin",
+    "done": "Verstanden"
+  },
+  "settings": {
+    "label": "Benachrichtigungen",
+    "on": "Aktiviert",
+    "off": "Deaktiviert",
+    "blocked": "Vom Browser blockiert — aktivieren Sie sie in den Website-Einstellungen Ihres Browsers",
+    "unsupported": "Auf diesem Browser nicht verfügbar",
+    "enable": "Aktivieren"
+  },
+  "goodbye": { "stopped": "Die Benachrichtigungen für diesen Aufenthalt wurden automatisch beendet" }
+}

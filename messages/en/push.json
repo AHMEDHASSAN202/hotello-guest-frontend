@@ -1,0 +1,35 @@
+{
+  "prompt": {
+    "postRequest": {
+      "title": "Want to know the moment your request is ready? 🔔",
+      "body": "Turn on notifications to get an update the instant your request moves forward — even with your phone locked."
+    },
+    "postOrder": {
+      "title": "Want to know the moment your order's on its way? 🔔",
+      "body": "Turn on notifications to get an alert the moment your order leaves the kitchen."
+    },
+    "inbox": {
+      "title": "Don't miss hotel announcements 🔔",
+      "body": "Turn on notifications to get important updates the moment they're posted."
+    },
+    "enable": "Turn on notifications",
+    "notNow": "Not now"
+  },
+  "ios": {
+    "title": "Two steps to turn on notifications",
+    "step1Title": "Add the app to your Home Screen",
+    "step1Body": "Open the Share menu, then choose \"Add to Home Screen\"",
+    "step2Title": "Open the app from its new icon",
+    "step2Body": "Then turn on notifications from inside it",
+    "done": "Got it"
+  },
+  "settings": {
+    "label": "Notifications",
+    "on": "On",
+    "off": "Off",
+    "blocked": "Blocked by your browser — enable it in your browser's site settings",
+    "unsupported": "Not available on this browser",
+    "enable": "Turn on"
+  },
+  "goodbye": { "stopped": "Notifications for this stay have stopped automatically" }
+}

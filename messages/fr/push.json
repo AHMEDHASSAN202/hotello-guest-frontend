@@ -1,0 +1,35 @@
+{
+  "prompt": {
+    "postRequest": {
+      "title": "Vous prévenir dès que votre demande est prête ? 🔔",
+      "body": "Activez les notifications pour être informé dès que votre demande avance — même téléphone verrouillé."
+    },
+    "postOrder": {
+      "title": "Vous prévenir dès que votre commande est en route ? 🔔",
+      "body": "Activez les notifications pour être alerté dès que votre commande quitte la cuisine."
+    },
+    "inbox": {
+      "title": "Ne manquez pas les annonces de l'hôtel 🔔",
+      "body": "Activez les notifications pour recevoir les informations importantes en temps réel."
+    },
+    "enable": "Activer les notifications",
+    "notNow": "Pas maintenant"
+  },
+  "ios": {
+    "title": "Deux étapes pour activer les notifications",
+    "step1Title": "Ajoutez l'application à l'écran d'accueil",
+    "step1Body": "Ouvrez le menu de partage, puis choisissez « Sur l'écran d'accueil »",
+    "step2Title": "Ouvrez l'application depuis sa nouvelle icône",
+    "step2Body": "Puis activez les notifications depuis l'application",
+    "done": "Compris"
+  },
+  "settings": {
+    "label": "Notifications",
+    "on": "Activées",
+    "off": "Désactivées",
+    "blocked": "Bloquées par votre navigateur — activez-les dans les paramètres du site de votre navigateur",
+    "unsupported": "Indisponible sur ce navigateur",
+    "enable": "Activer"
+  },
+  "goodbye": { "stopped": "Les notifications pour ce séjour se sont arrêtées automatiquement" }
+}

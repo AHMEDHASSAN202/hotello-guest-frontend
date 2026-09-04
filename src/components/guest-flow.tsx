@@ -7,7 +7,7 @@ import { api, ApiError, onSessionDeath } from '@/lib/api';
 import { tokenStore } from '@/lib/auth';
 import { cartStore } from '@/lib/cart';
 import { parseOpenParam } from '@/lib/deep-link';
-import type { GuestProfile, GuestSessionResponse } from '@/lib/types';
+import type { GuestAnnouncement, GuestProfile, GuestSessionResponse } from '@/lib/types';
 import {
   latestUnreadPriority,
   useGuestAnnouncements,
@@ -15,10 +15,12 @@ import {
 import { BottomNav, type GuestSection } from './bottom-nav';
 import type { DiningPrefill } from './dining/dining-screen';
 import { EntryScreen } from './entry-screen';
-import { HomeScreen } from './home-screen';
+import { HomeScreen, type HomeAnnouncements } from './home-screen';
 import { useHotel } from './hotel-provider';
 import { LocaleSync } from './locale-sync';
+import { PushPromptProvider, usePushPrompt } from './push/push-prompt-context';
 import { RequestsScreen } from './requests/requests-screen';
+import type { StayCardDnd } from './stay-card';
 import { GenericErrorScreen, GoodbyeScreen, OfflineScreen } from './state-screens';
 import { Screen, Skeleton } from './ui';
 
@@ -338,7 +340,7 @@ export function GuestFlow({
       const navLive = requestsLive || diningLive || infoLive || eventsLive;
       const housekeepingLive = isModuleEnabled('housekeeping');
       return (
-        <>
+        <PushPromptProvider stayId={state.profile.stayId}>
           <LocaleSync stayLanguage={state.profile.language} />
           <div className={navLive ? 'pb-16' : ''}>
             {state.section === 'announcements' && announcementsLive ? (
@@ -387,93 +389,60 @@ export function GuestFlow({
                 initialEventId={eventsEventId}
               />
             ) : (
-              <>
-                <HomeScreen
-                  profile={state.profile}
-                  onRefresh={refresh}
-                  announcements={
-                    announcementsLive
-                      ? {
-                          unreadCount: announcementsFeed.unreadCount,
-                          banner: latestUnreadPriority(
+              <HomeDashboard
+                profile={state.profile}
+                onRefresh={refresh}
+                announcements={
+                  announcementsLive
+                    ? {
+                        unreadCount: announcementsFeed.unreadCount,
+                        banner: latestUnreadPriority(
+                          announcementsFeed.announcements,
+                        ),
+                        onOpen: () => setSection('announcements'),
+                        onDismissBanner: () => {
+                          const banner = latestUnreadPriority(
                             announcementsFeed.announcements,
-                          ),
-                          onOpenInbox: () => setSection('announcements'),
-                          onOpenBanner: () => setSection('announcements'),
-                          onDismissBanner: () => {
-                            const banner = latestUnreadPriority(
-                              announcementsFeed.announcements,
-                            );
-                            if (banner) announcementsFeed.markRead(banner.id);
-                          },
-                        }
-                      : null
+                          );
+                          if (banner) announcementsFeed.markRead(banner.id);
+                        },
+                      }
+                    : null
+                }
+                dnd={
+                  housekeepingLive
+                    ? {
+                        active: dndActive,
+                        busy: dndBusy,
+                        onToggle: toggleDnd,
+                        onRequestCleaning: requestsLive
+                          ? () => setSection('requests')
+                          : undefined,
+                      }
+                    : null
+                }
+                onOpenTile={(key) => {
+                  if (key === 'requests' && requestsLive) {
+                    setSection('requests');
+                  } else if (key === 'dining' && diningLive) {
+                    setSection('dining');
+                  } else if (key === 'info' && infoLive) {
+                    setSection('info');
+                  } else if (key === 'events' && eventsLive) {
+                    setSection('events');
                   }
-                  dnd={
-                    housekeepingLive
-                      ? {
-                          active: dndActive,
-                          busy: dndBusy,
-                          onToggle: toggleDnd,
-                          onRequestCleaning: requestsLive
-                            ? () => setSection('requests')
-                            : undefined,
-                        }
-                      : null
-                  }
-                  onOpenTile={(key) => {
-                    if (key === 'requests' && requestsLive) {
-                      setSection('requests');
-                    } else if (key === 'dining' && diningLive) {
-                      setSection('dining');
-                    } else if (key === 'info' && infoLive) {
-                      setSection('info');
-                    } else if (key === 'events' && eventsLive) {
-                      setSection('events');
-                    }
-                  }}
-                />
-                {/* FINAL-REVIEW FIX (whole-branch review) — ActiveOrderStrip
-                    (Epic 16) and TodayEventStrip (Epic 21) used to each carry
-                    their own identical `fixed inset-x-0 bottom-[64px]`
-                    wrapper, so a guest with both an in-progress F&B order AND
-                    a today's-event booking got the Events strip silently
-                    covering the F&B one. Fixed positioning now lives once,
-                    here, on a flex column both strips render into (each
-                    still independently returns null when it has nothing to
-                    show) — whichever combination is present stacks instead
-                    of overlapping.
-
-                    The column is gated on the MODULES being live, not on the
-                    strips having content, so when both render null it is an
-                    empty transparent box sitting over the last tile row of a
-                    scrolled home — hence `pointer-events-none` here and
-                    `pointer-events-auto` on each strip's own button: the
-                    wrapper never eats a tap, the pills still take theirs. */}
-                {diningLive || eventsLive ? (
-                  <div
-                    data-testid="home-strips"
-                    className="pointer-events-none fixed inset-x-0 bottom-[64px] z-30 mx-auto flex max-w-[430px] flex-col gap-2 px-5 pb-2"
-                  >
-                    {diningLive ? (
-                      <ActiveOrderStrip
-                        onOpen={(orderId) => {
-                          setDiningOrderId(orderId);
-                          setSection('dining');
-                        }}
-                      />
-                    ) : null}
-                    {eventsLive ? (
-                      <TodayEventStrip
-                        onOpen={(bookingId) => {
-                          setEventsBookingId(bookingId);
-                          setSection('events');
-                        }}
-                      />
-                    ) : null}
-                  </div>
-                ) : null}
-              </>
+                }}
+                diningLive={diningLive}
+                eventsLive={eventsLive}
+                onOpenActiveOrder={(orderId) => {
+                  setDiningOrderId(orderId);
+                  setSection('dining');
+                }}
+                onOpenTodayEvent={(bookingId) => {
+                  setEventsBookingId(bookingId);
+                  setSection('events');
+                }}
+              />
             )}
           </div>
           {navLive ? (
@@ -493,10 +462,98 @@ export function GuestFlow({
               infoLive={infoLive}
             />
           ) : null}
-        </>
+        </PushPromptProvider>
       );
     }
   }
+}
+
+/**
+ * Epic 23, Task 12 — the default home view (StayCard + services grid +
+ * active-order/today's-event strips), split out of `GuestFlow`'s `case
+ * 'home'` branch only so it can call `usePushPrompt()` as a genuine
+ * descendant of the `<PushPromptProvider>` that branch mounts — a hook
+ * called directly in `GuestFlow`'s own body would read the context from
+ * `GuestFlow`'s ancestors, not from a provider `GuestFlow` renders itself.
+ * `onOpenInbox` is the bell/inbox-open trigger point (23.2 AC1's
+ * `inbox_open` moment); the banner tap deliberately doesn't also trigger —
+ * only the bell counts as "opened the inbox".
+ */
+function HomeDashboard({
+  profile,
+  onRefresh,
+  announcements,
+  dnd,
+  onOpenTile,
+  diningLive,
+  eventsLive,
+  onOpenActiveOrder,
+  onOpenTodayEvent,
+}: {
+  profile: GuestProfile;
+  onRefresh: () => Promise<void>;
+  announcements: {
+    unreadCount: number;
+    banner: GuestAnnouncement | null;
+    onOpen: () => void;
+    onDismissBanner: () => void;
+  } | null;
+  dnd: StayCardDnd | null;
+  onOpenTile: (key: string) => void;
+  diningLive: boolean;
+  eventsLive: boolean;
+  onOpenActiveOrder: (orderId: string) => void;
+  onOpenTodayEvent: (bookingId: string) => void;
+}) {
+  const { maybePrompt } = usePushPrompt();
+  const homeAnnouncements: HomeAnnouncements | null = announcements
+    ? {
+        unreadCount: announcements.unreadCount,
+        banner: announcements.banner,
+        onOpenInbox: () => {
+          maybePrompt('inbox_open');
+          announcements.onOpen();
+        },
+        onOpenBanner: announcements.onOpen,
+        onDismissBanner: announcements.onDismissBanner,
+      }
+    : null;
+
+  return (
+    <>
+      <HomeScreen
+        profile={profile}
+        onRefresh={onRefresh}
+        announcements={homeAnnouncements}
+        dnd={dnd}
+        onOpenTile={onOpenTile}
+      />
+      {/* FINAL-REVIEW FIX (whole-branch review) — ActiveOrderStrip (Epic 16)
+          and TodayEventStrip (Epic 21) used to each carry their own
+          identical `fixed inset-x-0 bottom-[64px]` wrapper, so a guest with
+          both an in-progress F&B order AND a today's-event booking got the
+          Events strip silently covering the F&B one. Fixed positioning
+          lives once, here, on a flex column both strips render into (each
+          still independently returns null when it has nothing to show) —
+          whichever combination is present stacks instead of overlapping.
+
+          The column is gated on the MODULES being live, not on the strips
+          having content, so when both render null it is an empty
+          transparent box sitting over the last tile row of a scrolled home
+          — hence `pointer-events-none` here and `pointer-events-auto` on
+          each strip's own button: the wrapper never eats a tap, the pills
+          still take theirs. */}
+      {diningLive || eventsLive ? (
+        <div
+          data-testid="home-strips"
+          className="pointer-events-none fixed inset-x-0 bottom-[64px] z-30 mx-auto flex max-w-[430px] flex-col gap-2 px-5 pb-2"
+        >
+          {diningLive ? <ActiveOrderStrip onOpen={onOpenActiveOrder} /> : null}
+          {eventsLive ? <TodayEventStrip onOpen={onOpenTodayEvent} /> : null}
+        </div>
+      ) : null}
+    </>
+  );
 }
 
 /** Boot skeleton mirroring the home layout — never a blank screen (AC4). */
