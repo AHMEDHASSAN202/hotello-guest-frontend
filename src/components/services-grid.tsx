@@ -25,8 +25,13 @@ export function ServicesGrid({
     <section>
       <h2 className="mb-3 text-[15px] font-semibold text-ink">{t('services.title')}</h2>
       <ul className="grid grid-cols-2 gap-3">
-        {tiles.map(({ key, icon: Icon, live }) => (
-          <li key={key}>
+        {tiles.map(({ key, icon: Icon, live }, index) => (
+          <li
+            key={key}
+            className={
+              tiles.length % 2 === 1 && index === tiles.length - 1 ? 'col-span-2' : undefined
+            }
+          >
             <div
               data-testid={`tile-${key}`}
               role={live ? 'button' : undefined}

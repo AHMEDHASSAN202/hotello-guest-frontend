@@ -147,6 +147,30 @@ describe('ServicesGrid gating (14.4 AC3)', () => {
     fireEvent.click(tile);
     expect(onOpen).toHaveBeenCalledWith('requests');
   });
+
+  it('guest-polish-v1 item B7 — spans the last tile full-width when the visible count is odd (5 tiles)', () => {
+    wrap(<ServicesGrid />, {
+      ...baseHotel,
+      enabledModules: [...baseHotel.enabledModules, 'events'],
+    });
+    const tiles = screen.getAllByTestId(/^tile-/);
+    expect(tiles.length).toBe(5);
+    const lastLi = tiles[tiles.length - 1].closest('li');
+    expect(lastLi?.className).toContain('col-span-2');
+    // every earlier tile's <li> must NOT be spanned
+    tiles.slice(0, -1).forEach((tile) => {
+      expect(tile.closest('li')?.className ?? '').not.toContain('col-span-2');
+    });
+  });
+
+  it('guest-polish-v1 item B7 — does not span any tile when the visible count is even (4 tiles)', () => {
+    wrap(<ServicesGrid />); // baseHotel yields exactly 4 tiles, per the existing "shows all four tiles" test above
+    const tiles = screen.getAllByTestId(/^tile-/);
+    expect(tiles.length).toBe(4);
+    tiles.forEach((tile) => {
+      expect(tile.closest('li')?.className ?? '').not.toContain('col-span-2');
+    });
+  });
 });
 
 describe('Epic 19 — bell + priority banner (19.4 AC1/AC3/AC4)', () => {
