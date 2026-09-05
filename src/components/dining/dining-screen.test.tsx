@@ -369,5 +369,8 @@ describe('DiningScreen (16.5)', () => {
     expect(img).not.toBeNull();
     expect(img?.getAttribute('src')).toContain('item-inc-detail.jpg');
     expect(img?.className).toContain('w-full');
+    expect(img?.className).toContain('aspect-[4/3]');
+    expect(img?.getAttribute('srcset')).toContain('480w');
+    expect(img?.getAttribute('srcset')).toContain('1200w');
   });
 });

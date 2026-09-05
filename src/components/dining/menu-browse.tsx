@@ -31,7 +31,7 @@ export function MenuBrowse({
       {menus.map((menu) => (
         <section key={menu.id}>
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-semibold text-lg text-ink capitalize">{menu.name}</h2>
+            <h2 className="font-semibold text-lg text-ink first-letter:uppercase">{menu.name}</h2>
             {!menu.availability.available ? (
               <span className="flex items-center gap-1 rounded-full bg-ink/[0.06] px-2.5 py-1 text-xs font-semibold text-ink-soft">
                 <Clock className="h-3 w-3" aria-hidden />
@@ -58,9 +58,15 @@ export function MenuBrowse({
                       onClick={() => onPick(item, menu)}
                       className="pressable flex w-full flex-col overflow-hidden rounded-card bg-card text-start shadow-card"
                     >
-                      {item.photoDetailUrl || item.photoThumbUrl ? (
+                      {item.photoDetailUrl ?? item.photoThumbUrl ? (
                         <img
                           src={assetUrl(item.photoDetailUrl ?? item.photoThumbUrl) ?? undefined}
+                          srcSet={
+                            item.photoThumbUrl && item.photoDetailUrl
+                              ? `${assetUrl(item.photoThumbUrl)} 480w, ${assetUrl(item.photoDetailUrl)} 1200w`
+                              : undefined
+                          }
+                          sizes="100vw"
                           alt=""
                           loading="lazy"
                           className="aspect-[4/3] w-full object-cover"
