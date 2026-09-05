@@ -1,4 +1,4 @@
-# CLAUDE.md — GXP Guest App (`hotello-guest-frontend`)
+# CLAUDE.md — GXP Guest App (`gxp-guest-frontend`)
 
 The guest-facing PWA of GXP (Guest Experience Platform) — the fourth surface,
 opened from a QR code in a hotel room. Next.js 14 App Router + TypeScript +
@@ -76,7 +76,7 @@ storage is `localStorage` (works in a WebView), never cookies-only, never URLs.
 
 ## Specs
 
-Feature specs live in the backend repo under `hotello-backend/specs/` —
+Feature specs live in the backend repo under `gxp-backend/specs/` —
 `epic-14-guest-app-foundation.md` is this app's founding spec and the source
 of truth; `epic-13-stays-guest-sessions.md` (Story 13.5) defines the session
 contract. Durable decisions made during implementation go back into the epic

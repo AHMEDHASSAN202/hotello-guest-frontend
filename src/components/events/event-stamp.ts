@@ -1,7 +1,7 @@
 /**
  * Events' `startAtLocal`/`endAtLocal` are naive hotel-local
  * 'YYYY-MM-DD HH:MM' stamps (Epic 21 backend convention — see
- * `hotello-backend/src/modules/events/event-time.ts`). Parsed via explicit
+ * `gxp-backend/src/modules/events/event-time.ts`). Parsed via explicit
  * date-part construction, never `new Date(stampString)`: that space-
  * separated (non-ISO) shape is parsed inconsistently across engines (Safari
  * in particular can return an Invalid Date), and this app runs inside a

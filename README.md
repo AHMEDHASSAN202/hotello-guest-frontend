@@ -18,7 +18,7 @@ npm run dev                   # http://localhost:3002/<hotel-slug>
 
 Current guest-route first-load JS: ~111 kB gzipped (budget: 130 kB, build-enforced).
 
-The backend (`hotello-backend`) must be running with at least one active
+The backend (`gxp-backend`) must be running with at least one active
 hotel + stay to log in as a guest.
 
 ## Scripts
